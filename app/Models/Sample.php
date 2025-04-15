@@ -73,6 +73,8 @@ class Sample extends Model
         'off_machine_data',
         'analysis_time',
         'report_time',
+        'pregnancy_week',
+        'analysis_process',
     ];
 
     public function families()

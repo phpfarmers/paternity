@@ -43,6 +43,8 @@ class SampleService extends BaseService
         // [2] => 样本名称
         // [3] => 所属家系
         // [4] => 称谓
+        // [5] => 孕周
+        // [6] => 分析流程
 
         // 删除第一行--表头
         if($sampleData[0][0] == '序号') {
@@ -76,6 +78,10 @@ class SampleService extends BaseService
                     $arrayFlip = array_flip($sampleTypeMap);
                     // 样本类型
                     $sampleType = $arrayFlip[$row[4]] ?? Sample::SAMPLE_TYPE_DEFAULT;
+                    // 孕周
+                    $pregnancyWeek = $row[5] ?? '';
+                    // 分析流程：空或umi
+                    $analysisProcess = $row[6] ?? '';
                     
                     throw_if($sampleType==Sample::SAMPLE_TYPE_DEFAULT, new \Exception('家系【'.$familyName.'】样本类型错误'));
                     // 插入样本表
@@ -84,6 +90,8 @@ class SampleService extends BaseService
                         'sample_type'   => $sampleType,
                         'sample_name'   => $row[2] ?? '',
                         'family_name'   => $familyName,
+                        'pregnancy_week'=> $pregnancyWeek,
+                        'analysis_process' => $analysisProcess,
                     ]);
 
                     // 插入家系样本关系表
