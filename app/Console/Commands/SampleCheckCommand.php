@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Http\Controllers\SampleController;
 use App\Models\Sample;
 
 class SampleCheckCommand extends Command
@@ -29,7 +28,10 @@ class SampleCheckCommand extends Command
      */
     public function handle()
     {
-        $samples = Sample::where('check_result', Sample::CHECK_RESULT_UNKNOWN)->limit(1)->get();
+        $samples = Sample::where('check_result', Sample::CHECK_RESULT_UNKNOWN)
+        ->orderBy('check_times', 'asc')
+        ->orderBy('id', 'asc')
+        ->limit(1)->get();
         if ($samples->isEmpty()) {
             $this->info('没有要检测的样本');
             return 0;
@@ -39,11 +41,12 @@ class SampleCheckCommand extends Command
                 $this->info('检测样本开始：'.$sample->id).'-'.date('Y-m-d H:i:s');
                 // 样本测试变为检测中
                 $sample->check_result = Sample::CHECK_RESULT_CHECKING;
+                $sample->check_times += 1;
                 $sample->save();
                 
                 // shell命令参数
                 $searchPattern = escapeshellarg('*'.$sample->sample_name.'*.gz'); // 搜索模式-样本名
-                $searchPattern = escapeshellarg('*Ignition.php'); // 测试
+                // $searchPattern = escapeshellarg('*Ignition.php'); // 测试
                 $searchPath = escapeshellarg('/var/www/paternity/'); // 搜索路径
                 $command = "find {$searchPath} -name {$searchPattern}";
                 // 执行shell命令
@@ -51,15 +54,29 @@ class SampleCheckCommand extends Command
                 
                 if ($returnVar === 0) {
                     $this->info("找到以下文件:");
+                    $r1Url = ''; // R1数据文件
+                    $r2Url = ''; // R2数据文件
+                    
                     foreach ($output as $file) {
                         $this->info($file);
                         // 获取文件名
                         $fileName = basename($file);
+                        // r1文件路径
+                        if(strpos($fileName, '1.fq.gz') !== false || strpos($fileName, '1.fastq.gz') !== false){
+                            $r1Url = $file;
+                        }
+                        // r2文件路径
+                        if(strpos($fileName, '2.fq.gz') !== false || strpos($fileName, '2.fastq.gz') !== false){
+                            $r2Url = $file;
+                        }
                         $this->info($fileName);
                     }
                     // 符合条件-更新检测结果状态为成功
-                    if(count($output) != 2){
+                    if(count($output) == 2 && !empty($r1Url) && !empty($r2Url)){
                         $sample->check_result = Sample::CHECK_RESULT_SUCCESS;
+                        $sample->off_machine_time = date('Y-m-d');
+                        $sample->r1_url = $r1Url;
+                        $sample->r2_url = $r2Url;
                         $sample->save();
                     }else{
                         // 未下机-变为未检测-继续检测

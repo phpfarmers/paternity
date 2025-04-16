@@ -75,6 +75,10 @@ class Sample extends Model
         'report_time',
         'pregnancy_week',
         'analysis_process',
+        'r1_url',
+        'r2_url',
+        'check_times',
+        'analysis_times',
     ];
 
     public function families()

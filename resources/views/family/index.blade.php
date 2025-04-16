@@ -199,7 +199,7 @@
                             window.location.reload();
                         }, 1000);
                     } else {
-                        layer.msg(res.msg, {icon: 2});
+                        layer.msg(res.message, {icon: 2});
                     }
                 },
                 error: function(){
@@ -246,7 +246,7 @@
                 }, function(){
                     $.ajax({
                         url: '{{ route("sample.checkRun") }}',
-                        type: 'POST',
+                        type: 'get',
                         data: {
                             sample_id: sampleId
                         },
@@ -262,7 +262,7 @@
                                     window.location.reload();
                                 }, 1000);
                             } else {
-                                layer.msg(res.msg, {icon: 2});
+                                layer.msg(res.message, {icon: 2});
                             }
                         },
                         error: function(){  // 请求失败
@@ -282,7 +282,7 @@
                 }, function(){
                     $.ajax({
                         url: '{{ route("sample.checkRerun") }}',
-                        type: 'POST',
+                        type: 'get',
                         data: {
                             sample_id: sampleId
                         },
@@ -298,7 +298,7 @@
                                     window.location.reload();
                                 }, 1000);
                             } else {
-                                layer.msg(res.msg, {icon: 2});
+                                layer.msg(res.message, {icon: 2});
                             }
                         },
                         error: function(){  // 请求失败 
@@ -318,7 +318,7 @@
                 }, function(){
                     $.ajax({
                         url: '{{ route("sample.analysisRun") }}',
-                        type: 'POST',
+                        type: 'get',
                         data: {
                             sample_id: sampleId
                         },
@@ -334,7 +334,7 @@
                                     window.location.reload();
                                 }, 1000);
                             }else{
-                                layer.msg(res.msg, {icon: 2});
+                                layer.msg(res.message, {icon: 2});
                             }
                         },
                         error: function(){  // 请求失败
@@ -354,7 +354,7 @@
                 }, function(){
                     $.ajax({
                         url: '{{ route("sample.analysisRerun") }}',
-                        type: 'POST',
+                        type: 'get',
                         data: {
                             sample_id: sampleId
                         },
@@ -370,7 +370,7 @@
                                     window.location.reload();
                                 }, 1000);
                             }else{
-                                layer.msg(res.msg, {icon: 2});
+                                layer.msg(res.message, {icon: 2});
                             }
                         },
                         error: function(){  // 请求失败 
@@ -390,7 +390,7 @@
                 }, function(){
                     $.ajax({
                         url: '{{ route("family.analysisRun") }}',
-                        type: 'POST',
+                        type: 'get',
                         data: {
                             family_id: familyId
                        },
@@ -406,7 +406,7 @@
                                     window.location.reload();
                                 }, 1000);
                             }else{
-                                layer.msg(res.msg, {icon: 2});
+                                layer.msg(res.message, {icon: 2});
                             }
                         },
                         error: function(){  // 请求失败 
@@ -426,7 +426,7 @@
                 }, function(){
                     $.ajax({
                         url: '{{ route("family.analysisRerun") }}',
-                        type: 'POST',
+                        type: 'get',
                         data: {
                             family_id: familyId
                         },
@@ -442,7 +442,7 @@
                                     window.location.reload();
                                 }, 1000);
                             }else{
-                                layer.msg(res.msg, {icon: 2});
+                                layer.msg(res.message, {icon: 2});
                             }
                         },
                         error: function(){  // 请求失败 

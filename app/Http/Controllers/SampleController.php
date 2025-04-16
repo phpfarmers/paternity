@@ -51,8 +51,9 @@ class SampleController extends Controller
     public function checkRun(Request $request)
     {
         $request->validate([
-            'id' => 'required|integer'
+            'sample_id' => 'required|integer'
         ]);
+     
         // 运行检测
         $this->sampleService->checkRun($request);
         return response()->json([
@@ -70,7 +71,7 @@ class SampleController extends Controller
     public function checkRerun(Request $request)
     {
         $request->validate([
-            'id' => 'required|integer'
+            'sample_id' => 'required|integer'
         ]);
         // 运行检测
         $this->sampleService->checkRerun($request);
@@ -89,7 +90,7 @@ class SampleController extends Controller
     public function analysisRun(Request $request)
     {
         $request->validate([
-            'id' => 'required|integer'
+            'sample_id' => 'required|integer'
         ]);
         // 运行分析
         $this->sampleService->analysisRun($request);
@@ -108,7 +109,7 @@ class SampleController extends Controller
     public function analysisRerun(Request $request)
     {
         $request->validate([
-            'id' => 'required|integer'
+            'sample_id' => 'required|integer'
         ]);
         // 运行分析
         $this->sampleService->analysisRerun($request);

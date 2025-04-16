@@ -25,7 +25,8 @@ class Family extends Model
     protected $fillable = [
         'name',
         'report_time',
-        'analysis_result',
+        'report_result',
+        'report_times',
     ];
 
     public function samples()

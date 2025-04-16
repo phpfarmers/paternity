@@ -120,7 +120,7 @@ class SampleService extends BaseService
      */
     public function checkRun(Request $request)
     {
-        $sample = Sample::find($request->input('id'));
+        $sample = Sample::find($request->input('sample_id'));
         throw_unless($sample, new \Exception('样本信息不存在！'));
         // 验证样本检测结果-仅未检测状态可运行
         $checkResult = Sample::CHECK_RESULT_MAP_NAMES[$sample->check_result]??'';
@@ -128,10 +128,19 @@ class SampleService extends BaseService
 
         DB::beginTransaction();
         try {
-            // TODO: 检测样本接口
+            // 检测样本接口
+            $result = $this->checkExec($sample->sample_name);
+            if(!$result){
+                throw new ApiException(1, '样本检测失败！');
+            }
             // 检测成功-修改状态
             $sample->check_result = Sample::CHECK_RESULT_SUCCESS;
-            $sample->save();
+            $sample->off_machine_time = date('Y-m-d');
+            $sample->r1_url = $result['r1_url'];
+            $sample->r2_url = $result['r2_url'];
+            if($sample->isDirty()){
+                $sample->save();
+            }
             // TODO:记录日志
             DB::commit();
             return true;
@@ -150,7 +159,7 @@ class SampleService extends BaseService
      */
     public function checkRerun(Request $request)
     {
-        $sample = Sample::find($request->input('id'));
+        $sample = Sample::find($request->input('sample_id'));
         throw_unless($sample, new \Exception('样本信息不存在！'));
         // 非失败结果-不可重运行
         if ($sample->check_result != Sample::CHECK_RESULT_FAIL) {
@@ -159,9 +168,18 @@ class SampleService extends BaseService
 
         DB::beginTransaction();
         try {
-            // TODO: 检测重运行接口
+            // 检测重运行接口
+            $result = $this->checkExec($sample->sample_name);
+            if(!$result){
+                throw new ApiException(1, '样本检测失败！');
+            }
             $sample->check_result = Sample::CHECK_RESULT_SUCCESS;
-            $sample->save();
+            $sample->off_machine_time = date('Y-m-d');
+            $sample->r1_url = $result['r1_url'];
+            $sample->r2_url = $result['r2_url'];
+            if($sample->isDirty()){
+                $sample->save();
+            }
             // TODO:记录日志
             DB::commit();
             return true;
@@ -172,6 +190,50 @@ class SampleService extends BaseService
     }
 
     /**
+     * 样本检测执行
+     * 
+     * @param string $sampleName
+     * @param string $searchPath
+     * 
+     * @return bool|array
+     */
+
+    public function checkExec(string $sampleName = '', string $searchPath = '/var/www/paternity/')
+    {
+        // shell命令参数
+        $searchPattern = escapeshellarg('*'.$sampleName.'*.gz'); // 搜索模式-样本名
+        // $searchPattern = escapeshellarg('*Ignition.php'); // 测试
+        $searchPath = escapeshellarg($searchPath); // 搜索路径
+        $command = "find {$searchPath} -name {$searchPattern}";
+        // 执行shell命令
+        exec($command, $output, $returnVar);
+        
+        if ($returnVar !== 0) {
+            return false;
+        }
+        $r1Url = ''; // 样本R1文件路径
+        $r2Url = ''; // 样本R2文件路径
+        foreach ($output as $file) {
+            // 获取文件名
+            $fileName = basename($file);
+            // r1文件路径
+            if (strpos($fileName, '1.fq.gz') !== false || strpos($fileName, '1.fastq.gz') !== false) {
+                $r1Url = $file;
+            }
+            // r2文件路径
+            if (strpos($fileName, '2.fq.gz') !== false || strpos($fileName, '2.fastq.gz') !== false) {
+                $r2Url = $file;
+            }
+        }
+        // 检测规则
+        // 符合条件-更新检测结果状态为成功
+        if(count($output) != 2 || empty($r1Url) || empty($r2Url)){
+            return false;
+        }
+        return ['r1_url' => $r1Url, 'r2_url' => $r2Url];
+    }
+
+    /**
      * 样本分析运行
      * 
      * @param Request $request
@@ -179,16 +241,21 @@ class SampleService extends BaseService
      */
     public function analysisRun(Request $request)
     {
-        $sample = Sample::find($request->input('id'));
+        $sample = Sample::find($request->input('sample_id'));
         throw_unless($sample, new ApiException(1,'样本信息不存在！'));
         // 验证样本分析结果-仅未分析状态可运行
         throw_unless($sample->analysis_result == Sample::ANALYSIS_RESULT_UNKNOWN, new ApiException(1,'样本分析结果-仅未分析状态可运行！'));
 
         DB::beginTransaction();
         try {
-            // TODO:样本分析接口
+            // 样本分析接口
+            $result = $this->analysisExec($sample->sample_name, $sample->r1_url, $sample->r2_url, $sample->analysis_process);
+            if(!$result){
+                throw new ApiException(1, '样本分析失败！');
+            }
             // 更新样本分析结果
             $sample->analysis_result = Sample::ANALYSIS_RESULT_SUCCESS;
+            $sample->analysis_time = date('Y-m-d H:i:s');
             $sample->save();
             // TODO:记录日志
             DB::commit();
@@ -208,16 +275,21 @@ class SampleService extends BaseService
      */
     public function analysisRerun(Request $request)
     {
-        $sample = Sample::find($request->input('id'));
+        $sample = Sample::find($request->input('sample_id'));
         throw_unless($sample, new ApiException(1,'样本信息不存在！'));
         // 非失败结果-不可重运行
         throw_if($sample->analysis_result != Sample::ANALYSIS_RESULT_FAIL, new ApiException(1,'样本分析结果非失败，不可重运行！'));
 
         DB::beginTransaction();
         try {
-            // TODO:样本分析重运行接口
+            // 样本分析重运行接口
+            $result = $this->analysisExec($sample->sample_name, $sample->r1_url, $sample->r2_url, $sample->analysis_process);
+            if(!$result){
+                throw new ApiException(1, '样本分析失败！');
+            }
             // 更新样本分析结果
             $sample->analysis_result = Sample::ANALYSIS_RESULT_SUCCESS;
+            $sample->analysis_time = date('Y-m-d H:i:s');
             $sample->save();
             // TODO:记录日志
             DB::commit();
@@ -226,5 +298,37 @@ class SampleService extends BaseService
             DB::rollBack();
             throw new ApiException(1, $e->getMessage());
         }
+    }
+
+    /**
+     * 样本分析执行
+     * 
+     * @param string $sampleName
+     * @param string $r1Url
+     * @param string $r2Url
+     * @param string $analysisProcess
+     * @param string $outputDir
+     * @return bool
+     */
+    public function analysisExec(string $sampleName = '', string $r1Url = '', string $r2Url = '', string $analysisProcess = '', string $outputDir = '/var/www/paternity/output/')
+    {
+        // shell命令参数
+        $outputDir = escapeshellarg($outputDir); // 输出路径
+        $command = "/path/cript/run_qinzi.pl \ -s {$sampleName} \ -r1 {$r1Url} \ -r2 {$r2Url} \ -u {$analysisProcess} \ -o {$outputDir} ";
+        // 执行shell命令
+        exec($command, $output, $returnVar);
+        
+        if ($returnVar !== 0) {
+            return false;
+        }
+        // foreach ($output as $file) {
+        //     // 获取文件名
+        //     $fileName = basename($file);
+        // }
+        // 符合条件-更新检测结果状态为成功
+        if(count($output) < 1){
+            return false;
+        }
+        return true;
     }
 }
