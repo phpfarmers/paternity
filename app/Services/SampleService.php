@@ -313,8 +313,12 @@ class SampleService extends BaseService
     public function analysisExec(string $sampleName = '', string $r1Url = '', string $r2Url = '', string $analysisProcess = '', string $outputDir = '/var/www/paternity/output/')
     {
         // shell命令参数
+        $sampleName = escapeshellarg($sampleName);
+        $r1Url = escapeshellarg($r1Url);
+        $r2Url = escapeshellarg($r2Url);
+        $analysisProcess = escapeshellarg($analysisProcess);
         $outputDir = escapeshellarg($outputDir); // 输出路径
-        $command = "/path/cript/run_qinzi.pl \ -s {$sampleName} \ -r1 {$r1Url} \ -r2 {$r2Url} \ -u {$analysisProcess} \ -o {$outputDir} ";
+        $command = "/path/cript/run_qinzi.pl -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} -o {$outputDir} ";
         // 执行shell命令
         exec($command, $output, $returnVar);
         

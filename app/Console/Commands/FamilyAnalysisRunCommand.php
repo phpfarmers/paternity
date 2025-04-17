@@ -57,7 +57,7 @@ class FamilyAnalysisRunCommand extends Command
         // 将样本信息用家系id分组
         $samplesGroupByFamilyId = [];
         foreach ($samples as $sample) {
-            $samplesGroupByFamilyId[$sample['family_id']][] = $sample;
+            $samplesGroupByFamilyId[$sample['family_id']][$sample->sample_type] = $sample;
         }
 
         try {
@@ -73,12 +73,23 @@ class FamilyAnalysisRunCommand extends Command
                 }
                 // TODO:脚本
                 // shell命令参数
-                $sampleName = $sample->sample_name;
-                $r1Url = $sample->r1_url;
-                $r2Url = $sample->r2_url;
-                $analysisProcess = $sample->analysis_process;
-                $outputDir = escapeshellarg('/var/www/paternity/output/'); // 输出路径
-                $command = "/path/cript/run_qinzi.pl \ -s {$sampleName} \ -r1 {$r1Url} \ -r2 {$r2Url} \ -u {$analysisProcess} \ -o {$outputDir} ";
+                // cd {分析目录} && /path/script/parse_perbase.pl -r 2 -s 0.003 -n All.baseline.tsv -b /path/{胎儿编号}.base.txt -m /path/{母本编号}.base.txt -f /path/{父本编号}.base.txt -o {输出前缀名，可以是胎儿编号} && Rscript /path/script/cal.r --args {输出前缀名，可以是胎儿编号}.result.tsv > {输出前缀名，可以是胎儿编号}.summary
+                // 分析目录-待沟通确定?
+                $analysisDir = escapeshellarg('/QinZiProject');
+                // 胎儿编号
+                $childSample = $samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_CHILD]['sample_name'];
+                $childPath = escapeshellarg($childSample.'.base.txt');
+                // 母本编号
+                $motherSample = $samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_MOTHER]['sample_name'];
+                $motherPath = escapeshellarg($motherSample.'.base.txt');
+                // 父本编号
+                $fatherSample = $samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_FATHER]['sample_name'];
+                $fatherPath = escapeshellarg($fatherSample.'.base.txt');
+                $childTsv = escapeshellarg($childSample.'.result.tsv');
+                $childSummary = escapeshellarg($childSample.'.summary');
+                // shell命令参数
+                // $command = "cd /QinZiProject && ~/scripts/parse_perbase.pl -r 4 -s 0.008 -n /share/guoyuntao/workspace/QinZi_20241125/wbc_baseline_noumi_20250225/All.baseline.tsv -b AKT103-S.1G/AKT103-S.1G.base.txt -m parent_bases/AKT103-M.base.txt -f parent_bases/AKT103-F.base.txt -o AKT103-S.1G.xxx 2>log && Rscript /path/script/cal.r --args AKT103-S.1G.xxx.result.tsv > AKT103-S.1G.xxx.summary";
+                $command = "cd {$analysisDir} && ~/scripts/parse_perbase.pl -r 4 -s 0.008 -n All.baseline.tsv -b {$childPath} -m {$motherPath} -f {$fatherPath} -o {$childSample} 2>log && Rscript /path/script/cal.r --args {$childTsv} > {$childSummary}";
                 // 执行shell命令
                 exec($command, $output, $returnVar);
                 
@@ -92,20 +103,20 @@ class FamilyAnalysisRunCommand extends Command
                     }
                     // 符合条件-更新检测结果状态为成功
                     if(count($output) > 0){
-                        $sample->analysis_result = Sample::ANALYSIS_RESULT_SUCCESS;
-                        $sample->analysis_time = date('Y-m-d');
-                        $sample->save();
+                        $family->report_result = Family::REPORT_RESULT_SUCCESS;
+                        $family->report_time = date('Y-m-d');
+                        $family->save();
                     }else{
                         // 未下机-变为未检测-继续检测
                         $this->info("文件数量不正确");
-                        $sample->analysis_result = Sample::ANALYSIS_RESULT_UNKNOWN;
-                        $sample->save();
+                        $family->report_result = Family::REPORT_RESULT_UNKNOWN;
+                        $family->save();
                     }
                 } else {
                     $this->error("未找到文件或命令执行失败");
                     // 不符合条件-更新检测结果状态为失败
-                    $sample->analysis_result = Sample::CHECK_RESULT_FAIL;
-                    $sample->save();
+                    $family->report_result = family::REPORT_RESULT_FAIL;
+                    $family->save();
                 }
                 $this->info('家系分析完成-'.date('Y-m-d H:i:s'));
             }
