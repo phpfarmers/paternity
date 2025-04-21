@@ -15,9 +15,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+Route::get('/', [FamilyController::class, 'index'])->name('index');
 
 // 家系
 Route::get('family/index', [FamilyController::class, 'index'])->name('family.index');
