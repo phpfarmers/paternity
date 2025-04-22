@@ -310,7 +310,7 @@ class SampleService extends BaseService
      * @param string $outputDir
      * @return bool
      */
-    public function analysisExec(string $sampleName = '', string $r1Url = '', string $r2Url = '', string $analysisProcess = '', string $outputDir = '/var/www/paternity/output/')
+    public function analysisExec(string $sampleName = '', string $r1Url = '', string $r2Url = '', string $analysisProcess = '', string $outputDir = '')
     {
         // shell命令参数
         $sampleName = escapeshellarg($sampleName);

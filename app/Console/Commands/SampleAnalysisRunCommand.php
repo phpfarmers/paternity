@@ -50,7 +50,7 @@ class SampleAnalysisRunCommand extends Command
                 $r1Url = escapeshellarg($sample->r1_url);
                 $r2Url = escapeshellarg($sample->r2_url);
                 $analysisProcess = escapeshellarg($sample->analysis_process);
-                $outputDir = escapeshellarg('/var/www/paternity/output/'); // 输出路径
+                $outputDir = escapeshellarg(''); // 输出路径
                 $command = "/path/cript/run_qinzi.pl -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} -o {$outputDir} ";
                 // 执行shell命令
                 exec($command, $output, $returnVar);
