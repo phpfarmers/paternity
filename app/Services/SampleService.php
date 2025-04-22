@@ -198,7 +198,7 @@ class SampleService extends BaseService
      * @return bool|array
      */
 
-    public function checkExec(string $sampleName = '', string $searchPath = '/var/www/paternity/')
+    public function checkExec(string $sampleName = '', string $searchPath = '/akdata/oss_data/')
     {
         // shell命令参数
         $searchPattern = escapeshellarg('*'.$sampleName.'*.gz'); // 搜索模式-样本名

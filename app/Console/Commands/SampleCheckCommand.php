@@ -28,6 +28,9 @@ class SampleCheckCommand extends Command
      */
     public function handle()
     {
+        $data = config('data');
+        $ossData = $data['oss_data_local'] ?? '/akdata/oss_data/'; // oss数据目录 样本数据下机目录
+
         $samples = Sample::where('check_result', Sample::CHECK_RESULT_UNKNOWN)
         ->orderBy('check_times', 'asc')
         ->orderBy('id', 'asc')
@@ -47,7 +50,7 @@ class SampleCheckCommand extends Command
                 // shell命令参数
                 $searchPattern = escapeshellarg('*'.$sample->sample_name.'*.gz'); // 搜索模式-样本名
                 // $searchPattern = escapeshellarg('*Ignition.php'); // 测试
-                $searchPath = escapeshellarg('/var/www/paternity/'); // 搜索路径
+                $searchPath = escapeshellarg($ossData); // 搜索路径
                 $command = "find {$searchPath} -name {$searchPattern}";
                 // 执行shell命令
                 exec($command, $output, $returnVar);
