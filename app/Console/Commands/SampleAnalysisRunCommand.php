@@ -53,6 +53,7 @@ class SampleAnalysisRunCommand extends Command
                 $outputDir = escapeshellarg(''); // 输出路径
                 $commandPl = config('data')['sample_analysis_run_command_pl'];
                 $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} -o {$outputDir} ";
+                $this->info('执行命令：'.$command);
                 // 执行shell命令
                 exec($command, $output, $returnVar);
                 
