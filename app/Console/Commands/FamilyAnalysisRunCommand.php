@@ -29,22 +29,11 @@ class FamilyAnalysisRunCommand extends Command
      */
     public function handle()
     {
-        /* $families = Family::with(['samples'])->where('report_result', Family::REPORT_RESULT_UNKNOWN)
-        ->whereHas('samples', function ($query) {
-            $query->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS);
-        })
-        ->whereDoesntHave('samples', function ($query) {
-            $query->where('analysis_result', '!=', Sample::ANALYSIS_RESULT_SUCCESS);
-        })
-        ->limit(1)->get(); */
         $families = Family::where('report_result', Family::REPORT_RESULT_UNKNOWN)
         ->orderBy('report_times', 'asc')
         ->orderBy('id', 'asc')
         ->limit(1)->get();
         
-        echo "<pre>";
-        print_r($families->toArray());
-        exit;
         if ($families->isEmpty()) {
             $this->info('没有要分析的家系');
             return 0;
@@ -75,7 +64,8 @@ class FamilyAnalysisRunCommand extends Command
                 // shell命令参数
                 // cd {分析目录} && /path/script/parse_perbase.pl -r 2 -s 0.003 -n All.baseline.tsv -b /path/{胎儿编号}.base.txt -m /path/{母本编号}.base.txt -f /path/{父本编号}.base.txt -o {输出前缀名，可以是胎儿编号} && Rscript /path/script/cal.r --args {输出前缀名，可以是胎儿编号}.result.tsv > {输出前缀名，可以是胎儿编号}.summary
                 // 分析目录-待沟通确定?
-                $analysisDir = escapeshellarg('/QinZiProject');
+                $analysisProject = config('data')['analysis_project'];
+                $analysisDir = escapeshellarg($analysisProject);
                 // 胎儿编号
                 $childSample = $samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_CHILD]['sample_name'];
                 $childPath = escapeshellarg($childSample.'.base.txt');
@@ -87,9 +77,12 @@ class FamilyAnalysisRunCommand extends Command
                 $fatherPath = escapeshellarg($fatherSample.'.base.txt');
                 $childTsv = escapeshellarg($childSample.'.result.tsv');
                 $childSummary = escapeshellarg($childSample.'.summary');
+                $commandPl = config('data')['family_analysis_run_command_pl'];
+                $commandCalR = config('data')['family_analysis_run_command_call_r'];
                 // shell命令参数
                 // $command = "cd /QinZiProject && ~/scripts/parse_perbase.pl -r 4 -s 0.008 -n /share/guoyuntao/workspace/QinZi_20241125/wbc_baseline_noumi_20250225/All.baseline.tsv -b AKT103-S.1G/AKT103-S.1G.base.txt -m parent_bases/AKT103-M.base.txt -f parent_bases/AKT103-F.base.txt -o AKT103-S.1G.xxx 2>log && Rscript /path/script/cal.r --args AKT103-S.1G.xxx.result.tsv > AKT103-S.1G.xxx.summary";
-                $command = "cd {$analysisDir} && ~/scripts/parse_perbase.pl -r 4 -s 0.008 -n All.baseline.tsv -b {$childPath} -m {$motherPath} -f {$fatherPath} -o {$childSample} 2>log && Rscript /path/script/cal.r --args {$childTsv} > {$childSummary}";
+                $command = "cd {$analysisDir} && ".$commandPl." -r 4 -s 0.008 -n All.baseline.tsv -b {$childPath} -m {$motherPath} -f {$fatherPath} -o {$childSample} 2>log && Rscript ".$commandCalR." --args {$childTsv} > {$childSummary}";
+                $this->info('执行命令：' . $command);
                 // 执行shell命令
                 exec($command, $output, $returnVar);
                 
