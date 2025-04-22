@@ -250,13 +250,12 @@ class SampleService extends BaseService
         // DB::beginTransaction();
         try {
             // 样本分析接口
-            $result = $this->analysisExec($sample->sample_name, $sample->r1_url, $sample->r2_url, $sample->analysis_process);
+            $result = $this->analysisExec($sample->id);
             if(!$result){
                 throw new ApiException(1, '样本分析失败！');
             }
             // 更新样本分析结果
-            $sample->analysis_result = Sample::ANALYSIS_RESULT_SUCCESS;
-            $sample->analysis_time = date('Y-m-d H:i:s');
+            $sample->analysis_result = Sample::ANALYSIS_RESULT_ANALYZING;
             $sample->save();
             // TODO:记录日志
             // DB::commit();
@@ -281,22 +280,21 @@ class SampleService extends BaseService
         // 非失败结果-不可重运行
         throw_if($sample->analysis_result != Sample::ANALYSIS_RESULT_FAIL, new ApiException(1,'样本分析结果非失败，不可重运行！'));
 
-        DB::beginTransaction();
+        // DB::beginTransaction();
         try {
             // 样本分析重运行接口
-            $result = $this->analysisExec($sample->sample_name, $sample->r1_url, $sample->r2_url, $sample->analysis_process);
+            $result = $this->analysisExec($sample->id);
             if(!$result){
                 throw new ApiException(1, '样本分析失败！');
             }
             // 更新样本分析结果
-            $sample->analysis_result = Sample::ANALYSIS_RESULT_SUCCESS;
-            $sample->analysis_time = date('Y-m-d H:i:s');
+            $sample->analysis_result = Sample::ANALYSIS_RESULT_ANALYZING;
             $sample->save();
             // TODO:记录日志
-            DB::commit();
+            // DB::commit();
             return true;
         }catch (\Exception $e) {
-            DB::rollBack();
+            // DB::rollBack();
             throw new ApiException(1, $e->getMessage());
         }
     }
@@ -304,17 +302,13 @@ class SampleService extends BaseService
     /**
      * 样本分析执行
      * 
-     * @param string $sampleName
-     * @param string $r1Url
-     * @param string $r2Url
-     * @param string $analysisProcess
-     * @param string $outputDir
+     * @param int $id
      * @return bool
      */
-    public function analysisExec(string $sampleName = '', string $r1Url = '', string $r2Url = '', string $analysisProcess = '', string $outputDir = '')
+    public function analysisExec(int $id = 0)
     {
         // 构建命令
-        $command = 'php ' . base_path('artisan') . ' sample:analysis:run a';
+        $command = 'php ' . base_path('artisan') . ' sample:analysis:run {$id}';
 
         // 创建进程
         $process = new Process(explode(' ', $command));
@@ -324,30 +318,6 @@ class SampleService extends BaseService
         // 检查进程是否启动
         if (!$process->isRunning()) {
             Log::error('进程启动失败');
-            return false;
-        }
-        return true;
-        // shell命令参数
-        $sampleName = escapeshellarg($sampleName);
-        $r1Url = escapeshellarg($r1Url);
-        $r2Url = escapeshellarg($r2Url);
-        $analysisProcess = escapeshellarg($analysisProcess);
-        $outputDir = escapeshellarg($outputDir); // 输出路径
-        $commandPl = config('data')['sample_analysis_run_command_pl'];
-        $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} -o {$outputDir}";
-        Log::info('执行命令：'.$command);
-        // 执行shell命令
-        exec($command, $output, $returnVar);
-        
-        if ($returnVar !== 0) {
-            return false;
-        }
-        // foreach ($output as $file) {
-        //     // 获取文件名
-        //     $fileName = basename($file);
-        // }
-        // 符合条件-更新检测结果状态为成功
-        if(count($output) < 1){
             return false;
         }
         return true;

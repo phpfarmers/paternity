@@ -12,7 +12,7 @@ class SampleAnalysisRunCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'sample:analysis:run';
+    protected $signature = 'sample:analysis:run {id?}';
 
     /**
      * The console command description.
@@ -28,11 +28,14 @@ class SampleAnalysisRunCommand extends Command
      */
     public function handle()
     {
-        $samples = Sample::where('check_result', Sample::CHECK_RESULT_SUCCESS)
-        ->where('analysis_result', Sample::ANALYSIS_RESULT_UNKNOWN)
-        ->orderBy('analysis_times', 'asc')
-        ->orderBy('id', 'asc')
-        ->limit(1)->get();
+        $id = $this->argument('id') ?? 0;
+        
+        $samples = Sample::where('check_result', Sample::CHECK_RESULT_SUCCESS)->where('analysis_result', Sample::ANALYSIS_RESULT_UNKNOWN);
+        // 指定id-前端操作
+        if ($id > 0) {
+            $samples = $samples->where('id', $id);
+        }
+        $samples = $samples->orderBy('analysis_times', 'asc')->orderBy('id', 'asc')->limit(1)->get();
         if ($samples->isEmpty()) {
             $this->info('没有要分析的样本');
             return 0;
