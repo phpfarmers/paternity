@@ -9,6 +9,8 @@ use App\Models\Family;
 use App\Models\FamilySample;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Process;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\FlareClient\Api;
 
@@ -246,7 +248,7 @@ class SampleService extends BaseService
         // 验证样本分析结果-仅未分析状态可运行
         throw_unless($sample->analysis_result == Sample::ANALYSIS_RESULT_UNKNOWN, new ApiException(1,'样本分析结果-仅未分析状态可运行！'));
 
-        DB::beginTransaction();
+        // DB::beginTransaction();
         try {
             // 样本分析接口
             $result = $this->analysisExec($sample->sample_name, $sample->r1_url, $sample->r2_url, $sample->analysis_process);
@@ -258,10 +260,10 @@ class SampleService extends BaseService
             $sample->analysis_time = date('Y-m-d H:i:s');
             $sample->save();
             // TODO:记录日志
-            DB::commit();
+            // DB::commit();
             return true;
         }catch (\Exception $e) {
-            DB::rollBack();
+            // DB::rollBack();
             throw new ApiException(1, $e->getMessage());
         }
     }
@@ -312,6 +314,20 @@ class SampleService extends BaseService
      */
     public function analysisExec(string $sampleName = '', string $r1Url = '', string $r2Url = '', string $analysisProcess = '', string $outputDir = '')
     {
+        // 构建命令
+        $command = 'php ' . base_path('artisan') . ' sample:analysis:run a';
+
+        // 创建进程
+        $process = new Process(explode(' ', $command));
+        $process->setTimeout(null); // 不设置超时
+        $process->start(); // 异步启动
+
+        // 检查进程是否启动
+        if (!$process->isRunning()) {
+            Log::error('进程启动失败');
+            return false;
+        }
+        return true;
         // shell命令参数
         $sampleName = escapeshellarg($sampleName);
         $r1Url = escapeshellarg($r1Url);
@@ -319,7 +335,8 @@ class SampleService extends BaseService
         $analysisProcess = escapeshellarg($analysisProcess);
         $outputDir = escapeshellarg($outputDir); // 输出路径
         $commandPl = config('data')['sample_analysis_run_command_pl'];
-        $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} -o {$outputDir} ";
+        $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} -o {$outputDir}";
+        Log::info('执行命令：'.$command);
         // 执行shell命令
         exec($command, $output, $returnVar);
         
