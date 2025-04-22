@@ -118,8 +118,6 @@
                                 off_machine_time += '<span class="layui-badge layui-bg-red">未检测</span>';
                                 off_machine_time += ' <a class="layui-btn layui-btn-xs sample-check-run" data-sample-id="'+sample.id+'">检测</a>';
                             }
-
-                            off_machine_time += '<div>' + sample.off_machine_time + '</div>';
                         });
                         off_machine_time += '</div>';
                         return off_machine_time;
