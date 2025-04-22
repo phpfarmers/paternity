@@ -318,7 +318,8 @@ class SampleService extends BaseService
         $r2Url = escapeshellarg($r2Url);
         $analysisProcess = escapeshellarg($analysisProcess);
         $outputDir = escapeshellarg($outputDir); // 输出路径
-        $command = "/path/cript/run_qinzi.pl -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} -o {$outputDir} ";
+        $commandPl = config('data')['sample_analysis_run_command_pl'];
+        $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} -o {$outputDir} ";
         // 执行shell命令
         exec($command, $output, $returnVar);
         
