@@ -11,7 +11,7 @@ class SampleDownloadCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'sample:download';
+    protected $signature = 'sample:download {oss_path?}';
 
     /**
      * The console command description.
@@ -30,7 +30,8 @@ class SampleDownloadCommand extends Command
         $this->info('开始下载样本下机文件'.date('Y-m-d H:i:s'));
         $data = config('data');
         $ossDataLocal = $data['oss_data_local'] ?? '/akdata/oss_data/'; // oss数据目录 样本数据下机目录
-        $ossDataRemote = $data['oss_data_remote'] ?? 'oss://ak2024-2446/'; // 要下载的远程目录
+        $ossPath = $this->argument('oss_path') ?? ''; // 要下载的远程目录-优先取参数
+        $ossDataRemote = !empty($ossPath) ? $ossPath : $data['oss_data_remote'] ?? 'oss://ak2024-2446/'; // 要下载的远程目录
         $command = "ossutil cp -r -u -c /akdata/software/oss-browser-linux-x64/conf {$ossDataRemote} {$ossDataLocal}"; // 下载命令
         exec($command, $output, $returnVar);
         if ($returnVar === 0) {
