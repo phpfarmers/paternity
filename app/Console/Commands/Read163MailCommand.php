@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\DownloadSampleJob;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 use Webklex\IMAP\Facades\Client;
@@ -43,17 +44,28 @@ class Read163MailCommand extends Command
         $folder = $client->getFolder('INBOX'); 
 
         // 获取所有邮件
-        $messages = $folder->messages()->all()->get();
+        $messages = $folder->messages()->since(now()->subDays(1))->get();
         
         if ($messages->count() > 0) {
             // 遍历邮件
             foreach ($messages as $message) {
                 // 输出邮件信息
-                $this->info("Subject: " . $message->getSubject());
-                $this->info("From: " . $message->getFrom()[0]->mail);
-                $this->info("Date: " . $message->getDate());
-                $this->info("Message: " . $message->getTextBody());
+                // $this->info("Subject: " . $message->getSubject());
+                // $this->info("From: " . $message->getFrom()[0]->mail);
+                // $this->info("Date: " . $message->getDate());
+                // $this->info("Message: " . $message->getTextBody());
                 $this->info("----------------------------------------");
+
+                $textBody = $message->getTextBody();
+                // 使用正则表达式匹配 oss:// 路径
+                preg_match_all('/oss:\/\/[^\s]+/', $textBody, $matches);
+                // 输出匹配到的 oss:// 路径
+                foreach ($matches[0] as $match) {
+                    $this->info($match);
+                    // 异步调用 php artisan sample:download $match
+                    dispatch(new DownloadSampleJob($match))->onQueue('downloads');
+                    $this->info("异步调用成功");
+                }
             }
         } else {
             $this->error('No emails found.');
