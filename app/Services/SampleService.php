@@ -4,14 +4,13 @@ namespace App\Services;
 
 use App\Exceptions\ApiException;
 use App\Imports\SampleImport;
+use App\Jobs\SampleAnalysisRunJob;
 use App\Models\Sample;
 use App\Models\Family;
 use App\Models\FamilySample;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
-use Symfony\Component\Process\Process;
 
 class SampleService extends BaseService
 {
@@ -250,10 +249,7 @@ class SampleService extends BaseService
         // DB::beginTransaction();
         try {
             // 样本分析接口
-            $result = $this->analysisExec($sample->id);
-            if(!$result){
-                throw new ApiException(1, '样本分析失败！');
-            }
+            dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run');
             // 更新样本分析结果
             $sample->analysis_result = Sample::ANALYSIS_RESULT_ANALYZING;
             $sample->save();
@@ -283,10 +279,7 @@ class SampleService extends BaseService
         // DB::beginTransaction();
         try {
             // 样本分析重运行接口
-            $result = $this->analysisExec($sample->id);
-            if(!$result){
-                throw new ApiException(1, '样本分析失败！');
-            }
+            dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run');
             // 更新样本分析结果
             $sample->analysis_result = Sample::ANALYSIS_RESULT_ANALYZING;
             $sample->save();
@@ -299,27 +292,4 @@ class SampleService extends BaseService
         }
     }
 
-    /**
-     * 样本分析执行
-     * 
-     * @param int $id
-     * @return bool
-     */
-    public function analysisExec(int $id = 0)
-    {
-        // 构建命令
-        $command = 'php ' . base_path('artisan') . ' sample:analysis:run {$id}';
-
-        // 创建进程
-        $process = new Process(explode(' ', $command));
-        $process->setTimeout(null); // 不设置超时
-        $process->start(); // 异步启动
-
-        // 检查进程是否启动
-        if (!$process->isRunning()) {
-            Log::error('进程启动失败');
-            return false;
-        }
-        return true;
-    }
 }
