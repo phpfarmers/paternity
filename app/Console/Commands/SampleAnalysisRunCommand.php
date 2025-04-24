@@ -30,7 +30,8 @@ class SampleAnalysisRunCommand extends Command
     public function handle()
     {
         $id = $this->argument('id') ?? 0;
-        
+        $this->info('开始分析样本');
+        Log::info('开始分析样本');
         $samples = Sample::where('check_result', Sample::CHECK_RESULT_SUCCESS)->where('analysis_result', Sample::ANALYSIS_RESULT_UNKNOWN);
         // 指定id-前端操作
         if ($id > 0) {
@@ -39,6 +40,7 @@ class SampleAnalysisRunCommand extends Command
         $samples = $samples->orderBy('analysis_times', 'asc')->orderBy('id', 'asc')->limit(1)->get();
         if ($samples->isEmpty()) {
             $this->info('没有要分析的样本');
+            Log::info('没有要分析的样本');
             return 0;
         }
         try {

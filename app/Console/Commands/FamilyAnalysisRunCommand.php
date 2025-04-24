@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Family;
 use Illuminate\Console\Command;
 use App\Models\Sample;
+use Illuminate\Support\Facades\Log;
 
 class FamilyAnalysisRunCommand extends Command
 {
@@ -29,6 +30,8 @@ class FamilyAnalysisRunCommand extends Command
      */
     public function handle()
     {
+        $this->info('家系分析开始');
+        Log::info('家系分析开始');
         $id = $this->argument('id') ?? 0;
         $families = Family::where('report_result', Family::REPORT_RESULT_UNKNOWN);
         // 指定id-前端操作
@@ -41,6 +44,7 @@ class FamilyAnalysisRunCommand extends Command
         
         if ($families->isEmpty()) {
             $this->info('没有要分析的家系');
+            Log::info('没有要分析的家系');
             return 0;
         }
         // 获取样本信息
@@ -57,12 +61,14 @@ class FamilyAnalysisRunCommand extends Command
         try {
             foreach ($families as $family) {
                 $this->info('家系分析开始：'.$family->id).'-'.date('Y-m-d H:i:s');
+                Log::info('家系分析开始：'.$family->id).'-'.date('Y-m-d H:i:s');
                 // 家系分析变为分析中
                 $family->report_result = Family::REPORT_RESULT_ANALYZING;
                 $family->report_times  += 1;
                 $family->save();
-                if(!isset($samplesGroupByFamilyId[$family->id]) || count($samplesGroupByFamilyId[$family->id]) !=3){
+                if(!isset($samplesGroupByFamilyId[$family->id]) || count($samplesGroupByFamilyId[$family->id]) < 2){
                     $this->info('家系分析：'.$family->name.'，样本分析完成数量不正确');
+                    Log::info('家系分析：'.$family->name.'，样本分析完成数量不正确');
                     continue;
                 }
                 // TODO:脚本
@@ -88,12 +94,14 @@ class FamilyAnalysisRunCommand extends Command
                 // $command = "cd /QinZiProject && ~/scripts/parse_perbase.pl -r 4 -s 0.008 -n /share/guoyuntao/workspace/QinZi_20241125/wbc_baseline_noumi_20250225/All.baseline.tsv -b AKT103-S.1G/AKT103-S.1G.base.txt -m parent_bases/AKT103-M.base.txt -f parent_bases/AKT103-F.base.txt -o AKT103-S.1G.xxx 2>log && Rscript /path/script/cal.r --args AKT103-S.1G.xxx.result.tsv > AKT103-S.1G.xxx.summary";
                 $command = "cd {$analysisDir} && ".$commandPl." -r 4 -s 0.008 -n All.baseline.tsv -b {$childPath} -m {$motherPath} -f {$fatherPath} -o {$childSample} 2>log && Rscript ".$commandCalR." --args {$childTsv} > {$childSummary}";
                 $this->info('执行命令：' . $command);
+                Log::info('执行命令：' . $command);
                 // 执行shell命令
                 exec($command, $output, $returnVar);
                 
                 if ($returnVar === 0) {
                     $this->info("找到以下文件:");
-                    foreach ($output as $file) {
+                    Log::info("找到以下文件:");
+                    /* foreach ($output as $file) {
                         $this->info($file);
                         // 获取文件名
                         $fileName = basename($file);
@@ -109,17 +117,20 @@ class FamilyAnalysisRunCommand extends Command
                         $this->info("文件数量不正确");
                         $family->report_result = Family::REPORT_RESULT_UNKNOWN;
                         $family->save();
-                    }
+                    } */
                 } else {
                     $this->error("未找到文件或命令执行失败");
+                    Log::info("未找到文件或命令执行失败");
                     // 不符合条件-更新检测结果状态为失败
                     $family->report_result = family::REPORT_RESULT_FAIL;
                     $family->save();
                 }
                 $this->info('家系分析完成-'.date('Y-m-d H:i:s'));
+                Log::info('家系分析完成-'.date('Y-m-d H:i:s'));
             }
         } catch (\Exception $e) {
             $this->info('家系分析出错：'.$e->getMessage());
+            Log::info('家系分析出错：'.$e->getMessage());
         }
         return 0;
     }
