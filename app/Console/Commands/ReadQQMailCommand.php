@@ -54,6 +54,7 @@ class ReadQQMailCommand extends Command
                 preg_match_all('/oss:\/\/[^\s]+/', $textBody, $matches);
                 // 输出匹配到的 oss:// 路径
                 foreach ($matches[0] as $match) {
+                    $match = escapeshellarg($match);
                     $this->info($match);
                     // 异步调用 php artisan sample:download $match
                     dispatch(new DownloadSampleJob($match))->onQueue('downloads');
