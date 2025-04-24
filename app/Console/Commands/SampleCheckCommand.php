@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Sample;
+use Illuminate\Support\Facades\Log;
 
 class SampleCheckCommand extends Command
 {
@@ -52,6 +53,8 @@ class SampleCheckCommand extends Command
                 // $searchPattern = escapeshellarg('*Ignition.php'); // 测试
                 $searchPath = escapeshellarg($ossData); // 搜索路径
                 $command = "find {$searchPath} -name {$searchPattern}";
+                $this->info('执行命令：'.$command);
+                Log::info('执行命令：'.$command);
                 // 执行shell命令
                 exec($command, $output, $returnVar);
                 

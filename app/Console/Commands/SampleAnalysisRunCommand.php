@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Sample;
+use Illuminate\Support\Facades\Log;
 
 class SampleAnalysisRunCommand extends Command
 {
@@ -43,6 +44,7 @@ class SampleAnalysisRunCommand extends Command
         try {
             foreach ($samples as $sample) {
                 $this->info('样本分析开始：'.$sample->id).'-'.date('Y-m-d H:i:s');
+                Log::info('样本分析开始：'.$sample->id).'-'.date('Y-m-d H:i:s');
                 // 样本分析变为分析中
                 $sample->analysis_result = Sample::ANALYSIS_RESULT_ANALYZING;
                 $sample->analysis_times += 1;
@@ -58,11 +60,13 @@ class SampleAnalysisRunCommand extends Command
                 // $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} -o {$outputDir} 2>&1";
                 $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} 2>&1";
                 $this->info('执行命令：'.$command);
+                Log::info('执行命令：'.$command);
                 // 执行shell命令
                 exec($command, $output, $returnVar);
                 
                 if ($returnVar === 0) {
                     $this->info("找到以下文件:");
+                    Log::info("找到以下文件:");
                     foreach ($output as $file) {
                         // $this->info($file);
                         // 获取文件名
@@ -82,14 +86,17 @@ class SampleAnalysisRunCommand extends Command
                     // }
                 } else {
                     $this->error("未找到文件或命令执行失败");
+                    Log::info("未找到文件或命令执行失败");
                     // 不符合条件-更新检测结果状态为失败
                     $sample->analysis_result = Sample::CHECK_RESULT_FAIL;
                     $sample->save();
                 }
                 $this->info('样本分析完成-'.date('Y-m-d H:i:s'));
+                Log::info('样本分析完成-'.date('Y-m-d H:i:s'));
             }
         } catch (\Exception $e) {
             $this->info('样本分析出错：'.$e->getMessage());
+            Log::info('样本分析出错：'.$e->getMessage());
         }
         return 0;
     }

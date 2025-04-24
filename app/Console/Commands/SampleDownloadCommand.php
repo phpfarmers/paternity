@@ -40,6 +40,7 @@ class SampleDownloadCommand extends Command
         Log::info('本地目录：'.$ossDataLocal);
         Log::info('远程目录：'.$ossDataRemote);
         $command = "ossutil cp -r -u -c /akdata/software/oss-browser-linux-x64/conf {$ossDataRemote} {$ossDataLocal} 2>&1"; // 下载命令
+        Log::info('执行命令：'.$command);
         exec($command, $output, $returnVar);
         if ($returnVar === 0) {
             $this->info("下载成功");
