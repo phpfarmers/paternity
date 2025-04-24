@@ -13,7 +13,7 @@ class FamilyAnalysisRunCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'family:analysis:run';
+    protected $signature = 'family:analysis:run {id?}';
 
     /**
      * The console command description.
@@ -29,8 +29,13 @@ class FamilyAnalysisRunCommand extends Command
      */
     public function handle()
     {
-        $families = Family::where('report_result', Family::REPORT_RESULT_UNKNOWN)
-        ->orderBy('report_times', 'asc')
+        $id = $this->argument('id') ?? 0;
+        $families = Family::where('report_result', Family::REPORT_RESULT_UNKNOWN);
+        // 指定id-前端操作
+        if ($id > 0) {
+            $families = $families->where('id', $id);
+        }
+        $families = $families->orderBy('report_times', 'asc')
         ->orderBy('id', 'asc')
         ->limit(1)->get();
         

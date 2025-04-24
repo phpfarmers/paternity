@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\ApiException;
+use App\Jobs\FamilyAnalysisRunJob;
 use App\Models\Family;
 use App\Models\Sample;
 use Illuminate\Http\Request;
@@ -137,6 +138,7 @@ class FamilyService extends BaseService
         DB::beginTransaction();
         try {
             // TODO:请求分析接口
+            dispatch(new FamilyAnalysisRunJob($family->id))->onQueue('family_analysis_run');
             // 更新家系报告结果
             $family->report_result = Family::REPORT_RESULT_SUCCESS;
             $family->save();
