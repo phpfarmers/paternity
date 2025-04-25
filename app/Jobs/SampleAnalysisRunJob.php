@@ -31,7 +31,21 @@ class SampleAnalysisRunJob implements ShouldQueue
         // 例如：调用 shell 脚本或 PHP 函数处理下载
         Log::info("开始样本分析：{$this->id}");
         $id = escapeshellarg($this->id);
-        exec("php artisan sample:analysis:run {$id} > /dev/null 2>&1");
+        
+        $this->runAnalysis($id);
+
         Log::info("样本分析结束：{$this->id}");
+    }
+
+    protected function runAnalysis($id): void
+    {
+        $logFile = storage_path('logs/sample_analysis.log');
+        $command = "php artisan sample:analysis:run {$id} >> {$logFile} 2>&1";
+        Log::info("执行命令：{$command}");
+        exec($command, $output, $returnVar);
+
+        if ($returnVar !== 0) {
+            Log::error("样本分析失败：{$id}", ['output' => $output]);
+        }
     }
 }

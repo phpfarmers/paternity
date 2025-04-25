@@ -34,7 +34,20 @@ class DownloadSampleJob implements ShouldQueue
         // 实现下载逻辑
         // 例如：调用 shell 脚本或 PHP 函数处理下载
         Log::info("开始下载：{$this->ossPath}");
-        exec("php artisan sample:download {$this->ossPath} > /dev/null 2>&1");
+        $ossPath = escapeshellarg($this->ossPath);
+        $this->runDownload($ossPath);
         Log::info("下载结束：{$this->ossPath}");
+    }
+    
+    protected function runDownload($ossPath): void
+    {
+        $logFile = storage_path('logs/sample_download.log');
+        $command = "php artisan sample:download {$ossPath} >> {$logFile} 2>&1";
+        Log::info("执行命令：{$command}");
+        exec($command, $output, $returnVar);
+
+        if ($returnVar !== 0) {
+            Log::error("样本下载失败：{$ossPath}", ['output' => $output]);
+        }
     }
 }
