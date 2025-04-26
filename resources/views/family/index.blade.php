@@ -380,7 +380,7 @@
                 )
             });
             // 报告分析运行按钮点击事件
-            $(document).on('click', '.report-analysis-run', function(){
+            $(document).on('click', '.family-analysis-run', function(){
                 var familyId = $(this).data('family-id');
                 layer.confirm('确定要运行报告分析吗？', {
                     btn: ['确定', '取消'],
@@ -416,7 +416,7 @@
                 )
             });
             // 报告分析重新运行按钮点击事件
-            $(document).on('click', '.report-analysis-rerun', function(){
+            $(document).on('click', '.family-analysis-rerun', function(){
                 var familyId = $(this).data('family-id');
                 layer.confirm('确定要重新运行报告分析吗？', {
                     btn: ['确定', '取消'],
