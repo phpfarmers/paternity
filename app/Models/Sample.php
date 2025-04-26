@@ -79,6 +79,7 @@ class Sample extends Model
         'r2_url',
         'check_times',
         'analysis_times',
+        'output_dir',
     ];
 
     public function families()
