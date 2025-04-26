@@ -184,4 +184,116 @@ class FamilyService extends BaseService
             throw new ApiException(1, $e->getMessage());
         }
     }
+
+    /**
+     * 获取TSV数据
+     *
+     * @param int $familyId
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getTsvData($familyId, $request)
+    {return [];
+        $type = $request->input('type', '');
+        $family = Family::with('samples')->findOrFail($familyId);
+        if (!$family) {
+            throw new \Exception('Family not found');
+        }
+        $samples = $family->samples;
+        $sampleTypes = array_column($samples->toArray(),'sample_name' ,'sample_type');
+        $fatherSample = $sampleTypes[Sample::SAMPLE_TYPE_FATHER] ?? '';
+        // $motherSample = $sampleTypes[Sample::SAMPLE_TYPE_MOTHER] ?? '';
+        $childSample = $sampleTypes[Sample::SAMPLE_TYPE_CHILD] ?? '';
+        $dataDir = config('data')['second_analysis_project'].$fatherSample.'_vs_'.$childSample;
+        // 文件后缀
+
+        $fileExt = '';
+        switch ($type) {
+            case 'value':
+                $fileExt = '.result.tsv';
+                break;
+            
+            default:
+                $fileExt = '.result.tsv';
+                break;
+        }
+        $tsvFilePath = $dataDir.$fileExt;
+
+        if (!file_exists($tsvFilePath)) {
+            throw new \Exception('TSV file not found');
+        }
+
+        $tsvData = $this->parseTsvFile($tsvFilePath);
+        return $this->filterTsvData($tsvData, $searchParams);
+    }
+
+    private function parseTsvFile($filePath)
+    {
+        $rows = array_map('str_getcsv', file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
+        $header = array_shift($rows);
+        $data = array();
+
+        foreach ($rows as $row) {
+            $data[] = array_combine($header, $row);
+        }
+
+        return $data;
+    }
+
+    private function filterTsvData($data, $params)
+    {
+        return array_filter($data, function ($row) use ($params) {
+            foreach ($params as $key => $value) {
+                if (isset($row[$key]) && strpos($row[$key], $value) === false) {
+                    return false;
+                }
+            }
+            return true;
+        });
+    }
+
+    /**
+     * 
+     */
+    public function searchData($id, $request)
+    {
+        throw new \Exception('处理中...');
+        $newMontherSample = $request->input('mother_sample', '');
+        $newFatherSample = $request->input('father_sample', '');
+        $newChildSample = $request->input('child_sample', '');
+        $newr = $request->input('slider_r', '');
+        $news = $request->input('slider_s', '');
+        $family = Family::with('samples')->find($id);
+        if (!$family) {
+            throw new \Exception('Family not found');
+        }
+        $samples = $family->samples;
+        $sampleTypes = array_column($samples->toArray(),'sample_name' ,'sample_type');
+        $fatherSample = $sampleTypes[Sample::SAMPLE_TYPE_FATHER] ?? '';
+        $motherSample = $sampleTypes[Sample::SAMPLE_TYPE_MOTHER] ?? '';
+        $childSample = $sampleTypes[Sample::SAMPLE_TYPE_CHILD] ?? '';
+        // 比较传过来的父本与当前的父本，传过来的子本与当前的子本是否一致，不一致则查询，是否已组建家系，未组建家系则创建家系
+        if ($fatherSample != $newFatherSample || $childSample != $newChildSample) {
+            $newSamples = Sample::whereIn('sample_name', [$newFatherSample, $newChildSample])
+                ->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)->pluck('sample_name', 'id')->toArray();
+            $diffSamples = array_diff([$newFatherSample, $newChildSample], $newSamples);
+            if (!empty($diffSamples)) {
+                throw new \Exception('样本不存在或未分析成功：' . implode(',', $diffSamples));
+            }
+
+            // 查询家系与样本关系表(families_samples)，用2个样本查询是不是属于同一个家系
+
+            $family = Family::where('father_sample', $fatherSample)
+                ->where('child_sample', $childSample)
+                ->first();
+
+            if (!$family) {
+                $family = Family::create([
+                    'father_sample' => $fatherSample,
+                    'child_sample' => $childSample,
+                ]);
+            }
+        }
+
+    }
 }

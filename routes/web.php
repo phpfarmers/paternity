@@ -31,6 +31,9 @@ Route::get('family/analysis-run', [FamilyController::class, 'analysisRun'])->nam
 // 家系报告分析重运行
 Route::get('family/analysis-rerun', [FamilyController::class, 'analysisRerun'])->name('family.analysisRerun');
 
+Route::get('/family/{id}/tsv', [FamilyController::class, 'getTsvData'])->name('family.tsv');
+Route::get('/family/{id}/search', [FamilyController::class, 'searchData'])->name('family.search');
+
 // 样本
 Route::post('sample/import', [SampleController::class, 'import'])->name('sample.import');
 // 样本检测运行

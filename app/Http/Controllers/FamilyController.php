@@ -98,4 +98,53 @@ class FamilyController extends Controller
             'msg' => '分析重运行成功！'
         ]);
     }
+
+    /**
+     * 获取TSV数据
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getTsvData(Request $request, $id)
+    {
+        // 获取tsv数据
+        $data = $this->familyService->getTsvData($id, $request);
+        return response()->json([
+            'code' => 0,
+            'msg' => '',
+            'data' => $data
+        ]);
+    }
+
+    /**
+     * 搜索数据
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function searchData(Request $request, $id)
+    {
+        $request->validate([
+            'child_sample' => 'required|string',
+            'father_sample' => 'required|string',
+            'mother_sample' => 'string',
+            'slider_r' => 'required',
+            'slider_s' => 'required',
+        ]);
+        
+        try {
+            $data = $this->familyService->searchData($id, $request);
+        } catch (\Exception $e) {
+            return response()->json([
+                'code' => 1,
+                'msg' => $e->getMessage()
+            ]);
+        }
+       
+        return response()->json([
+            'code' => 0,
+            'msg' => '',
+            'data' => $data
+        ]);
+    }
 }
