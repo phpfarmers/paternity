@@ -41,7 +41,7 @@ class FamilyAnalysisRunCommand extends Command
         $families = $families->orderBy('report_times', 'asc')
         ->orderBy('id', 'asc')
         ->limit(1)->get();
-        
+
         if ($families->isEmpty()) {
             $this->info('没有要分析的家系');
             Log::info('没有要分析的家系');
@@ -55,7 +55,7 @@ class FamilyAnalysisRunCommand extends Command
         // 将样本信息用家系id分组
         $samplesGroupByFamilyId = [];
         foreach ($samples as $sample) {
-            $samplesGroupByFamilyId[$sample['family_id']][$sample->sample_type] = $sample;
+            $samplesGroupByFamilyId[$sample['family_id']][$sample['sample_type']] = $sample;
         }
 
         try {
