@@ -50,12 +50,23 @@ class FamilyAnalysisRunCommand extends Command
         // 获取样本信息
         $samples = Sample::leftJoin('families_samples', 'families_samples.sample_id', '=', 'samples.id')
         ->whereIn('families_samples.family_id', $families->pluck('id')->toArray())
-        ->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)
+        // ->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)
         ->get()->toArray();
         // 将样本信息用家系id分组
         $samplesGroupByFamilyId = [];
+        $canAnalysis = true;
         foreach ($samples as $sample) {
             $samplesGroupByFamilyId[$sample['family_id']][$sample['sample_type']] = $sample;
+            if ($sample['analysis_result'] != Sample::ANALYSIS_RESULT_SUCCESS) {
+                $this->error('样本未分析成功，请先分析样本:'.$sample['sample_name']);
+                $canAnalysis = false;
+                break;
+            }
+        }
+        if (!$canAnalysis) {
+            $this->error('存在未分析成功的样本，请先分析后再执行分析');
+            Log::info('存在未分析成功的样本，请先分析后再执行分析');
+            return;
         }
 
         try {
