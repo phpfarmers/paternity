@@ -106,10 +106,14 @@ class FamilyService extends BaseService
     {
         $family = Family::with('samples')->find($request->input('id'));
         if ($family) {
+            $sampleTypes = [];
             foreach ($family->samples as $k => $sample) {
-                $family->samples[$k]->sample_type_name = Sample::SAMPLE_TYPE_MAP_NAMES[$sample->sample_type];
+                $sample->sample_type_name = Sample::SAMPLE_TYPE_MAP_NAMES[$sample->sample_type] ?? '未知类型';
+                $sampleTypes[$sample->sample_type] = $sample;
             }
+            $family->samples = $sampleTypes;    
         }
+        
         return $family;
     }
 
