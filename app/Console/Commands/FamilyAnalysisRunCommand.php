@@ -73,8 +73,8 @@ class FamilyAnalysisRunCommand extends Command
 
         try {
             foreach ($families as $family) {
-                $this->info('家系分析开始：'.$family->id).'-'.date('Y-m-d H:i:s');
-                Log::info('家系分析开始：'.$family->id).'-'.date('Y-m-d H:i:s');
+                $this->info('家系分析开始：'.$family->id.'-'.date('Y-m-d H:i:s'));
+                Log::info('家系分析开始：'.$family->id.'-'.date('Y-m-d H:i:s'));
                 // 家系分析变为分析中
                 $family->report_result = Family::REPORT_RESULT_ANALYZING;
                 $family->report_times  += 1;
