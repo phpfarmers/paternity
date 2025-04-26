@@ -93,9 +93,12 @@ class FamilyAnalysisRunCommand extends Command
                 // 胎儿编号
                 $childSample = $samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_CHILD]['sample_name'];
                 $childPath = escapeshellarg($childSample.'.base.txt');
-                // 母本编号
-                $motherSample = $samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_MOTHER]['sample_name'];
-                $motherPath = escapeshellarg($motherSample.'.base.txt');
+                // 母本编号-可能为空
+                $motherPath = '';
+                if(isset($samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_MOTHER])){
+                    $motherSample = $samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_MOTHER]['sample_name'];
+                    $motherPath = escapeshellarg($motherSample.'.base.txt');
+                }
                 // 父本编号
                 $fatherSample = $samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_FATHER]['sample_name'];
                 $fatherPath = escapeshellarg($fatherSample.'.base.txt');
@@ -105,7 +108,7 @@ class FamilyAnalysisRunCommand extends Command
                 $commandCalR = config('data')['family_analysis_run_command_call_r'];
                 // shell命令参数
                 // $command = "cd /QinZiProject && ~/scripts/parse_perbase.pl -r 4 -s 0.008 -n /share/guoyuntao/workspace/QinZi_20241125/wbc_baseline_noumi_20250225/All.baseline.tsv -b AKT103-S.1G/AKT103-S.1G.base.txt -m parent_bases/AKT103-M.base.txt -f parent_bases/AKT103-F.base.txt -o AKT103-S.1G.xxx 2>log && Rscript /path/script/cal.r --args AKT103-S.1G.xxx.result.tsv > AKT103-S.1G.xxx.summary";
-                $command = "cd {$analysisDir} && ".$commandPl." -r 4 -s 0.008 -n All.baseline.tsv -b {$childPath} -m {$motherPath} -f {$fatherPath} -o {$childSample} 2>log && Rscript ".$commandCalR." --args {$childTsv} > {$childSummary}";
+                $command = "cd {$analysisDir} && ".$commandPl." -r 4 -s 0.008 -n All.baseline.tsv -b {$childPath} -m {$motherPath} -f {$fatherPath} -o {$childSample} 2>log && Rscript ".$commandCalR." --args {$childTsv} > {$childSummary} 2>&1";
                 $this->info('执行命令：' . $command);
                 Log::info('执行命令：' . $command);
                 // 执行shell命令
