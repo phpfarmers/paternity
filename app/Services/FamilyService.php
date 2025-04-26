@@ -122,7 +122,7 @@ class FamilyService extends BaseService
     public function analysisRun(Request $request)
     {
         // 验证家系信息
-        $family = Family::with(['samples'])->find($request->input('id'));
+        $family = Family::with(['samples'])->find($request->input('family_id'));
         throw_unless($family, new ApiException(1, '家庭信息不存在！'));
         // 验证家系报告结果-仅未分析状态可运行
         $reportResult = Family::REPORT_RESULT_MAP_NAMES[$family->report_result]??'';
@@ -135,18 +135,18 @@ class FamilyService extends BaseService
         $sampleAnalysisResult = Sample::ANALYSIS_RESULT_MAP_NAMES[$analysisResult[0]] ?? '';
         throw_if($analysisResult[0] != Sample::ANALYSIS_RESULT_SUCCESS, new ApiException(1, '此家系内的样本的分析结果为'.$sampleAnalysisResult.'，不能运行！'));
         
-        DB::beginTransaction();
+        // DB::beginTransaction();
         try {
             // TODO:请求分析接口
             dispatch(new FamilyAnalysisRunJob($family->id))->onQueue('family_analysis_run');
             // 更新家系报告结果
-            $family->report_result = Family::REPORT_RESULT_SUCCESS;
+            $family->report_result = Family::REPORT_RESULT_ANALYZING;
             $family->save();
             // 记录日志
-            DB::commit();
+            // DB::commit();
             return true;
         }catch (\Exception $e) {
-            DB::rollBack();
+            // DB::rollBack();
             throw new ApiException(1, $e->getMessage());
         }
     }
