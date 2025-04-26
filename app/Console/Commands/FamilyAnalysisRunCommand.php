@@ -33,10 +33,12 @@ class FamilyAnalysisRunCommand extends Command
         $this->info('家系分析开始');
         Log::info('家系分析开始');
         $id = $this->argument('id') ?? 0;
-        $families = Family::where('report_result', Family::REPORT_RESULT_UNKNOWN);
+        $families = Family::where('report_result','!=' ,Family::REPORT_RESULT_SUCCESS);
         // 指定id-前端操作
         if ($id > 0) {
             $families = $families->where('id', $id);
+        }else{
+            $families = $families->where('report_result', Family::REPORT_RESULT_UNKNOWN);
         }
         $families = $families->orderBy('report_times', 'asc')
         ->orderBy('id', 'asc')
