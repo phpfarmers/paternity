@@ -190,29 +190,36 @@ class FamilyService extends BaseService
      *
      * @param int $familyId
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse|array
      */
     public function getTsvData($familyId, $request)
-    {return [];
+    {
         $type = $request->input('type', '');
+
         $family = Family::with('samples')->findOrFail($familyId);
         if (!$family) {
             throw new \Exception('Family not found');
         }
+        // 组装路径等相关参数
         $samples = $family->samples;
-        $sampleTypes = array_column($samples->toArray(),'sample_name' ,'sample_type');
+        $sampleTypes = array_column($samples->toArray(), 'sample_name', 'sample_type');
         $fatherSample = $sampleTypes[Sample::SAMPLE_TYPE_FATHER] ?? '';
         // $motherSample = $sampleTypes[Sample::SAMPLE_TYPE_MOTHER] ?? '';
         $childSample = $sampleTypes[Sample::SAMPLE_TYPE_CHILD] ?? '';
-        $dataDir = config('data')['second_analysis_project'].$fatherSample.'_vs_'.$childSample;
+        // 组装路径
+        $dataDir = config('data')['second_analysis_project'] . $fatherSample . '_vs_' . $childSample;
         // 文件后缀
-
         $fileExt = '';
         switch ($type) {
-            case 'value':
-                $fileExt = '.result.tsv';
+            // 简单报告数据
+            case 'summary':
+                $fileExt = '.result.summary.tsv';
                 break;
-            
+            // SNP匹配表
+            case 'report':
+                $fileExt = '.report.tsv';
+                break;
+            // 总表
             default:
                 $fileExt = '.result.tsv';
                 break;
@@ -222,34 +229,124 @@ class FamilyService extends BaseService
         if (!file_exists($tsvFilePath)) {
             throw new \Exception('TSV file not found');
         }
+        // 本地测试文件
+        // $tsvFilePath = storage_path('a.tsv');
 
-        $tsvData = $this->parseTsvFile($tsvFilePath);
-        return $this->filterTsvData($tsvData, $searchParams);
-    }
-
-    private function parseTsvFile($filePath)
-    {
-        $rows = array_map('str_getcsv', file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
-        $header = array_shift($rows);
-        $data = array();
-
-        foreach ($rows as $row) {
-            $data[] = array_combine($header, $row);
+        switch ($type) {
+            case 'summary':
+                $tsvData = $this->getSummareTsvFile($tsvFilePath, $request);
+                break;
+            case 'report':
+                $tsvData = $this->parseTsvFile($tsvFilePath);
+                break;
+            default:
+                $tsvData = $this->parseTsvFile($tsvFilePath);
+                break;
         }
 
-        return $data;
+        return $tsvData;
     }
 
-    private function filterTsvData($data, $params)
+    /**
+     * 简单报告表格
+     *
+     * @param [type] $filePath
+     * @return void
+     */
+    protected function getSummareTsvFile($filePath, $request)
     {
-        return array_filter($data, function ($row) use ($params) {
-            foreach ($params as $key => $value) {
-                if (isset($row[$key]) && strpos($row[$key], $value) === false) {
-                    return false;
+        $page = $request->input('page', 1);
+        $limit = $request->input('limit', 10);
+        $offset = ($page - 1) * $limit;
+
+        $search = [];
+
+        // 将数组转换为集合
+        $data = collect($this->parseTsvFile($filePath))->when($search, function ($collection) use ($search) {
+            return $collection->filter(function ($item) use ($search) {
+                // 根据搜索条件过滤数据
+                // return Str::contains($item['title'], $search); // 搜索title字段
+            });
+        });
+
+        // 分页处理
+        $paginatedData = $data->slice($offset, $limit)->values();
+        foreach ($paginatedData as $kk => $item) {
+            foreach ($item as $key => $value) {
+                // 特殊处理错配位点数
+                if('A/N' == $key){
+                    $replaceKey = str_replace('/', '_', $key);
+                    $replaceValue = explode('/', $value);
+                    $item[$replaceKey] = $replaceValue[1] ?? '';
+                    unset($item[$key]);
+                }
+                // 特殊处理父本
+                if('Pairs' == $key){
+                    $item[$key] = explode('_vs_',$value)[0] ?? '';
                 }
             }
-            return true;
-        });
+            $paginatedData[$kk] = $item;
+        }
+
+        return [
+            'total' => $data->count(),
+            'data' => $paginatedData
+        ];
+    }
+    /**
+     * 解析TSV文件-公共方法
+     *
+     * @param string $filePath
+     * @return array
+     */
+    protected function parseTsvFile($filePath)
+    {
+        $rows = array_map('str_getcsv', file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES), array_fill(0, count(file($filePath)), "\t"));
+        $header = array_shift($rows);
+        
+        $data = [];
+
+        foreach ($rows as $row) {
+            $data[] =  array_combine($header, $row);
+        }
+        
+        return $data;
+    }
+    
+    public function getPicData($familyId, $request)
+    {
+        $type = $request->input('type', '');
+
+        $family = Family::with('samples')->findOrFail($familyId);
+        if (!$family) {
+            throw new \Exception('Family not found');
+        }
+        // 组装路径等相关参数
+        $samples = $family->samples;
+        $sampleTypes = array_column($samples->toArray(), 'sample_name', 'sample_type');
+        $fatherSample = $sampleTypes[Sample::SAMPLE_TYPE_FATHER] ?? '';
+        // $motherSample = $sampleTypes[Sample::SAMPLE_TYPE_MOTHER] ?? '';
+        $childSample = $sampleTypes[Sample::SAMPLE_TYPE_CHILD] ?? '';
+        // 组装路径
+        $dataDir = config('data')['second_analysis_project'] . $fatherSample . '_vs_' . $childSample;
+        // 文件后缀
+        $fileExt = '';
+        switch ($type) {
+            // 简单报告数据
+            case 'qc':
+                $fileExt = '.qc.png';
+                break;
+            // SNP匹配表
+            case 'child':
+                $fileExt = '.child.png';
+                break;
+            // 总表
+            default:
+                break;
+        }
+        $picFilePath = $dataDir.$fileExt;
+
+        return $picFilePath;
     }
 
     /**

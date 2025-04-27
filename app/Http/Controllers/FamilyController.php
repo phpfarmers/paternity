@@ -107,13 +107,48 @@ class FamilyController extends Controller
      */
     public function getTsvData(Request $request, $id)
     {
-        // 获取tsv数据
-        $data = $this->familyService->getTsvData($id, $request);
-        return response()->json([
-            'code' => 0,
-            'msg' => '',
-            'data' => $data
-        ]);
+        try {
+            $result = $this->familyService->getTsvData($id, $request);
+            // 获取tsv数据
+            return response()->json([
+                'code' => 0,
+                'msg' => '',
+                'count' => $result['count'] ?? 0,
+                'data' => $result['data'] ?? []
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'code' => 1,
+                'msg' => '无数据'.$e->getMessage(),
+                'count' => 0,
+                'data' => []
+            ]);
+        }
+    }
+
+    /**
+     * 获取家系图片数据
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getPicData(Request $request, $id)
+    {
+        try {
+            $result = $this->familyService->getPicData($id, $request);
+            // 获取tsv数据
+            return response()->json([
+                'code' => 0,
+                'msg' => '',
+                'data' => $result ?? ''
+            ]);
+        }  catch (\Exception $e) {
+            return response()->json([
+                'code' => 1,
+                'msg' => '未取到数据',
+                'data' => ''
+            ]);
+        }
     }
 
     /**

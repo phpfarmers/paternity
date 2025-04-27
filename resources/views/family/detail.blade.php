@@ -60,7 +60,7 @@
         </div>
     </div>
     <!-- tabs -->
-    <div class="layui-tab">
+    <div class="layui-tab" lay-filter="detailTab">
         <ul class="layui-tab-title">
             <li class="layui-this">简单报告</li>
             <li>胎儿深度图</li>
@@ -85,13 +85,13 @@
                 </table>
                 <div id="page"></div>
             </div>
-            <div class="layui-tab-item">内容2</div>
-            <div class="layui-tab-item">内容3</div>
-            <div class="layui-tab-item">内容4</div>
-            <div class="layui-tab-item">内容5</div>
-            <div class="layui-tab-item">内容6</div>
-            <div class="layui-tab-item">内容7</div>
-            <div class="layui-tab-item">内容8</div>
+            <div class="layui-tab-item"></div>
+            <div class="layui-tab-item"></div>
+            <div class="layui-tab-item"></div>
+            <div class="layui-tab-item"></div>
+            <div class="layui-tab-item"></div>
+            <div class="layui-tab-item"></div>
+            <div class="layui-tab-item"></div>
         </div>
     </div>
 
@@ -106,62 +106,147 @@
             var element = layui.element;
             var slider = layui.slider;
 
-            // 初始化表格
-            table.render({
-                elem: '#tsvTable',
-                url: '{{ route("family.tsv", $family->id) }}', // 使用新添加的路由
-                page: true, // 开启分页
-                limit: 10, // 每页显示的条数
-                limits: [10, 20, 30], // 每页条数的选择项
-                cols: [
-                    [{
-                            field: 'column1',
-                            title: '父本名称',
-                            sort: false
-                        },
-                        {
-                            field: 'column2',
-                            title: '有效位点数',
-                            sort: false
-                        },
-                        {
-                            field: 'column3',
-                            title: '错配位点数',
-                            sort: false
-                        },
-                        {
-                            field: 'column3',
-                            title: '错配率',
-                            sort: false
-                        },
-                        {
-                            field: 'column3',
-                            title: '父权值',
-                            sort: false
-                        },
-                        {
-                            field: 'column3',
-                            title: ' 深度',
-                            sort: false
-                        },
-                        // 根据TSV文件的列数添加更多列
-                    ]
-                ],
-                parseData: function(res) {
-                    // 解析TSV文件数据
-                    return {
-                        "code": 0,
-                        "msg": "",
-                        "count": res.length,
-                        "data": res
-                    };
+            // 页面加载完成后自动切换到“简单报告”选项卡
+            $(document).ready(function() {
+                // 切换到第一个选项卡（索引为 0）
+                switchTable(0);
+            });
+
+            // 监听选项卡切换事件
+            element.on('tab(detailTab)', function(data) {
+                // 根据选项卡索引执行不同的操作
+                switch (data.index) {
+                    case 0: // 简单报告
+                        switchTable(0);
+                        console.log('切换到简单报告');
+                        break;
+                    case 1: // 胎儿深度图
+                        console.log('切换到胎儿深度图');
+                        break;
+                    case 2: // 家系图
+                        switchImage(2);
+                        console.log('切换到家系图');
+                        break;
+                    case 3: // 匹配图
+                        switchImage(3);
+                        console.log('切换到匹配图');
+                        break;
+                        // 其他选项卡...
+                    default:
+                        console.log('切换到其他选项卡');
+                        break;
                 }
             });
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            // 切换表格
+            function switchTable(index) {
+                let elem = '';
+                let url = '';
+                let where = {};
+                let cols = [];
+                switch (index) {
+                    case 0:
+                        elem = '#tsvTable';
+                        url = '{{ route("family.tsv", $family->id) }}';
+                        where = {
+                            type: 'summary'
+                        };
+                        cols = [
+                            [{
+                                    field: 'Pairs',
+                                    title: '父本名称',
+                                    sort: false
+                                },
+                                {
+                                    field: 'Site',
+                                    title: '有效位点数',
+                                    sort: false
+                                },
+                                {
+                                    field: 'A_N',
+                                    title: '错配位点数',
+                                    sort: false
+                                },
+                                {
+                                    field: 'MismatchRate',
+                                    title: '错配率',
+                                    sort: false
+                                },
+                                {
+                                    field: 'CPI',
+                                    title: '父权值',
+                                    sort: false
+                                },
+                                // {
+                                //     field: 'column3',
+                                //     title: ' 深度',
+                                //     sort: false
+                                // },
+                                // 根据TSV文件的列数添加更多列
+                            ]
+                        ];
+                        break;
                 }
-            });
+
+                // 初始化表格
+                table.render({
+                    elem: elem,
+                    url: url, // 使用新添加的路由
+                    page: true, // 开启分页
+                    limit: 10, // 每页显示的条数
+                    limits: [10, 20, 30], // 每页条数的选择项
+                    where: where,
+                    cols: cols
+                });
+            }
+            // 切换图片
+            function switchImage(index) {
+                // 根据选项卡索引执行不同的操作
+                switch (index) {
+                    case 1:
+                        // 胎儿深度图
+                        break;
+                    case 2:
+                        getImgData(2);
+                        // 家系图
+                        break;
+                    case 3:
+                        getImgData(3);
+                        // 谱系图
+                        break;
+                        // 其他选项卡...
+                    default:
+                        break;
+                }
+                // 接口获取图片数据
+                function getImgData(index) { 
+                    let type = '';
+                    switch (index) {
+                        case 2:
+                            type = 'qc';
+                            break;
+                        case 3:
+                            type = 'child';
+
+                        default:
+                            break;
+                    }
+                    $.ajax({
+                        type: "get",
+                        url: '{{ route("family.pic", $family->id) }}',
+                        dataType: "json",
+                        data: {
+                            type: type
+                        },
+                        success: function(data) {
+                            if (data.code == 0) {
+                                // 获取图片数据成功
+                                let html = "<img src ='"+data.data+"'>";
+                                $('div.layui-tab-item').eq(index).html(html);
+                            }
+                        }
+                    })
+                }
+            }
             // 搜索按钮点击事件
             $('#searchBtn').on('click', function() {
                 var formData = $('#searchForm').serializeArray();
@@ -182,9 +267,11 @@
                         console.log(res);
                         if (res.code == 0) {
                             // 成功
-                        }else {
+                        } else {
                             // 失败
-                            layer.msg(res.msg, { icon: 5 });
+                            layer.msg(res.msg, {
+                                icon: 5
+                            });
                         }
                     }
                 });
