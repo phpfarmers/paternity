@@ -85,12 +85,30 @@
                 </table>
                 <div id="page"></div>
             </div>
+            <!-- 胎儿深度图 -->
             <div class="layui-tab-item"></div>
+            <!-- 家系图 -->
             <div class="layui-tab-item"></div>
+            <!-- 匹配图 -->
             <div class="layui-tab-item"></div>
+            <!-- SNP匹配表 -->
+            <div class="layui-tab-item">
+                <table id="tsvSNPTable" lay-filter="tsvSNPTable">
+                    <thead>
+                        <tr>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 数据会通过表格组件自动填充 -->
+                    </tbody>
+                </table>
+                <div id="page"></div>
+            </div>
+            <!-- 总表 -->
             <div class="layui-tab-item"></div>
+            <!-- 父本排查 -->
             <div class="layui-tab-item"></div>
-            <div class="layui-tab-item"></div>
+            <!-- 同一认定 -->
             <div class="layui-tab-item"></div>
         </div>
     </div>
@@ -130,6 +148,10 @@
                     case 3: // 匹配图
                         switchImage(3);
                         console.log('切换到匹配图');
+                        break;
+                    case 4: // SNP匹配表
+                        switchTable(4);
+                        console.log('切换到SNP匹配表');
                         break;
                         // 其他选项卡...
                     default:
@@ -182,6 +204,38 @@
                                 //     sort: false
                                 // },
                                 // 根据TSV文件的列数添加更多列
+                            ]
+                        ];
+                        break;
+                    case 4:
+                        elem = '#tsvSNPTable';
+                        url = '{{ route("family.tsv", $family->id) }}';
+                        where = {
+                            type: 'snp'
+                        };
+                        cols = [
+                            [{
+                                    field: 'ID',
+                                    title: '检测位点编号',
+                                    sort: false
+                                },
+                                {
+                                    field: 'GT_Father',
+                                    title: '父本基因型',
+                                    sort: false
+                                },
+                                {
+                                    field: 'GT_Mother',
+                                    title: '母本基因型',
+                                },
+                                {
+                                    field: 'GT_Baby',
+                                    title: '胎儿基因型',
+                                },
+                                {
+                                    field: 'Match',
+                                    title: '是否错配',
+                                }
                             ]
                         ];
                         break;
