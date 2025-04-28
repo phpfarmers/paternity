@@ -236,7 +236,7 @@ class FamilyService extends BaseService
             case 'summary':
                 $tsvData = $this->getSummareTsvFile($tsvFilePath, $request);
                 break;
-            case 'snp':
+            case 'report':
                 $tsvData = $this->getReportTsvFile($tsvFilePath, $request);
                 break;
             default:
@@ -301,7 +301,7 @@ class FamilyService extends BaseService
      * @param [type] $filePath
      * @return void
      */
-    protected function getSnpTsvFile($filePath, $request)
+    protected function getReportTsvFile($filePath, $request)
     {
         $page = $request->input('page', 1);
         $limit = $request->input('limit', 10);
@@ -325,7 +325,7 @@ class FamilyService extends BaseService
             'data' => $paginatedData
         ];
     }
-    
+
     /**
      * 解析TSV文件-公共方法
      *

@@ -211,7 +211,7 @@
                         elem = '#tsvSNPTable';
                         url = '{{ route("family.tsv", $family->id) }}';
                         where = {
-                            type: 'snp'
+                            type: 'report'
                         };
                         cols = [
                             [{
