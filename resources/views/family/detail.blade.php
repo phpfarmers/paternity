@@ -240,7 +240,7 @@
                         success: function(data) {
                             if (data.code == 0) {
                                 // 获取图片数据成功
-                                let html = "<img src ='"+data.data+"' max-width='100%'>";
+                                let html = "<img src ='"+data.data+"' width='800px'>";
                                 $('div.layui-tab-item').eq(index).html(html);
                             }
                         }
