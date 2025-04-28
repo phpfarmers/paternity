@@ -174,6 +174,7 @@ class FamilyService extends BaseService
         DB::beginTransaction();
         try {
             // TODO:请求重分析接口
+            dispatch(new FamilyAnalysisRunJob($family->id))->onQueue('family_analysis_rerun');
             // 更新家系报告结果
             $family->report_result = Family::REPORT_RESULT_SUCCESS;
             $family->save();
@@ -405,7 +406,6 @@ class FamilyService extends BaseService
      */
     public function searchData($id, $request)
     {
-        throw new \Exception('处理中...');
         $newMontherSample = $request->input('mother_sample', '');
         $newFatherSample = $request->input('father_sample', '');
         $newChildSample = $request->input('child_sample', '');
@@ -415,34 +415,26 @@ class FamilyService extends BaseService
         if (!$family) {
             throw new \Exception('Family not found');
         }
-        $samples = $family->samples;
-        $sampleTypes = array_column($samples->toArray(),'sample_name' ,'sample_type');
-        $fatherSample = $sampleTypes[Sample::SAMPLE_TYPE_FATHER] ?? '';
-        $motherSample = $sampleTypes[Sample::SAMPLE_TYPE_MOTHER] ?? '';
-        $childSample = $sampleTypes[Sample::SAMPLE_TYPE_CHILD] ?? '';
-        // 比较传过来的父本与当前的父本，传过来的子本与当前的子本是否一致，不一致则查询，是否已组建家系，未组建家系则创建家系
-        if ($fatherSample != $newFatherSample || $childSample != $newChildSample) {
-            $newSamples = Sample::whereIn('sample_name', [$newFatherSample, $newChildSample])
-                ->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)->pluck('sample_name', 'id')->toArray();
-            $diffSamples = array_diff([$newFatherSample, $newChildSample], $newSamples);
-            if (!empty($diffSamples)) {
-                throw new \Exception('样本不存在或未分析成功：' . implode(',', $diffSamples));
-            }
+        
+        $newSamples = Sample::whereIn('sample_name', [$newFatherSample, $newChildSample, $newMontherSample])
+            ->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)
+            ->pluck('output_dir', 'sample_name')
+            ->toArray();
 
-            // 查询家系与样本关系表(families_samples)，用2个样本查询是不是属于同一个家系
+        $diffSamples = array_diff(
+            array_filter([$newFatherSample, $newChildSample, $newMontherSample]),
+            array_keys($newSamples)
+        );
+        if (!empty($diffSamples)) {
+            throw new \Exception('样本不存在或未分析成功：' . implode(',', $diffSamples));
+        }
+        // 执行分析
 
-            $family = Family::where('father_sample', $fatherSample)
-                ->where('child_sample', $childSample)
-                ->first();
-
-            if (!$family) {
-                $family = Family::create([
-                    'father_sample' => $fatherSample,
-                    'child_sample' => $childSample,
-                ]);
-            }
+        if(!$this->run($newFatherSample, $newSamples[$newFatherSample], $newChildSample, $newSamples[$newChildSample], $newMontherSample, $newSamples[$newMontherSample], $newr, $news)){
+            return false;
         }
 
+        return true;
     }
 
     /**
@@ -476,5 +468,58 @@ class FamilyService extends BaseService
         $excel->generateXls($data, $header, $keys);
 
         return $final_name;
+    }
+
+    private function run(
+        $fatherSample,
+        $fatherOutputDir,
+        $childSample,
+        $childOutputDir,
+        $motherSample = '',
+        $motherOutputDir = '',
+        $s = 0.008,
+        $r = 4,
+        $familyId = 0
+    )
+    {
+        $analysisProject = config('data')['analysis_project']; // 本地样本分析目录
+        $secondAnalysisProject = config('data')['second_analysis_project']; // 二级分析目录
+        $secondAnalysisProjectDir = escapeshellarg($secondAnalysisProject); //转义后的二级分析目录
+
+        // 胎儿编号
+        $childPath = escapeshellarg($childOutputDir . '/' . $childSample . '.base.txt');
+        // 母本编号-可能为空
+        $motherPath = '';
+        if (!empty($motherSample)) {
+            $motherPath = escapeshellarg($motherOutputDir . '/' . $motherSample . '.base.txt');
+        }
+        // 父本编号
+        $fatherPath = escapeshellarg($fatherOutputDir . '/' . $fatherSample . '.base.txt'); //绝对路径
+
+        $commandPl = config('data')['family_analysis_run_command_pl'];
+        $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r {$r} -s {$s} -b {$childPath} -m {$motherPath} -f {$fatherPath} 2>log";
+        // 执行shell命令
+        exec($command, $output, $returnVar);
+
+        if ($returnVar === 0) {
+            // 符合条件-更新检测结果状态为成功
+            if($familyId > 0){
+                // 更新family表
+                Family::where('id', $familyId)->update([
+                    'report_result' => Family::REPORT_RESULT_SUCCESS,
+                    'report_time' => date('Y-m-d')
+                ]);
+            }
+            return true;
+        } else {
+            // 不符合条件-更新检测结果状态为失败
+            if($familyId > 0){
+                // 更新family表
+                Family::where('id', $familyId)->update([
+                    'report_result' => Family::REPORT_RESULT_FAIL
+                ]);
+            }
+            return false;
+        }
     }
 }

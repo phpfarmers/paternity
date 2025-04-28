@@ -332,6 +332,12 @@
                         console.log(res);
                         if (res.code == 0) {
                             // 成功
+                            // 重置表格数据
+                            father_sample = params.father_sample;
+                            child_sample = params.child_sample;
+                            mother_sample = params.mother_sample;
+                            slider_r = params.slider_r;
+                            slider_s = params.slider_s;
                         } else {
                             // 失败
                             layer.msg(res.msg, {
@@ -339,12 +345,6 @@
                             });
                         }
                     }
-                });
-                return;
-                table.reload('tsvTable', {
-                    // url: '{{ route("family.search", $family->id) }}', // 使用新添加的路由
-                    where: params,
-
                 });
             });
 
