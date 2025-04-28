@@ -34,6 +34,7 @@ Route::get('family/analysis-rerun', [FamilyController::class, 'analysisRerun'])-
 Route::get('/family/{id}/tsv', [FamilyController::class, 'getTsvData'])->name('family.tsv');
 Route::get('/family/{id}/pic', [FamilyController::class, 'getPicData'])->name('family.pic');
 Route::get('/family/{id}/search', [FamilyController::class, 'searchData'])->name('family.search');
+Route::get('/family/downloadTable', [FamilyController::class, 'downloadTable'])->name('family.download');
 
 // 样本
 Route::post('sample/import', [SampleController::class, 'import'])->name('sample.import');

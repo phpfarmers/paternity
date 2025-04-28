@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Console\Tools\Office\Excel;
 use App\Exceptions\ApiException;
 use App\Jobs\FamilyAnalysisRunJob;
 use App\Models\Family;
@@ -442,5 +443,38 @@ class FamilyService extends BaseService
             }
         }
 
+    }
+
+    /**
+     * 下载表格
+     */
+    public function downloadTable($request)
+    {
+         // 组装路径
+        $dataDir = config('data')['second_analysis_project'] . $request->input('father_sample', '') . '_vs_' . $request->input('child_sample', '');
+        // $dataDir = config('data')['second_analysis_project'] . 'PPA20250300041F1-2_vs_PPA20250300041S1.report';
+        
+        $data = $this->parseTsvFile($dataDir . '.report.tsv');
+
+        $keys = [
+            'ID',
+            'GT_Father',
+            'GT_Mother',
+            'GT_Baby',
+            'Match',            
+        ];
+        $header   = [
+            '检测位点编号',
+            '父本基因型',
+            '母本基因型',
+            '胎儿基因型',
+            '是否错配'
+        ];
+        
+        $final_name = generateFileSavePath(public_path('/static/download/files/'), 'snp_' . date('Ymd_His') . '.xls');
+        $excel      = new Excel(['save_path' => $final_name]);
+        $excel->generateXls($data, $header, $keys);
+
+        return $final_name;
     }
 }

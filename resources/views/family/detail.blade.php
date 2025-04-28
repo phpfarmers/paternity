@@ -94,7 +94,7 @@
             <!-- SNP匹配表 -->
             <div class="layui-tab-item">
                 <div class="layui-form-item">
-                    <button type="button" class="layui-btn layui-btn-primary downloadTsvBtn" style="float:right;">
+                    <button type="button" class="layui-btn layui-btn-primary downloadTableBtn" style="float:right;">
                         下载</button>
                 </div>
                 <table id="tsvSNPTable" lay-filter="tsvSNPTable">
@@ -127,6 +127,12 @@
             var table = layui.table;
             var element = layui.element;
             var slider = layui.slider;
+
+            var father_sample = "{{$family['samples'][3]['sample_name']??''}}";
+            var mother_sample = "{{$family['samples'][1]['sample_name']??''}}";
+            var child_sample = "{{$family['samples'][2]['sample_name']??''}}";
+            var slider_s = "{{$family['s']??''}}";
+            var slider_r = "{{$family['r']??''}}";
 
             // 页面加载完成后自动切换到“简单报告”选项卡
             $(document).ready(function() {
@@ -373,6 +379,57 @@
                         alert('图片下载失败，请检查网络或图片链接是否正确。');
                     });
             });
+            // 下载表格
+            $(document).on('click', '.downloadTableBtn', async function() {
+                try {
+                    // 调用下载函数
+                    const blob = await downloadProjectExcel();
+
+                    // 创建下载链接
+                    const link = document.createElement('a');
+                    link.style.display = 'none';
+                    link.href = URL.createObjectURL(blob);
+                    link.setAttribute('download', 'snp匹配表.xlsx');
+
+                    // 触发下载
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    // 释放 Blob URL
+                    URL.revokeObjectURL(link.href);
+                } catch (error) {
+                    console.error('下载失败:', error);
+                    alert('表格下载失败，请稍后重试。');
+                }
+            });
+
+            // 下载 Excel 文件
+            async function downloadProjectExcel() {
+                const params = {
+                    father_sample: father_sample,
+                    child_sample: child_sample,
+                };
+
+                // 将参数拼接到 URL 中
+                const url = `/family/downloadTable?${new URLSearchParams(params).toString()}`;
+
+                // 发起请求
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                // 检查响应状态
+                if (!response.ok) {
+                    throw new Error('网络响应错误');
+                }
+
+                // 返回 Blob 数据
+                return response.blob();
+            }
 
             // 初始化滑窗
             slider.render({

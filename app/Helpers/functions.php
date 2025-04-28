@@ -72,3 +72,22 @@ if (!function_exists('is_json')) {
         return (json_last_error() == JSON_ERROR_NONE);
     }
 }
+
+
+if (!function_exists('generateFileSavePath')) {
+    /**
+     * 生成文件下载目录
+     *
+     * @param string $save_path 目录
+     * @param string $file_name 文件名
+     * @return string
+     */
+    function generateFileSavePath($save_path = '', $file_name = '')
+    {
+        // 如果目录不存在，那么就先创建
+        if (!is_dir($save_path)) {
+            mkdir($save_path, 0777, true);
+        }
+        return $save_path . $file_name;
+    }
+}

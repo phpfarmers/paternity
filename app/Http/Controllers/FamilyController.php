@@ -182,4 +182,16 @@ class FamilyController extends Controller
             'data' => $data
         ]);
     }
+
+    /**
+     * 下载表格
+     */
+    public function downloadTable(Request $request)
+    { 
+        $filePath = $this->familyService->downloadTable($request);
+
+        $file_name = str_replace(dirname($filePath) . DIRECTORY_SEPARATOR, '', $filePath);
+        
+        return response()->download($filePath, $file_name);
+    }
 }
