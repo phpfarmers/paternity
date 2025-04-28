@@ -93,6 +93,10 @@
             <div class="layui-tab-item"></div>
             <!-- SNP匹配表 -->
             <div class="layui-tab-item">
+                <div class="layui-form-item">
+                    <button type="button" class="layui-btn layui-btn-primary downloadTsvBtn" style="float:right;">
+                        下载</button>
+                </div>
                 <table id="tsvSNPTable" lay-filter="tsvSNPTable">
                     <thead>
                         <tr>
@@ -341,16 +345,33 @@
             // 添加下载按钮点击事件
             $(document).on('click', '.downloadImgBtn', function() {
                 // 获取图片的URL
-                var imageUrl = $(this).next('img').attr('src');
-                // 创建一个隐藏的<a>标签，并设置其href属性为图片的URL
-                var link = document.createElement('a');
-                link.href = imageUrl;
-                link.download = 'image.png'; // 设置下载文件的名称
+                var imageUrl = $(this).parents('.layui-tab-item').find('img').attr('src');
+                // 使用 fetch API 获取图片数据
+                fetch(imageUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        // 创建一个隐藏的<a>标签，并设置其href属性为生成的Blob URL
+                        var link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = 'image.png'; // 设置下载文件的名称
 
-                // 模拟点击<a>标签以触发下载
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                        // 模拟点击<a>标签以触发下载
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                        // 释放Blob URL
+                        URL.revokeObjectURL(link.href);
+                    })
+                    .catch(error => {
+                        console.error('Error downloading image:', error);
+                        alert('图片下载失败，请检查网络或图片链接是否正确。');
+                    });
             });
 
             // 初始化滑窗
