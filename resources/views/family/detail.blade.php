@@ -218,7 +218,7 @@
                         break;
                 }
                 // 接口获取图片数据
-                function getImgData(index) { 
+                function getImgData(index) {
                     let type = '';
                     switch (index) {
                         case 2:
@@ -240,7 +240,8 @@
                         success: function(data) {
                             if (data.code == 0) {
                                 // 获取图片数据成功
-                                let html = "<img src ='"+data.data+"' width='800px'>";
+                                let html = '<div><button type="button" class="layui-btn layui-btn-primary downloadImgBtn" style="float:right">下载</button></div>';
+                                html += "<img src ='" + data.data + "' width='800px'>";
                                 $('div.layui-tab-item').eq(index).html(html);
                             }
                         }
@@ -281,6 +282,21 @@
                     where: params,
 
                 });
+            });
+
+            // 添加下载按钮点击事件
+            $(document).on('click', '.downloadImgBtn', function() {
+                // 获取图片的URL
+                var imageUrl = $(this).next('img').attr('src');
+                // 创建一个隐藏的<a>标签，并设置其href属性为图片的URL
+                var link = document.createElement('a');
+                link.href = imageUrl;
+                link.download = 'image.png'; // 设置下载文件的名称
+
+                // 模拟点击<a>标签以触发下载
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             });
 
             // 初始化滑窗
