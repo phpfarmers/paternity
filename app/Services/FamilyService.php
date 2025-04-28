@@ -339,10 +339,24 @@ class FamilyService extends BaseService
     {
         $rows = array_map('str_getcsv', file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES), array_fill(0, count(file($filePath)), "\t"));
         $header = array_shift($rows);
-        
+
+        // 处理表头和表体长度不一致的情况
+        $headerCount = count($header);
+        $rowCount =  count($rows[0]??[]);
+        $minLenght = 0;
+        if($headerCount != $minLenght){
+            $minLenght = min($headerCount, $rowCount);
+            $header = array_slice($header, 0, $minLenght);
+        }
+
         $data = [];
 
         foreach ($rows as $row) {
+            // 长度不一致处理
+            if($minLenght > 0){
+                $row = array_slice($row, 0, $minLenght);
+            }
+
             $data[] =  array_combine($header, $row);
         }
         
