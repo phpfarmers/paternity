@@ -194,57 +194,60 @@ class FamilyService extends BaseService
      */
     public function getTsvData($familyId, $request)
     {
-        $type = $request->input('type', '');
+        try {
+            $type = $request->input('type', '');
 
-        $family = Family::with('samples')->findOrFail($familyId);
-        if (!$family) {
-            throw new \Exception('Family not found');
-        }
-        // 组装路径等相关参数
-        $samples = $family->samples;
-        $sampleTypes = array_column($samples->toArray(), 'sample_name', 'sample_type');
-        $fatherSample = $sampleTypes[Sample::SAMPLE_TYPE_FATHER] ?? '';
-        // $motherSample = $sampleTypes[Sample::SAMPLE_TYPE_MOTHER] ?? '';
-        $childSample = $sampleTypes[Sample::SAMPLE_TYPE_CHILD] ?? '';
-        // 组装路径
-        $dataDir = config('data')['second_analysis_project'] . $fatherSample . '_vs_' . $childSample;
-        // 文件后缀
-        $fileExt = '';
-        switch ($type) {
-            // 简单报告数据
-            case 'summary':
-                $fileExt = '.result.summary.tsv';
-                break;
-            // SNP匹配表
-            case 'report':
-                $fileExt = '.report.tsv';
-                break;
-            // 总表
-            default:
-                $fileExt = '.result.tsv';
-                break;
-        }
-        $tsvFilePath = $dataDir.$fileExt;
+            $family = Family::with('samples')->findOrFail($familyId);
+            if (!$family) {
+                throw new ApiException(1, 'Family not found');
+            }
+            // 组装路径等相关参数
+            $samples = $family->samples;
+            $sampleTypes = array_column($samples->toArray(), 'sample_name', 'sample_type');
+            $fatherSample = $sampleTypes[Sample::SAMPLE_TYPE_FATHER] ?? '';
+            // $motherSample = $sampleTypes[Sample::SAMPLE_TYPE_MOTHER] ?? '';
+            $childSample = $sampleTypes[Sample::SAMPLE_TYPE_CHILD] ?? '';
+            // 组装路径
+            $dataDir = config('data')['second_analysis_project'] . $fatherSample . '_vs_' . $childSample;
+            // 文件后缀
+            $fileExt = '';
+            switch ($type) {
+                // 简单报告数据
+                case 'summary':
+                    $fileExt = '.result.summary.tsv';
+                    break;
+                // SNP匹配表
+                case 'report':
+                    $fileExt = '.report.tsv';
+                    break;
+                // 总表
+                default:
+                    $fileExt = '.result.tsv';
+                    break;
+            }
+            $tsvFilePath = $dataDir . $fileExt;
 
-        if (!file_exists($tsvFilePath)) {
-            throw new \Exception('TSV file not found');
-        }
-        // 本地测试文件
-        // $tsvFilePath = storage_path('a.tsv');
+            if (!file_exists($tsvFilePath)) {
+                throw new ApiException(1, 'TSV file not found');
+            }
+            // 本地测试文件
+            // $tsvFilePath = storage_path('a.tsv');
 
-        switch ($type) {
-            case 'summary':
-                $tsvData = $this->getSummareTsvFile($tsvFilePath, $request);
-                break;
-            case 'report':
-                $tsvData = $this->getReportTsvFile($tsvFilePath, $request);
-                break;
-            default:
-                $tsvData = $this->parseTsvFile($tsvFilePath);
-                break;
+            switch ($type) {
+                case 'summary':
+                    $tsvData = $this->getSummareTsvFile($tsvFilePath, $request);
+                    break;
+                case 'report':
+                    $tsvData = $this->getReportTsvFile($tsvFilePath, $request);
+                    break;
+                default:
+                    $tsvData = $this->parseTsvFile($tsvFilePath);
+                    break;
+            }
+            return $tsvData;
+        } catch (\Exception $e) {
+            throw new ApiException(1, $e->getMessage());
         }
-
-        return $tsvData;
     }
 
     /**
