@@ -236,8 +236,8 @@ class FamilyService extends BaseService
             case 'summary':
                 $tsvData = $this->getSummareTsvFile($tsvFilePath, $request);
                 break;
-            case 'report':
-                $tsvData = $this->parseTsvFile($tsvFilePath);
+            case 'snp':
+                $tsvData = $this->getReportTsvFile($tsvFilePath, $request);
                 break;
             default:
                 $tsvData = $this->parseTsvFile($tsvFilePath);
@@ -293,6 +293,39 @@ class FamilyService extends BaseService
             'data' => $paginatedData
         ];
     }
+
+    
+    /**
+     * SNP表格
+     *
+     * @param [type] $filePath
+     * @return void
+     */
+    protected function getSnpTsvFile($filePath, $request)
+    {
+        $page = $request->input('page', 1);
+        $limit = $request->input('limit', 10);
+        $offset = ($page - 1) * $limit;
+
+        $search = [];
+
+        // 将数组转换为集合
+        $data = collect($this->parseTsvFile($filePath))->when($search, function ($collection) use ($search) {
+            return $collection->filter(function ($item) use ($search) {
+                // 根据搜索条件过滤数据
+                // return Str::contains($item['title'], $search); // 搜索title字段
+            });
+        });
+
+        // 分页处理
+        $paginatedData = $data->slice($offset, $limit)->values();
+
+        return [
+            'total' => $data->count(),
+            'data' => $paginatedData
+        ];
+    }
+    
     /**
      * 解析TSV文件-公共方法
      *
