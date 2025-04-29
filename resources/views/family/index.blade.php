@@ -149,11 +149,11 @@
                     }},
                     {field: 'report_time', title: '报告时间', templet: function(d){
                         var report_time = '';
-                        if(d.report_time == 2){
+                        if(d.report_result == 2){
                             report_time += '<div><span class="layui-badge layui-bg-green">已分析</span>' + d.report_time + '</div>';
-                        }else if(d.report_time == 1){
+                        }else if(d.report_result == 1){
                             report_time += '<div><span class="layui-badge layui-bg-orange">分析中</span></div>' ;
-                        }else if(d.report_time == 3){
+                        }else if(d.report_result == 3){
                             report_time += '<div><span class="layui-badge layui-bg-blue">分析失败</span>';
                             report_time += ' <a class="layui-btn layui-btn-xs family-analysis-rerun" data-family-id="'+d.id+'">重新分析</a></div>';
                         }else{
