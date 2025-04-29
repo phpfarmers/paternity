@@ -36,11 +36,15 @@ class SampleDownloadCommand extends Command
         $ossDataLocal = $data['oss_data_local'] ?? '/akdata/oss_data/'; // oss数据目录 样本数据下机目录
         $ossDataRemote = $data['oss_data_remote'] ?? 'oss://ak2024-2446/'; // 要下载的远程目录
         if(!empty($ossPath)) {
+            $ossDataRemoteArr = explode('/', $ossDataRemote);
+            $ossDataRemoteCount = count($ossDataRemoteArr);
+
             $ossDataRemote = $ossPath; // 远程目录
             // 处理本地目录，放到oss_data_local 目录下
-            $ossPath = str_replace('oss://', '', $ossPath); // 去掉oss://
-            $ossPathArr = explode('/', $ossPath, 2); // 分割路径-取第二段
-            $ossSecondPath = $ossPathArr[1] ?? ''; // 第二段路径
+            $ossPathArr = explode('/', $ossPath, $ossDataRemoteCount); // 分割路径
+            
+            $ossSecondPath = $ossPathArr[$ossDataRemoteCount-1] ?? ''; // 第二段路径
+            
             $ossDataLocal  = $ossDataLocal.$ossSecondPath.'/'; // 本地目录
         }
         

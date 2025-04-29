@@ -13,7 +13,7 @@
     <div id="app">
         <nav class="layui-layout layui-layout-admin">
             <div class="layui-header">
-                <div class="layui-logo"><a href="/">{{ config('app.name', '') }}</a></div>
+                <div class="layui-logo"><a href="/" style="color: #fff; text-decoration: none; font-weight: bold;">{{ config('app.name', '') }}</a></div>
                 <ul class="layui-nav layui-layout-right">
                     <!-- Navigation Links -->
                 </ul>
