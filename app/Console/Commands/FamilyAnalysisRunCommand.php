@@ -96,11 +96,11 @@ class FamilyAnalysisRunCommand extends Command
                 $childOutputDir = $analysisProject . $samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_CHILD]['output_dir'];
                 $childPath = escapeshellarg($childOutputDir . '/' . $childSample . '.base.txt');
                 // 母本编号-可能为空
-                $motherPath = '';
-                if (isset($samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_MOTHER])) {
+                $m = '';
+                if (!empty($samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_MOTHER])) {
                     $motherSample = $samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_MOTHER]['sample_name'];
                     $motherOutputDir = $analysisProject . $samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_MOTHER]['output_dir'];
-                    $motherPath = escapeshellarg($motherOutputDir . '/' . $motherSample . '.base.txt');
+                    $m = ' -m '. escapeshellarg($motherOutputDir . '/' . $motherSample . '.base.txt');
                 }
                 // 父本编号
                 $fatherSample = $samplesGroupByFamilyId[$family->id][Sample::SAMPLE_TYPE_FATHER]['sample_name'];
@@ -113,7 +113,7 @@ class FamilyAnalysisRunCommand extends Command
                 // shell命令参数
                 // $command = "cd /QinZiProject && ~/scripts/parse_perbase.pl -r 4 -s 0.008 -n /share/guoyuntao/workspace/QinZi_20241125/wbc_baseline_noumi_20250225/All.baseline.tsv -b AKT103-S.1G/AKT103-S.1G.base.txt -m parent_bases/AKT103-M.base.txt -f parent_bases/AKT103-F.base.txt -o AKT103-S.1G.xxx 2>log && Rscript /path/script/cal.r --args AKT103-S.1G.xxx.result.tsv > AKT103-S.1G.xxx.summary";
                 // $command = "cd {$secondAnalysisProjectDir} && ".$commandPl." -r 4 -s 0.008 -n All.baseline.tsv -b {$childPath} -m {$motherPath} -f {$fatherPath} -o {$childSample} 2>log && Rscript ".$commandCalR." --args {$childTsv} > {$childSummary} 2>&1";
-                $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r 4 -s 0.008 -b {$childPath} -m {$motherPath} -f {$fatherPath} 2>log";
+                $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r 4 -s 0.008 -b {$childPath}{$m} -f {$fatherPath} 2>log";
                 $this->info('执行命令：' . $command);
                 Log::info('执行命令：' . $command);
                 // 执行shell命令
