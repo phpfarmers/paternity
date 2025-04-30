@@ -41,7 +41,7 @@ class DownloadSampleJob implements ShouldQueue
     
     protected function runDownload($ossPath): void
     {
-        $logFile = storage_path('logs/sample_download.log');
+        /* $logFile = storage_path('logs/sample_download.log');
         $command = "php artisan sample:download {$ossPath} >> {$logFile} 2>&1";
         Log::info("执行命令：{$command}");
         exec($command, $output, $returnVar);
@@ -50,6 +50,40 @@ class DownloadSampleJob implements ShouldQueue
             Log::error("样本下载失败：{$ossPath}", ['output' => $output]);
         }else{
             Log::info("样本下载成功：{$ossPath}");
-        }
+        } */
+
+       // 默认取全量数据
+       $ossDataLocal = $data['oss_data_local'] ?? '/akdata/oss_data/'; // oss数据目录 样本数据下机目录
+       $ossDataRemote = $data['oss_data_remote'] ?? 'oss://ak2024-2446/'; // 要下载的远程目录
+       if(empty($ossPath)) {
+        return;
+       }
+        $ossDataRemoteArr = explode('/', $ossDataRemote);
+        $ossDataRemoteCount = count($ossDataRemoteArr);
+
+        $ossDataRemote = $ossPath; // 远程目录
+        // 处理本地目录，放到oss_data_local 目录下
+        $ossPathArr = explode('/', $ossPath, $ossDataRemoteCount); // 分割路径
+        
+        $ossSecondPath = $ossPathArr[$ossDataRemoteCount-1] ?? ''; // 第二段路径
+        
+        $ossDataLocal  = $ossDataLocal.$ossSecondPath.'/'; // 本地目录
+       
+       $ossDataRemote = escapeshellarg($ossDataRemote); // 转义
+       $ossDataLocal = escapeshellarg($ossDataLocal); // 转义
+       Log::info('开始下载样本下机文件'.$ossDataRemote.date('Y-m-d H:i:s'));
+       Log::info('本地目录：'.$ossDataLocal);
+       Log::info('远程目录：'.$ossDataRemote);
+       // 免密：sudo 增加：需要在服务器上执行命令：sudo visudo,在文件末尾添加：labserver2 ALL=(root) NOPASSWD: /bin/ossutil
+       // $command = "sudo -u labserver2 ossutil cp -r -u -c /akdata/software/oss-browser-linux-x64/conf {$ossDataRemote} {$ossDataLocal} 2>&1"; // 下载命令
+       $command = "ossutil cp -r -u -c /akdata/software/oss-browser-linux-x64/conf {$ossDataRemote} {$ossDataLocal} 2>&1"; // 下载命令
+       Log::info('执行命令：'.$command);
+       exec($command, $output, $returnVar);
+       if ($returnVar === 0) {
+           Log::info("下载成功");
+       } else {
+           Log::error("下载失败");
+       }
+       Log::info('下载样本下机文件结束'.date('Y-m-d H:i:s'));
     }
 }
