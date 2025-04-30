@@ -76,7 +76,7 @@ class SampleAnalysisRunCommand extends Command
                 $outputFullDir = escapeshellarg($ossAnalysisProjectLocal.$outputDir); // 输出路径
 
                 $commandPl = config('data')['sample_analysis_run_command_pl'];
-                $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} {$u} -o {$outputFullDir} 2>&1";
+                $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url}{$u} -o {$outputFullDir} 2>&1";
                 // $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} 2>&1";
                 $this->info('执行命令：'.$command);
                 Log::info('执行命令：'.$command);
