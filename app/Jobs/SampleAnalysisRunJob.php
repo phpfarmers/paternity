@@ -31,10 +31,7 @@ class SampleAnalysisRunJob implements ShouldQueue
         // 实现分析逻辑
         // 例如：调用 shell 脚本或 PHP 函数处理下载
         Log::info("开始样本分析：{$this->id}-".date('Y-m-d H:i:s'));
-        $id = escapeshellarg($this->id);
-        
-        $this->runAnalysis($id);
-
+        $this->runAnalysis($this->id);
         Log::info("样本分析结束：{$this->id}-".date('Y-m-d H:i:s'));
     }
 
@@ -94,11 +91,6 @@ class SampleAnalysisRunJob implements ShouldQueue
                 
                 if ($returnVar === 0) {
                     Log::info("找到以下文件:");
-                    foreach ($output as $file) {
-                        // $this->info($file);
-                        // 获取文件名
-                        $fileName = basename($file);
-                    }
                     // 符合条件-更新检测结果状态为成功
                     // if(count($output) > 0){
                         $sample->analysis_result = Sample::ANALYSIS_RESULT_SUCCESS;

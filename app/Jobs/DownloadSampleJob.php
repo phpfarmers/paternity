@@ -34,8 +34,7 @@ class DownloadSampleJob implements ShouldQueue
         // 实现下载逻辑
         // 例如：调用 shell 脚本或 PHP 函数处理下载
         Log::info("job开始下载：{$this->ossPath}-".date('Y-m-d H:i:s'));
-        $ossPath = escapeshellarg($this->ossPath);
-        $this->runDownload($ossPath);
+        $this->runDownload($this->ossPath);
         Log::info("job下载结束：{$this->ossPath}-".date('Y-m-d H:i:s'));
     }
     
