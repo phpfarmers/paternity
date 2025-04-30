@@ -69,7 +69,7 @@ class SampleAnalysisRunCommand extends Command
                 $r1Url = escapeshellarg($sample->r1_url);
                 $r2Url = escapeshellarg($sample->r2_url);
                 $analysisProcess = escapeshellarg($sample->analysis_process);
-                $u = empty($analysisProcess) ? '' : ' -u '.$analysisProcess; // 默认分析流程
+                $u = empty(trim($sample->analysis_process)) ? '' : ' -u '.$analysisProcess; // 默认分析流程
 
                 $ossAnalysisProjectLocal = config('data')['analysis_project']; // 本地样本分析目录
                 $outputDir = 'pipeline_'.$sample->sample_name.'_run_'.date('YmdHis', time()); // 输出路径
