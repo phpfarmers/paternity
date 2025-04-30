@@ -450,6 +450,7 @@ class FamilyService extends BaseService
 
         $keys = [
             'ID',
+            'CHR',
             'GT_Father',
             'GT_Mother',
             'GT_Baby',
@@ -457,6 +458,7 @@ class FamilyService extends BaseService
         ];
         $header   = [
             '检测位点编号',
+            '染色体',
             '父本基因型',
             '母本基因型',
             '胎儿基因型',
