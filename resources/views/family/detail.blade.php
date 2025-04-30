@@ -230,6 +230,11 @@
                                     sort: false
                                 },
                                 {
+                                    field: 'CHR',
+                                    title: '染色体',
+                                    sort: false
+                                },
+                                {
                                     field: 'GT_Father',
                                     title: '父本基因型',
                                     sort: false
