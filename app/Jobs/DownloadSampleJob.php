@@ -33,10 +33,10 @@ class DownloadSampleJob implements ShouldQueue
     {
         // 实现下载逻辑
         // 例如：调用 shell 脚本或 PHP 函数处理下载
-        Log::info("开始下载：{$this->ossPath}");
+        Log::info("job开始下载：{$this->ossPath}-".date('Y-m-d H:i:s'));
         $ossPath = escapeshellarg($this->ossPath);
         $this->runDownload($ossPath);
-        Log::info("下载结束：{$this->ossPath}");
+        Log::info("job下载结束：{$this->ossPath}-".date('Y-m-d H:i:s'));
     }
     
     protected function runDownload($ossPath): void
@@ -48,6 +48,8 @@ class DownloadSampleJob implements ShouldQueue
 
         if ($returnVar !== 0) {
             Log::error("样本下载失败：{$ossPath}", ['output' => $output]);
+        }else{
+            Log::info("样本下载成功：{$ossPath}");
         }
     }
 }

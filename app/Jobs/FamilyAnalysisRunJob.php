@@ -29,10 +29,10 @@ class FamilyAnalysisRunJob implements ShouldQueue
     {
         // 实现家系分析逻辑
         // 例如：调用 shell 脚本或 PHP 函数处理下载
-        Log::info("开始家系分析：{$this->id}");
+        Log::info("开始家系分析：{$this->id}-".date('Y-m-d H:i:s'));
         $id = escapeshellarg($this->id);
         $this->runAnalysis($id);
-        Log::info("家系分析结束：{$this->id}");
+        Log::info("家系分析结束：{$this->id}-".date('Y-m-d H:i:s'));
     }
     
     protected function runAnalysis($id): void
@@ -44,6 +44,8 @@ class FamilyAnalysisRunJob implements ShouldQueue
 
         if ($returnVar !== 0) {
             Log::error("家系分析失败：{$id}", ['output' => $output]);
+        }else{
+            Log::info("家系分析成功：{$id}");
         }
     }
 }
