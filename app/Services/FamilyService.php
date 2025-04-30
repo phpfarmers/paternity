@@ -82,7 +82,7 @@ class FamilyService extends BaseService
         }
 
         $total = $query->count();
-        $data = $query->paginate((int)$request->input('limit', 10))->items();
+        $data = $query->orderBy('id', 'desc')->paginate((int)$request->input('limit', 10))->items();
 
         // 处理样本类型名称
         foreach ($data as $item) {
