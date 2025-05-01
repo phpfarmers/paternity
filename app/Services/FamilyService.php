@@ -243,7 +243,8 @@ class FamilyService extends BaseService
                     $tsvData = $this->getReportTsvFile($tsvFilePath, $request);
                     break;
                 default:
-                    $tsvData = $this->parseTsvFile($tsvFilePath);
+                    $tsvData = [];
+                    // $tsvData = $this->parseTsvFile($tsvFilePath);
                     break;
             }
             return $tsvData;
@@ -294,7 +295,7 @@ class FamilyService extends BaseService
         }
 
         return [
-            'total' => $data->count(),
+            'count' => $data->count(),
             'data' => $paginatedData
         ];
     }
@@ -326,7 +327,7 @@ class FamilyService extends BaseService
         $paginatedData = $data->slice($offset, $limit)->values();
 
         return [
-            'total' => $data->count(),
+            'count' => $data->count(),
             'data' => $paginatedData
         ];
     }
