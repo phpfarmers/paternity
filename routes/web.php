@@ -47,21 +47,3 @@ Route::get('sample/check-rerun', [SampleController::class, 'checkRerun'])->name(
 Route::get('sample/analysis-run', [SampleController::class, 'analysisRun'])->name('sample.analysisRun');
 // 样本分析重运行
 Route::get('sample/analysis-rerun', [SampleController::class, 'analysisRerun'])->name('sample.analysisRerun');
-
-Route::get('/test-redis', function () {
-    try {
-        Redis::set('test-key', 'test-value');
-        $value = Redis::get('test-key');
-        
-        return response()->json([
-            'status' => 'success',
-            'data' => $value,
-            'message' => 'Redis is working correctly'
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => phpinfo()
-        ], 500);
-    }
-});
