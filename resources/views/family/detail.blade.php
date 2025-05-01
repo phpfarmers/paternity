@@ -83,7 +83,7 @@
                         <!-- 数据会通过表格组件自动填充 -->
                     </tbody>
                 </table>
-                <div id="page"></div>
+                <div id="page_0"></div>
             </div>
             <!-- 胎儿深度图 -->
             <div class="layui-tab-item"></div>
@@ -106,7 +106,7 @@
                         <!-- 数据会通过表格组件自动填充 -->
                     </tbody>
                 </table>
-                <div id="page"></div>
+                <div id="page_4"></div>
             </div>
             <!-- 总表 -->
             <div class="layui-tab-item"></div>
@@ -264,7 +264,8 @@
                     limit: 10, // 每页显示的条数
                     limits: [10, 20, 30], // 每页条数的选择项
                     where: where,
-                    cols: cols
+                    cols: cols,
+                    id:'page_'+index
                 });
             }
             // 切换图片
