@@ -36,7 +36,6 @@ class TestJob implements ShouldQueue
 
     protected function runAnalysis($id): void
     {
-        return;
         try {
                 $command = "ls /var/www/paternity";
                 Log::info('测试job-执行命令：'.$command);
