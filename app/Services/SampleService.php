@@ -10,6 +10,7 @@ use App\Models\Family;
 use App\Models\FamilySample;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class SampleService extends BaseService
@@ -209,6 +210,7 @@ class SampleService extends BaseService
         exec($command, $output, $returnVar);
         
         if ($returnVar !== 0) {
+            Log::error('手动令执行失败：'.$command);
             return false;
         }
         $r1Url = ''; // 样本R1文件路径
@@ -228,6 +230,7 @@ class SampleService extends BaseService
         // 检测规则
         // 符合条件-更新检测结果状态为成功
         if(count($output) != 2 || empty($r1Url) || empty($r2Url)){
+            Log::error('样本检测结果不符合要求！'.count($output).';'.$r1Url.';'.$r2Url);
             return false;
         }
         return ['r1_url' => $r1Url, 'r2_url' => $r2Url];
