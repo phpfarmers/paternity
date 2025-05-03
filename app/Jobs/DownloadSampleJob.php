@@ -13,7 +13,12 @@ class DownloadSampleJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    // oss路径
     protected $ossPath;
+    // 重试次数
+    public $tries = 3;
+    public $timeout = 3000;
+
 
     /**
      * Create a new job instance.

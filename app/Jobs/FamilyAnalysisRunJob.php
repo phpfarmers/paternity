@@ -16,6 +16,9 @@ class FamilyAnalysisRunJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $id;
+    // 重试次数
+    public $tries = 3;
+    public $timeout = 3000;
     /**
      * Create a new job instance.
      */
