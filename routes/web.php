@@ -31,10 +31,13 @@ Route::get('family/detail', [FamilyController::class, 'detail'])->name('family.d
 Route::get('family/analysis-run', [FamilyController::class, 'analysisRun'])->name('family.analysisRun');
 // 家系报告分析重运行
 Route::get('family/analysis-rerun', [FamilyController::class, 'analysisRerun'])->name('family.analysisRerun');
-
+// 获取表格数据-ajax使用
 Route::get('/family/{id}/tsv', [FamilyController::class, 'getTsvData'])->name('family.tsv');
+// 获取图片
 Route::get('/family/{id}/pic', [FamilyController::class, 'getPicData'])->name('family.pic');
+// 筛选
 Route::get('/family/{id}/search', [FamilyController::class, 'searchData'])->name('family.search');
+// 下载表格
 Route::get('/family/downloadTable', [FamilyController::class, 'downloadTable'])->name('family.download');
 
 // 样本

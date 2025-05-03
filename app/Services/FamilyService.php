@@ -204,11 +204,14 @@ class FamilyService extends BaseService
                 throw new ApiException(1, 'Family not found');
             }
             // 组装路径等相关参数
-            $samples = $family->samples;
+            /* $samples = $family->samples;
             $sampleTypes = array_column($samples->toArray(), 'sample_name', 'sample_type');
             $fatherSample = $sampleTypes[Sample::SAMPLE_TYPE_FATHER] ?? '';
             // $motherSample = $sampleTypes[Sample::SAMPLE_TYPE_MOTHER] ?? '';
-            $childSample = $sampleTypes[Sample::SAMPLE_TYPE_CHILD] ?? '';
+            $childSample = $sampleTypes[Sample::SAMPLE_TYPE_CHILD] ?? ''; */
+
+            $fatherSample = $request->input('father_sample', '');
+            $childSample = $request->input('child_sample', '');
             // 组装路径
             $dataDir = config('data')['second_analysis_project'] . $fatherSample . '_vs_' . $childSample;
             // 文件后缀
@@ -375,11 +378,14 @@ class FamilyService extends BaseService
             throw new \Exception('Family not found');
         }
         // 组装路径等相关参数
-        $samples = $family->samples;
+        /* $samples = $family->samples;
         $sampleTypes = array_column($samples->toArray(), 'sample_name', 'sample_type');
         $fatherSample = $sampleTypes[Sample::SAMPLE_TYPE_FATHER] ?? '';
         // $motherSample = $sampleTypes[Sample::SAMPLE_TYPE_MOTHER] ?? '';
-        $childSample = $sampleTypes[Sample::SAMPLE_TYPE_CHILD] ?? '';
+        $childSample = $sampleTypes[Sample::SAMPLE_TYPE_CHILD] ?? ''; */
+
+        $fatherSample = $request->input('father_sample', '');
+        $childSample = $request->input('child_sample', '');
         // 组装路径
         $dataDir = config('data')['second_analysis_project'] . $fatherSample . '_vs_' . $childSample;
         // 文件后缀

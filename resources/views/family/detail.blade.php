@@ -180,7 +180,12 @@
                         elem = '#tsvTable';
                         url = '{{ route("family.tsv", $family->id) }}';
                         where = {
-                            type: 'summary'
+                            type: 'summary',
+                            father_sample: params.father_sample,
+                            child_sample: params.child_sample,
+                            mother_sample: params.mother_sample,
+                            slider_r: params.slider_r,
+                            slider_s: params.slider_s,
                         };
                         cols = [
                             [{
@@ -265,7 +270,7 @@
                     limits: [10, 20, 30], // 每页条数的选择项
                     where: where,
                     cols: cols,
-                    id:'page_'+index
+                    id: 'page_' + index
                 });
             }
             // 切换图片
@@ -305,7 +310,12 @@
                         url: '{{ route("family.pic", $family->id) }}',
                         dataType: "json",
                         data: {
-                            type: type
+                            type: type,
+                            father_sample: params.father_sample,
+                            child_sample: params.child_sample,
+                            mother_sample: params.mother_sample,
+                            slider_r: params.slider_r,
+                            slider_s: params.slider_s
                         },
                         success: function(data) {
                             if (data.code == 0) {
@@ -344,6 +354,8 @@
                             mother_sample = params.mother_sample;
                             slider_r = params.slider_r;
                             slider_s = params.slider_s;
+                            // 重点击第一个选项卡
+                            $('#sliderTab').find('li').eq(0).click();
                         } else {
                             // 失败
                             layer.msg(res.msg, {
