@@ -57,7 +57,7 @@ class ReadQQMailCommand extends Command
                     $match = escapeshellarg($match);
                     $this->info($match);
                     // 异步调用 php artisan sample:download $match
-                    dispatch(new DownloadSampleJob($match))->onQueue('downloads');
+                    DownloadSampleJob::dispatch($match)->onQueue('downloads');
                     $this->info("异步调用成功");
                 }
             }
