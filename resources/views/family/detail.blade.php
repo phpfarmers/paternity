@@ -181,11 +181,11 @@
                         url = '{{ route("family.tsv", $family->id) }}';
                         where = {
                             type: 'summary',
-                            father_sample: params.father_sample,
-                            child_sample: params.child_sample,
-                            mother_sample: params.mother_sample,
-                            slider_r: params.slider_r,
-                            slider_s: params.slider_s,
+                            father_sample: father_sample,
+                            child_sample: child_sample,
+                            mother_sample: mother_sample,
+                            slider_r: slider_r,
+                            slider_s: slider_s,
                         };
                         cols = [
                             [{
@@ -311,11 +311,11 @@
                         dataType: "json",
                         data: {
                             type: type,
-                            father_sample: params.father_sample,
-                            child_sample: params.child_sample,
-                            mother_sample: params.mother_sample,
-                            slider_r: params.slider_r,
-                            slider_s: params.slider_s
+                            father_sample: father_sample,
+                            child_sample: child_sample,
+                            mother_sample: mother_sample,
+                            slider_r: slider_r,
+                            slider_s: slider_s
                         },
                         success: function(data) {
                             if (data.code == 0) {

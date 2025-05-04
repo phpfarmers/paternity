@@ -96,10 +96,10 @@ class SampleAnalysisRunJob implements ShouldQueue
                     Log::info("找到以下文件:");
                     // 符合条件-更新检测结果状态为成功
                     // if(count($output) > 0){
-                        $sample->analysis_result = Sample::ANALYSIS_RESULT_SUCCESS;
-                        $sample->analysis_time = date('Y-m-d');
-                        $sample->output_dir = $outputDir;
-                        $sample->save();
+                        // $sample->analysis_result = Sample::ANALYSIS_RESULT_SUCCESS;
+                        // $sample->analysis_time = date('Y-m-d');
+                        // $sample->output_dir = $outputDir;
+                        // $sample->save();
                     // }else{
                     //     // 未下机-变为未检测-继续检测
                     //     $this->info("文件数量不正确");
