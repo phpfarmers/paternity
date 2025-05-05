@@ -506,7 +506,8 @@ class FamilyService extends BaseService
         $fatherPath = escapeshellarg($analysisProject.$fatherOutputDir . '/' . $fatherSample . '.base.txt'); //绝对路径
 
         $commandPl = config('data')['family_analysis_run_command_pl'];
-        $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r {$r} -s {$s} -b {$childPath}{$motherPath} -f {$fatherPath} 2>log";
+        
+        $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -b {$childPath}{$motherPath} -f {$fatherPath} 2>log";
         Log::info('search-command:'.$command);
         // 执行shell命令
         exec($command, $output, $returnVar);
