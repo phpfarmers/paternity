@@ -348,7 +348,7 @@ class FamilyService extends BaseService
 
         // 处理表头和表体长度不一致的情况
         $headerCount = count($header);
-        $rowCount =  count($rows[0] ?? 0);
+        $rowCount =  isset($rows) ? count($rows[0] ?? 0) : 0;
         $minLenght = 0;
         if($headerCount != $minLenght){
             $minLenght = min($headerCount, $rowCount);
