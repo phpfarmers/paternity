@@ -106,6 +106,9 @@ class SampleAnalysisRunJob implements ShouldQueue
                     //     $sample->analysis_result = Sample::ANALYSIS_RESULT_UNKNOWN;
                     //     $sample->save();
                     // }
+                    
+                    $sample->analysis_result = Sample::ANALYSIS_RESULT_SUCCESS;
+                    $sample->save();
                 } else {
                     Log::error("未找到文件或命令执行失败");
                     // 不符合条件-更新检测结果状态为失败
