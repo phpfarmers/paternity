@@ -85,7 +85,7 @@ class SampleAnalysisRunJob implements ShouldQueue
                 $outputDir = 'pipeline_'.$sample->sample_name.'_run_'.date('YmdHis', time()); // 输出路径
                 $outputFullDir = escapeshellarg($ossAnalysisProjectLocal.$outputDir); // 输出路径
 
-                $commandPl = config('data')['sample_analysis_run_command_pl'];
+                $commandPl = escapeshellarg(config('data')['sample_analysis_run_command_pl']);
                 $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url}{$u} -o {$outputFullDir} 2>&1";
                 // $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} 2>&1";
                 Log::info('执行命令：'.$command);
