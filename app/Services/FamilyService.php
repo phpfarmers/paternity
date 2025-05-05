@@ -440,11 +440,7 @@ class FamilyService extends BaseService
         }
         // 执行分析
 
-        if (!$this->run($newFatherSample, $newSamples[$newFatherSample], $newChildSample, $newSamples[$newChildSample], $newMontherSample, $newSamples[$newMontherSample] ?? '', $newr, $news)) {
-            return false;
-        }
-
-        return true;
+        return $this->run($newFatherSample, $newSamples[$newFatherSample], $newChildSample, $newSamples[$newChildSample], $newMontherSample, $newSamples[$newMontherSample] ?? '', $newr, $news);
     }
 
     /**
