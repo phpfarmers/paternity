@@ -499,16 +499,13 @@ class FamilyService extends BaseService
         // 母本编号-可能为空
         $motherPath = '';
         if (!empty($motherSample)) {
-            $motherPath = escapeshellarg($motherOutputDir . '/' . $motherSample . '.base.txt');
+            $motherPath = ' m '.escapeshellarg($motherOutputDir . '/' . $motherSample . '.base.txt');
         }
         // 父本编号
         $fatherPath = escapeshellarg($fatherOutputDir . '/' . $fatherSample . '.base.txt'); //绝对路径
 
         $commandPl = config('data')['family_analysis_run_command_pl'];
-        $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r {$r} -s {$s} -b {$childPath} -m {$motherPath} -f {$fatherPath} 2>log";
-        echo "<pre>";
-        print_r($command);
-        exit;
+        $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r {$r} -s {$s} -b {$childPath}{$motherPath} -f {$fatherPath} 2>log";
         // 执行shell命令
         exec($command, $output, $returnVar);
 
