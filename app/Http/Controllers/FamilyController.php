@@ -162,7 +162,6 @@ class FamilyController extends Controller
         $request->validate([
             'child_sample' => 'required|string',
             'father_sample' => 'required|string',
-            'mother_sample' => 'string',
             'slider_r' => 'required',
             'slider_s' => 'required',
         ]);
