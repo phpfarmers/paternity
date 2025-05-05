@@ -93,6 +93,9 @@ class FamilyAnalysisRunJob implements ShouldQueue
                     Log::info('家系分析：' . $family->name . 
                     '，样本分析完成数量不正确，family_id:' . $family->id . 
                     ',samples:' . count($samplesGroupByFamilyId[$family->id]));
+                    // 不符合条件-更新检测结果状态为失败
+                    $family->report_result = family::REPORT_RESULT_FAIL;
+                    $family->save();
                     continue;
                 }
                 // TODO:脚本
