@@ -506,6 +506,9 @@ class FamilyService extends BaseService
 
         $commandPl = config('data')['family_analysis_run_command_pl'];
         $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r {$r} -s {$s} -b {$childPath} -m {$motherPath} -f {$fatherPath} 2>log";
+        echo "<pre>";
+        print_r($command);
+        exit;
         // 执行shell命令
         exec($command, $output, $returnVar);
 
