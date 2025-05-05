@@ -520,6 +520,7 @@ class FamilyService extends BaseService
                     'report_time' => date('Y-m-d')
                 ]);
             }
+            Log::info('search-success:'.implode("\n", $output));
             return true;
         } else {
             // 不符合条件-更新检测结果状态为失败
@@ -529,6 +530,7 @@ class FamilyService extends BaseService
                     'report_result' => Family::REPORT_RESULT_FAIL
                 ]);
             }
+            Log::info('search-fail:'.implode("\n", $output));
             return false;
         }
     }
