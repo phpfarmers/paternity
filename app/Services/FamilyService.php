@@ -496,14 +496,14 @@ class FamilyService extends BaseService
         $secondAnalysisProjectDir = escapeshellarg($secondAnalysisProject); //转义后的二级分析目录
 
         // 胎儿编号
-        $childPath = escapeshellarg($childOutputDir . '/' . $childSample . '.base.txt');
+        $childPath = escapeshellarg($analysisProject.$childOutputDir . '/' . $childSample . '.base.txt');
         // 母本编号-可能为空
         $motherPath = '';
         if (!empty($motherSample)) {
-            $motherPath = ' m '.escapeshellarg($motherOutputDir . '/' . $motherSample . '.base.txt');
+            $motherPath = ' m '.escapeshellarg($analysisProject.$motherOutputDir . '/' . $motherSample . '.base.txt');
         }
         // 父本编号
-        $fatherPath = escapeshellarg($fatherOutputDir . '/' . $fatherSample . '.base.txt'); //绝对路径
+        $fatherPath = escapeshellarg($analysisProject.$fatherOutputDir . '/' . $fatherSample . '.base.txt'); //绝对路径
 
         $commandPl = config('data')['family_analysis_run_command_pl'];
         $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r {$r} -s {$s} -b {$childPath}{$motherPath} -f {$fatherPath} 2>log";
