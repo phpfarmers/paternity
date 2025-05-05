@@ -344,6 +344,9 @@ class FamilyService extends BaseService
     protected function parseTsvFile($filePath)
     {
         $rows = array_map('str_getcsv', file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES), array_fill(0, count(file($filePath)), "\t"));
+        if(empty($rows)){
+            return [];
+        }
         $header = array_shift($rows);
 
         // 处理表头和表体长度不一致的情况
