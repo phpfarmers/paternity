@@ -106,7 +106,7 @@ class SampleAnalysisRunJob implements ShouldQueue
                     //     $sample->analysis_result = Sample::ANALYSIS_RESULT_UNKNOWN;
                     //     $sample->save();
                     // }
-                    
+                    $sample->analysis_time = date('Y-m-d');
                     $sample->analysis_result = Sample::ANALYSIS_RESULT_SUCCESS;
                     $sample->save();
                 } else {
