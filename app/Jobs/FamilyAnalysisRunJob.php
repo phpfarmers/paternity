@@ -90,7 +90,9 @@ class FamilyAnalysisRunJob implements ShouldQueue
                 $family->report_times  += 1;
                 $family->save();
                 if (!isset($samplesGroupByFamilyId[$family->id]) || count($samplesGroupByFamilyId[$family->id]) < 2) {
-                    Log::info('家系分析：' . $family->name . '，样本分析完成数量不正确');
+                    Log::info('家系分析：' . $family->name . 
+                    '，样本分析完成数量不正确，family_id:' . $family->id . 
+                    ',samples:' . count($samplesGroupByFamilyId[$family->id]));
                     continue;
                 }
                 // TODO:脚本
