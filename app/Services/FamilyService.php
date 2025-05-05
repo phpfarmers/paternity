@@ -9,6 +9,7 @@ use App\Models\Family;
 use App\Models\Sample;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class FamilyService extends BaseService
 {
@@ -506,6 +507,7 @@ class FamilyService extends BaseService
 
         $commandPl = config('data')['family_analysis_run_command_pl'];
         $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r {$r} -s {$s} -b {$childPath}{$motherPath} -f {$fatherPath} 2>log";
+        Log::info('search-command', $command);
         // 执行shell命令
         exec($command, $output, $returnVar);
 
