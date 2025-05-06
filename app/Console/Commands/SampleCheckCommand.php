@@ -35,7 +35,7 @@ class SampleCheckCommand extends Command
         $samples = Sample::where('check_result', Sample::CHECK_RESULT_UNKNOWN)
         ->orderBy('check_times', 'asc')
         ->orderBy('id', 'asc')
-        ->limit(100)->get();
+        ->limit(1000)->get();
         if ($samples->isEmpty()) {
             $this->info('没有要检测的样本');
             return 0;
