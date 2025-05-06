@@ -52,7 +52,7 @@ class SampleCheckCommand extends Command
                 $searchPattern = escapeshellarg('*'.$sample->sample_name.'*.gz'); // 搜索模式-样本名
                 // $searchPattern = escapeshellarg('*Ignition.php'); // 测试
                 $searchPath = escapeshellarg($ossData); // 搜索路径
-                $command = "find {$searchPath} -name {$searchPattern}";
+                $command = "find {$searchPath} -name {$searchPattern} -type f -printf '%T@ %p\n' | sort -nr | cut -d' ' -f2-";
                 $this->info('执行命令：'.$command);
                 Log::info('执行命令：'.$command);
                 // 执行shell命令
@@ -68,17 +68,17 @@ class SampleCheckCommand extends Command
                         // 获取文件名
                         $fileName = basename($file);
                         // r1文件路径
-                        if(strpos($fileName, '1.fq.gz') !== false || strpos($fileName, '1.fastq.gz') !== false){
+                        if((strpos($fileName, '1.fq.gz') !== false || strpos($fileName, '1.fastq.gz') !== false) && empty($r1Url)){
                             $r1Url = $file;
                         }
                         // r2文件路径
-                        if(strpos($fileName, '2.fq.gz') !== false || strpos($fileName, '2.fastq.gz') !== false){
+                        if((strpos($fileName, '2.fq.gz') !== false || strpos($fileName, '2.fastq.gz') !== false) && empty($r2Url)){
                             $r2Url = $file;
                         }
                         $this->info($fileName);
                     }
                     // 符合条件-更新检测结果状态为成功
-                    if(count($output) == 2 && !empty($r1Url) && !empty($r2Url)){
+                    if(!empty($r1Url) && !empty($r2Url)){
                         $sample->check_result = Sample::CHECK_RESULT_SUCCESS;
                         $sample->off_machine_time = date('Y-m-d');
                         $sample->r1_url = $r1Url;
@@ -86,7 +86,8 @@ class SampleCheckCommand extends Command
                         $sample->save();
                     }else{
                         // 未下机-变为未检测-继续检测
-                        $this->info("文件数量不正确");
+                        $this->info("文件数量不正确:r1url:{$r1Url}-r2url:{$r2Url}");
+                        Log::info("文件数量不正确:r1url:{$r1Url}-r2url:{$r2Url}");
                         $sample->check_result = Sample::CHECK_RESULT_UNKNOWN;
                         $sample->save();
                     }
