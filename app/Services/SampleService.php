@@ -205,7 +205,9 @@ class SampleService extends BaseService
         $searchPattern = escapeshellarg('*'.$sampleName.'*.gz'); // 搜索模式-样本名
         // $searchPattern = escapeshellarg('*Ignition.php'); // 测试
         $searchPath = escapeshellarg($searchPath); // 搜索路径
-        $command = "find {$searchPath} -name {$searchPattern}";
+        // 按修改时间倒序排序并获取文件路径
+        $command = "find {$searchPath} -name {$searchPattern} -type f -printf '%T@ %p\n' | sort -nr | cut -d' ' -f2-";
+        Log::info('样本检测-执行命令：'.$command);
         // 执行shell命令
         exec($command, $output, $returnVar);
         
@@ -219,20 +221,21 @@ class SampleService extends BaseService
             // 获取文件名
             $fileName = basename($file);
             // r1文件路径
-            if (strpos($fileName, '1.fq.gz') !== false || strpos($fileName, '1.fastq.gz') !== false) {
+            if ((strpos($fileName, '1.fq.gz') !== false || strpos($fileName, '1.fastq.gz') !== false) && empty($r1Url)) {
                 $r1Url = $file;
             }
             // r2文件路径
-            if (strpos($fileName, '2.fq.gz') !== false || strpos($fileName, '2.fastq.gz') !== false) {
+            if ((strpos($fileName, '2.fq.gz') !== false || strpos($fileName, '2.fastq.gz') !== false) && empty($r2Url)) {
                 $r2Url = $file;
             }
         }
         // 检测规则
         // 符合条件-更新检测结果状态为成功
-        if(count($output) != 2 || empty($r1Url) || empty($r2Url)){
+        if(empty($r1Url) || empty($r2Url)){
             Log::error('样本检测结果不符合要求！'.count($output).';'.$r1Url.';'.$r2Url);
             return false;
         }
+        Log::info('样本检测结果符合要求！'.count($output).';'.$r1Url.';'.$r2Url);
         return ['r1_url' => $r1Url, 'r2_url' => $r2Url];
     }
 
