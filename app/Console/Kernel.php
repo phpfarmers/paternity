@@ -25,7 +25,6 @@ class Kernel extends ConsoleKernel
         // 每20分钟执行一次 样本分析
         $schedule->command('sample:analysis:run')
         ->cron('*/20 * * * *')  // 每20分钟执行一次
-        ->timeout(300)
         ->appendOutputTo(storage_path('logs/sample_analysis_run_cron'.$date.'.log'));
         // 每1分钟执行一次 样本检测
         $schedule->command('sample:check')
