@@ -15,16 +15,24 @@ class SampleAnalysisRunJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $id;
+    // 重试次数
     public $tries = 3;
     public $timeout = 3000;
-
+    /**
+     * Create a new job instance.
+     */
     public function __construct($id)
     {
         $this->id = $id;
     }
 
+    /**
+     * Execute the job.
+     */
     public function handle(): void
     {
+        // 实现分析逻辑
+        // 例如：调用 shell 脚本或 PHP 函数处理下载
         Log::info("开始样本分析：{$this->id}-".date('Y-m-d H:i:s'));
         $this->runAnalysis($this->id);
         Log::info("样本分析结束：{$this->id}-".date('Y-m-d H:i:s'));
@@ -33,133 +41,63 @@ class SampleAnalysisRunJob implements ShouldQueue
     protected function runAnalysis($id): void
     {
         start:
-        $samples = Sample::where('check_result', Sample::CHECK_RESULT_SUCCESS)
-            ->where('id', $id)
-            ->where('analysis_result', '!=', Sample::ANALYSIS_RESULT_SUCCESS)
-            ->orderBy('analysis_times', 'asc')
-            ->orderBy('id', 'asc')
-            ->limit(1)
-            ->get();
-
+        $samples = Sample::where('check_result', Sample::CHECK_RESULT_SUCCESS);
+        // 指定id-前端操作-只要未完成的都可操作
+        $samples = $samples->where('id', $id)->where('analysis_result', '!=', Sample::ANALYSIS_RESULT_SUCCESS);
+        $samples = $samples->orderBy('analysis_times', 'asc')->orderBy('id', 'asc')->limit(1)->get();
         if ($samples->isEmpty()) {
             Log::info('没有要分析的样本');
             return;
         }
-
+        // 如果正在分析中的样本数量大50，停止1分钟，再从start位置开始执行
         $analyzingCount = Sample::where('analysis_result', Sample::ANALYSIS_RESULT_ANALYZING)->count();
         if ($analyzingCount > 50) {
             Log::info('正在分析中的样本数量大于50，停止1分钟');
             sleep(60);
             goto start;
         }
-
-        foreach ($samples as $sample) {
-            try {
-                Log::info('样本分析开始：'.$sample->id.'-'.date('Y-m-d H:i:s'));
-                
+        try {
+            foreach ($samples as $sample) {
+                Log::info('样本分析开始：'.$sample->id).'-'.date('Y-m-d H:i:s');
+                // 样本分析变为分析中
                 $sample->analysis_result = Sample::ANALYSIS_RESULT_ANALYZING;
                 $sample->analysis_times += 1;
                 $sample->save();
-
-                // 准备命令参数
-                $command = $this->buildCommand($sample);
-                Log::info('执行命令：'.$command);
-
-                // 使用 proc_open 执行命令
-                $process = $this->executeCommand($command);
                 
-                if ($process['status'] === 0) {
-                    Log::info("命令执行成功");
+                // shell命令参数
+                $sampleName = escapeshellarg($sample->sample_name);
+                $r1Url = escapeshellarg($sample->r1_url);
+                $r2Url = escapeshellarg($sample->r2_url);
+                $analysisProcess = escapeshellarg($sample->analysis_process);
+                $u = empty(trim($sample->analysis_process)) ? '' : ' -u '.$analysisProcess; // 默认分析流程
+
+                $ossAnalysisProjectLocal = config('data')['analysis_project']; // 本地样本分析目录
+                $outputDir = 'pipeline_'.$sample->sample_name.'_run_'.date('YmdHis', time()); // 输出路径
+                $outputFullDir = escapeshellarg($ossAnalysisProjectLocal.$outputDir); // 输出路径
+
+                $commandPl = escapeshellarg(config('data')['sample_analysis_run_command_pl']);
+                $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url}{$u} -o {$outputFullDir} 2>&1";
+                // $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} 2>&1";
+                Log::info('执行命令：'.$command);
+                // 执行shell命令
+                exec($command, $output, $returnVar);
+                
+                if ($returnVar === 0) {
+                    Log::info("找到以下文件:");
                     $sample->analysis_time = date('Y-m-d');
                     $sample->analysis_result = Sample::ANALYSIS_RESULT_SUCCESS;
+                    $sample->save();
                 } else {
-                    Log::error("命令执行失败，返回码: ".$process['status']);
-                    Log::error("错误输出: ".$process['error']);
+                    Log::error("未找到文件或命令执行失败");
+                    // 不符合条件-更新检测结果状态为失败
                     $sample->analysis_result = Sample::CHECK_RESULT_FAIL;
-                    $sample->output_dir = $this->getOutputDir($sample);
-                }
-                
-                $sample->save();
-                Log::info('样本分析完成-'.date('Y-m-d H:i:s'));
-
-            } catch (\Exception $e) {
-                Log::error('样本分析出错：'.$e->getMessage());
-                if (isset($sample)) {
-                    $sample->analysis_result = Sample::CHECK_RESULT_FAIL;
+                    $sample->output_dir = $outputDir;
                     $sample->save();
                 }
+                Log::info('样本分析完成-'.date('Y-m-d H:i:s'));
             }
+        } catch (\Exception $e) {
+            Log::error('样本分析出错：'.$e->getMessage());
         }
-    }
-
-    /**
-     * 构建执行命令
-     */
-    protected function buildCommand(Sample $sample): string
-    {
-        $sampleName = escapeshellarg($sample->sample_name);
-        $r1Url = escapeshellarg($sample->r1_url);
-        $r2Url = escapeshellarg($sample->r2_url);
-        $analysisProcess = escapeshellarg($sample->analysis_process);
-        $u = empty(trim($sample->analysis_process)) ? '' : ' -u '.$analysisProcess;
-
-        $ossAnalysisProjectLocal = config('data')['analysis_project'];
-        $outputDir = 'pipeline_'.$sample->sample_name.'_run_'.date('YmdHis');
-        $outputFullDir = escapeshellarg($ossAnalysisProjectLocal.$outputDir);
-
-        $commandPl = config('data')['sample_analysis_run_command_pl'];
-        
-        return $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url}{$u} -o {$outputFullDir}";
-    }
-
-    /**
-     * 使用 proc_open 执行命令
-     */
-    protected function executeCommand(string $command): array
-    {
-        $descriptors = [
-            0 => ['pipe', 'r'], // stdin
-            1 => ['pipe', 'w'], // stdout
-            2 => ['pipe', 'w'], // stderr
-        ];
-
-        $process = proc_open($command, $descriptors, $pipes);
-        
-        if (!is_resource($process)) {
-            throw new \RuntimeException("无法启动进程");
-        }
-
-        // 关闭不需要的 stdin
-        fclose($pipes[0]);
-
-        // 读取输出
-        $output = stream_get_contents($pipes[1]);
-        $error = stream_get_contents($pipes[2]);
-
-        // 关闭管道
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-
-        // 获取返回状态
-        $status = proc_close($process);
-
-        // 记录输出日志
-        if (!empty($output)) {
-            Log::info("命令输出: ".$output);
-        }
-
-        return [
-            'status' => $status,
-            'output' => $output,
-            'error' => $error
-        ];
-    }
-
-    /**
-     * 获取输出目录
-     */
-    protected function getOutputDir(Sample $sample): string
-    {
-        return 'pipeline_'.$sample->sample_name.'_run_'.date('YmdHis');
     }
 }
