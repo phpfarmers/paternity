@@ -21,6 +21,9 @@ class SampleDownloadCommand extends Command
      */
     protected $description = '自动下载样本下机文件';
 
+    // 超时时间 默认1小时
+    protected $timeout = 3600;
+    
     /**
      * Execute the console command.
      *

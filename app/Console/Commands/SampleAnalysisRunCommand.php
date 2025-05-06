@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\SampleAnalysisRunJob;
 use Illuminate\Console\Command;
 use App\Models\Sample;
 use Illuminate\Support\Facades\Log;
@@ -23,6 +24,12 @@ class SampleAnalysisRunCommand extends Command
     protected $description = '自动分析样本';
 
     /**
+     * 超时时间
+     * 默认1小时
+     **/
+    protected $timeout = 60 * 60; // 1小时
+
+    /**
      * Execute the console command.
      *
      * @return int
@@ -41,7 +48,7 @@ class SampleAnalysisRunCommand extends Command
         } else {
             $samples = $samples->where('analysis_result', Sample::ANALYSIS_RESULT_UNKNOWN);
         }
-        $samples = $samples->orderBy('analysis_times', 'asc')->orderBy('id', 'asc')->limit(1)->get();
+        $samples = $samples->orderBy('analysis_times', 'asc')->orderBy('id', 'asc')->limit(100)->get();
         if ($samples->isEmpty()) {
             $this->info('没有要分析的样本');
             Log::info('没有要分析的样本');
@@ -63,55 +70,7 @@ class SampleAnalysisRunCommand extends Command
                 $sample->analysis_result = Sample::ANALYSIS_RESULT_ANALYZING;
                 $sample->analysis_times += 1;
                 $sample->save();
-                
-                // shell命令参数
-                $sampleName = escapeshellarg($sample->sample_name);
-                $r1Url = escapeshellarg($sample->r1_url);
-                $r2Url = escapeshellarg($sample->r2_url);
-                $analysisProcess = escapeshellarg($sample->analysis_process);
-                $u = empty(trim($sample->analysis_process)) ? '' : ' -u '.$analysisProcess; // 默认分析流程
-
-                $ossAnalysisProjectLocal = config('data')['analysis_project']; // 本地样本分析目录
-                $outputDir = 'pipeline_'.$sample->sample_name.'_run_'.date('YmdHis', time()); // 输出路径
-                $outputFullDir = escapeshellarg($ossAnalysisProjectLocal.$outputDir); // 输出路径
-
-                $commandPl = config('data')['sample_analysis_run_command_pl'];
-                $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url}{$u} -o {$outputFullDir} 2>&1";
-                // $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} 2>&1";
-                $this->info('执行命令：'.$command);
-                Log::info('执行命令：'.$command);
-                // 执行shell命令
-                exec($command, $output, $returnVar);
-                
-                if ($returnVar === 0) {
-                    $this->info("找到以下文件:");
-                    Log::info("找到以下文件:");
-                    foreach ($output as $file) {
-                        // $this->info($file);
-                        // 获取文件名
-                        $fileName = basename($file);
-                        $this->info($fileName);
-                    }
-                    // 符合条件-更新检测结果状态为成功
-                    // if(count($output) > 0){
-                        $sample->analysis_result = Sample::ANALYSIS_RESULT_SUCCESS;
-                        $sample->analysis_time = date('Y-m-d');
-                        $sample->output_dir = $outputDir;
-                        $sample->save();
-                    // }else{
-                    //     // 未下机-变为未检测-继续检测
-                    //     $this->info("文件数量不正确");
-                    //     $sample->analysis_result = Sample::ANALYSIS_RESULT_UNKNOWN;
-                    //     $sample->save();
-                    // }
-                } else {
-                    $this->error("未找到文件或命令执行失败");
-                    Log::info("未找到文件或命令执行失败");
-                    // 不符合条件-更新检测结果状态为失败
-                    $sample->analysis_result = Sample::CHECK_RESULT_FAIL;
-                    $sample->output_dir = $outputDir;
-                    $sample->save();
-                }
+                dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run');
                 $this->info('样本分析完成-'.date('Y-m-d H:i:s'));
                 Log::info('样本分析完成-'.date('Y-m-d H:i:s'));
             }

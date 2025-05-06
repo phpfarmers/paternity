@@ -41,16 +41,6 @@ class FamilyAnalysisRunJob implements ShouldQueue
     
     protected function runAnalysis($id): void
     {
-        /* $logFile = storage_path('logs/family_analysis.log');
-        $command = "php artisan family:analysis:run {$id} >> {$logFile} 2>&1";
-        Log::info("执行命令：{$command}");
-        exec($command, $output, $returnVar);
-
-        if ($returnVar !== 0) {
-            Log::error("家系分析失败：{$id}", ['output' => $output]);
-        }else{
-            Log::info("家系分析成功：{$id}");
-        } */
         $families = Family::where('report_result', '!=', Family::REPORT_RESULT_SUCCESS);
         // 指定id-前端操作
         $families = $families->where('id', $id);

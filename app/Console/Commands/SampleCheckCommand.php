@@ -23,6 +23,12 @@ class SampleCheckCommand extends Command
     protected $description = '自动检测样本';
 
     /**
+     * 超时时间
+     * 默认1小时
+     **/
+    protected $timeout = 60 * 60; // 1小时
+
+    /**
      * Execute the console command.
      *
      * @return int

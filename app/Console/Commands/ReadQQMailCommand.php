@@ -23,6 +23,12 @@ class ReadQQMailCommand extends Command
     protected $description = 'Read emails from QQ mailbox';
 
     /**
+     * 超时时间
+     * 默认1小时
+     */
+    protected $timeout = 60 * 60; // 1小时
+
+    /**
      * Execute the console command.
      *
      * @return int

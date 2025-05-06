@@ -24,6 +24,12 @@ class FamilyAnalysisRunCommand extends Command
     protected $description = '自动分析家系';
 
     /**
+     * 超时时间
+     * 默认1小时
+     */
+    protected $timeout = 3600; // 1小时
+
+    /**
      * Execute the console command.
      *
      * @return int
@@ -42,7 +48,7 @@ class FamilyAnalysisRunCommand extends Command
         }
         $families = $families->orderBy('report_times', 'asc')
             ->orderBy('id', 'asc')
-            ->limit(1)->get();
+            ->limit(100)->get();
 
         if ($families->isEmpty()) {
             $this->info('没有要分析的家系');

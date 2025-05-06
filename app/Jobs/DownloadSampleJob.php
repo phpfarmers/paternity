@@ -46,17 +46,6 @@ class DownloadSampleJob implements ShouldQueue
 
     protected function runDownload($ossPath): void
     {
-        /* $logFile = storage_path('logs/sample_download.log');
-        $command = "php artisan sample:download {$ossPath} >> {$logFile} 2>&1";
-        Log::info("执行命令：{$command}");
-        exec($command, $output, $returnVar);
-
-        if ($returnVar !== 0) {
-            Log::error("样本下载失败：{$ossPath}", ['output' => $output]);
-        }else{
-            Log::info("样本下载成功：{$ossPath}");
-        } */
-
         // 默认取全量数据
         $ossDataLocal = $data['oss_data_local'] ?? '/akdata/oss_data/'; // oss数据目录 样本数据下机目录
         $ossDataRemote = $data['oss_data_remote'] ?? 'oss://ak2024-2446/'; // 要下载的远程目录
