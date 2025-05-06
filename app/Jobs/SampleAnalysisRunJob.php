@@ -78,10 +78,11 @@ class SampleAnalysisRunJob implements ShouldQueue
                 $commandPl = escapeshellarg(config('data')['sample_analysis_run_command_pl']);
                 $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url}{$u} -o {$outputFullDir} 2>&1";
                 // $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} 2>&1";
-                Log::info('执行命令：'.$command);
+                Log::info('开始执行命令：'.$command);
                 // 执行shell命令
                 exec($command, $output, $returnVar);
-                
+                Log::info('命令执行完成，返回码：'.$returnVar);
+
                 if ($returnVar === 0) {
                     Log::info("找到以下文件:");
                     $sample->analysis_time = date('Y-m-d');
@@ -89,6 +90,8 @@ class SampleAnalysisRunJob implements ShouldQueue
                     $sample->save();
                 } else {
                     Log::error("未找到文件或命令执行失败");
+                    Log::error('命令输出：'.print_r($output, true));
+                    Log::error('返回码：'.$returnVar);
                     // 不符合条件-更新检测结果状态为失败
                     $sample->analysis_result = Sample::CHECK_RESULT_FAIL;
                     $sample->output_dir = $outputDir;
