@@ -69,6 +69,7 @@ class SampleAnalysisRunCommand extends Command
                 // 样本分析变为分析中
                 $sample->analysis_result = Sample::ANALYSIS_RESULT_ANALYZING;
                 $sample->analysis_times += 1;
+                $sample->output_dir = generateObjectOutputDir($sample->sample_name);
                 $sample->save();
                 dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run');
                 $this->info('样本分析完成-'.date('Y-m-d H:i:s'));

@@ -91,3 +91,11 @@ if (!function_exists('generateFileSavePath')) {
         return $save_path . $file_name;
     }
 }
+
+if (!function_exists('generateObjectOutputDir')) {
+    // 生成对象存储的输出目录
+    function generateObjectOutputDir($sample_name = '')
+    {
+        return 'pipeline_' . $sample_name . '_run_' . date('YmdHis', time());
+    }
+}

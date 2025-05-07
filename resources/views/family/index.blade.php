@@ -250,7 +250,7 @@
                         },
                         dataType: 'json',
                         beforeSend: function(){
-                            layer.load(2);
+                            layer.load(1);
                         },
                         success: function(res){
                             layer.closeAll();
@@ -286,7 +286,7 @@
                         },
                         dataType: 'json',
                         beforeSend: function(){
-                            layer.load(2);
+                            layer.load(1);
                         },
                         success: function(res){
                             layer.closeAll();
@@ -322,7 +322,7 @@
                         },
                         dataType: 'json',
                         beforeSend: function(){
-                            layer.load(2);
+                            layer.load(1);
                         },
                         success: function(res){
                             layer.closeAll();
@@ -358,7 +358,7 @@
                         },
                         dataType: 'json',
                         beforeSend: function(){
-                            layer.load(2);
+                            layer.load(1);
                         },
                         success: function(res){
                             layer.closeAll();
@@ -394,7 +394,7 @@
                        },
                         dataType: 'json',
                         beforeSend: function(){
-                            layer.load(2);
+                            layer.load(1);
                         },
                         success: function(res){
                             layer.closeAll();
@@ -430,7 +430,7 @@
                         },
                         dataType: 'json',
                         beforeSend: function(){
-                            layer.load(2);
+                            layer.load(1);
                         },
                         success: function(res){
                             layer.closeAll();

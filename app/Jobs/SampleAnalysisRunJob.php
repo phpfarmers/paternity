@@ -72,7 +72,7 @@ class SampleAnalysisRunJob implements ShouldQueue
                 $u = empty(trim($sample->analysis_process)) ? '' : ' -u '.$analysisProcess; // 默认分析流程
 
                 $ossAnalysisProjectLocal = config('data')['analysis_project']; // 本地样本分析目录
-                $outputDir = 'pipeline_'.$sample->sample_name.'_run_'.date('YmdHis', time()); // 输出路径
+                $outputDir = $sample->output_dir; // 输出路径
                 $outputFullDir = escapeshellarg($ossAnalysisProjectLocal.$outputDir); // 输出路径
 
                 $commandPl = escapeshellarg(config('data')['sample_analysis_run_command_pl']);
@@ -94,7 +94,6 @@ class SampleAnalysisRunJob implements ShouldQueue
                     Log::error('返回码：'.$returnVar);
                     // 不符合条件-更新检测结果状态为失败
                     $sample->analysis_result = Sample::CHECK_RESULT_FAIL;
-                    $sample->output_dir = $outputDir;
                     $sample->save();
                 }
                 Log::info('样本分析完成-'.date('Y-m-d H:i:s'));

@@ -254,11 +254,12 @@ class SampleService extends BaseService
 
         // DB::beginTransaction();
         try {
-            // 样本分析接口
-            dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run');
             // 更新样本分析结果
             $sample->analysis_result = Sample::ANALYSIS_RESULT_ANALYZING;
+            $sample->output_dir = generateObjectOutputDir($sample->sample_name);
             $sample->save();
+            // 样本分析接口
+            dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run');
             // TODO:记录日志
             // DB::commit();
             return true;
@@ -284,11 +285,12 @@ class SampleService extends BaseService
 
         // DB::beginTransaction();
         try {
-            // 样本分析重运行接口
-            dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run');
             // 更新样本分析结果
             $sample->analysis_result = Sample::ANALYSIS_RESULT_ANALYZING;
+            $sample->output_dir = generateObjectOutputDir($sample->sample_name);
             $sample->save();
+            // 样本分析重运行接口
+            dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run');
             // TODO:记录日志
             // DB::commit();
             return true;
