@@ -60,7 +60,7 @@
         </div>
     </div>
     <!-- tabs -->
-    <div class="layui-tab" lay-filter="detailTab">
+    <div class="layui-tab" lay-filter="detailTab" id="sliderTab">
         <ul class="layui-tab-title">
             <li class="layui-this">简单报告</li>
             <li>胎儿深度图</li>
@@ -355,7 +355,7 @@
                             slider_r = params.slider_r;
                             slider_s = params.slider_s;
                             // 重点击第一个选项卡
-                            $('#sliderTab').find('li').eq(0).click();
+                            $(document).find('#sliderTab li').first().trigger('click');
                         } else {
                             // 失败
                             layer.msg(res.msg, {
