@@ -71,7 +71,7 @@ class SampleAnalysisRunCommand extends Command
                 $sample->analysis_times += 1;
                 $sample->output_dir = generateObjectOutputDir($sample->sample_name);
                 $sample->save();
-                dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run')->delay(now()->addSeconds(5))->uniqueId($sample->id);
+                dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run')->delay(now()->addSeconds(5));
                 $this->info('样本分析完成-'.date('Y-m-d H:i:s'));
                 Log::info('样本分析完成-'.date('Y-m-d H:i:s'));
             }
