@@ -331,7 +331,7 @@ class FamilyService extends BaseService
         $paginatedData = $data->slice($offset, $limit)->values();
 
         return [
-            'count' => $data ? $data->count() : 0,
+            'count' => is_numeric($data) ? $data : $data->count(),
             'data' => $paginatedData
         ];
     }
