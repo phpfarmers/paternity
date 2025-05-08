@@ -259,7 +259,7 @@ class SampleService extends BaseService
             $sample->output_dir = generateObjectOutputDir($sample->sample_name);
             $sample->save();
             // 样本分析接口
-            dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run');
+            dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run')->delay(now()->addSeconds(5))->uniqueId($sample->id);
             // TODO:记录日志
             // DB::commit();
             return true;
@@ -290,7 +290,7 @@ class SampleService extends BaseService
             $sample->output_dir = generateObjectOutputDir($sample->sample_name);
             $sample->save();
             // 样本分析重运行接口
-            dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run');
+            dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run')->delay(now()->addSeconds(5))->uniqueId($sample->id);
             // TODO:记录日志
             // DB::commit();
             return true;
