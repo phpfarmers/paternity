@@ -496,8 +496,8 @@ class FamilyService extends BaseService
         $childOutputDir,
         $motherSample = '',
         $motherOutputDir = '',
-        $s = 0.008,
         $r = 4,
+        $s = 0.008,
         $familyId = 0
     )
     {
@@ -515,7 +515,7 @@ class FamilyService extends BaseService
         // 父本编号
         $fatherPath = escapeshellarg($analysisProject.$fatherOutputDir . '/' . $fatherSample . '.base.txt'); //绝对路径
 
-        $commandPl = escapeshellarg(config('data')['family_analysis_run_command_pl']);
+        $commandPl = config('data')['family_analysis_run_command_pl'];
         
         $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r {$r} -s {$s} -b {$childPath}{$motherPath} -f {$fatherPath} 2>log";
         Log::info('search-command:'.$command);
