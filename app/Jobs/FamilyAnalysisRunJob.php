@@ -138,6 +138,7 @@ class FamilyAnalysisRunJob implements ShouldQueue
                 }
                 Log::info('家系分析完成-' . date('Y-m-d H:i:s'));
             }
+            return;
         } catch (\Exception $e) {
             Log::error('家系分析出错：' . $e->getMessage());
         }
