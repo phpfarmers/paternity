@@ -329,9 +329,11 @@ class FamilyService extends BaseService
 
         // 分页处理
         $paginatedData = $data->slice($offset, $limit)->values();
-
+        // 确保 $data 是集合或数组
+        $count = is_array($data) || $data instanceof \Countable ? $data->count() : 0;
+        
         return [
-            'count' => is_numeric($data) ? $data : $data->count(),
+            'count' => $count,
             'data' => $paginatedData
         ];
     }
