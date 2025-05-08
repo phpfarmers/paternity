@@ -16,8 +16,8 @@ class SampleAnalysisRunJob implements ShouldQueue
 
     protected $id;
     // 重试次数
-    public $tries = 3;
-    public $timeout = 3000;
+    public $tries = 10;
+    public $timeout = 3600;
     /**
      * Create a new job instance.
      */

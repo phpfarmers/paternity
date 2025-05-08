@@ -16,8 +16,8 @@ class DownloadSampleJob implements ShouldQueue
     // oss路径
     protected $ossPath;
     // 重试次数
-    public $tries = 3;
-    public $timeout = 3000;
+    public $tries = 10;
+    public $timeout = 3600;
 
 
     /**
