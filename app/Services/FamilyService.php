@@ -145,6 +145,8 @@ class FamilyService extends BaseService
         try {
             // 更新家系报告结果
             $family->report_result = Family::REPORT_RESULT_ANALYZING;
+            $family->s = config('data')['family_analysis_run_command_default_s'] ?? '';
+            $family->r = config('data')['family_analysis_run_command_default_r'] ?? '';
             $family->save();
             // 请求分析接口
             FamilyAnalysisRunJob::dispatch($family->id)->onQueue('family_analysis_run');
@@ -176,6 +178,8 @@ class FamilyService extends BaseService
         try {
             // 更新家系报告结果
             $family->report_result = Family::REPORT_RESULT_SUCCESS;
+            $family->s = config('data')['family_analysis_run_command_default_s'] ?? '';
+            $family->r = config('data')['family_analysis_run_command_default_r'] ?? '';
             $family->save();
             // 请求重分析接口
             FamilyAnalysisRunJob::dispatch($family->id)->onQueue('family_analysis_rerun');
