@@ -226,7 +226,12 @@
                         elem = '#tsvSNPTable';
                         url = '{{ route("family.tsv", $family->id) }}';
                         where = {
-                            type: 'report'
+                            type: 'report',
+                            father_sample: father_sample,
+                            child_sample: child_sample,
+                            mother_sample: mother_sample,
+                            slider_r: slider_r,
+                            slider_s: slider_s,
                         };
                         cols = [
                             [{
