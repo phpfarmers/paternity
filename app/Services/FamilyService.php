@@ -143,11 +143,11 @@ class FamilyService extends BaseService
         
         // DB::beginTransaction();
         try {
-            // TODO:请求分析接口
-            FamilyAnalysisRunJob::dispatch($family->id)->onQueue('family_analysis_run');
             // 更新家系报告结果
             $family->report_result = Family::REPORT_RESULT_ANALYZING;
             $family->save();
+            // 请求分析接口
+            FamilyAnalysisRunJob::dispatch($family->id)->onQueue('family_analysis_run');
             // 记录日志
             // DB::commit();
             return true;
@@ -174,11 +174,11 @@ class FamilyService extends BaseService
         
         DB::beginTransaction();
         try {
-            // TODO:请求重分析接口
-            FamilyAnalysisRunJob::dispatch($family->id)->onQueue('family_analysis_rerun');
             // 更新家系报告结果
             $family->report_result = Family::REPORT_RESULT_SUCCESS;
             $family->save();
+            // 请求重分析接口
+            FamilyAnalysisRunJob::dispatch($family->id)->onQueue('family_analysis_rerun');
             // 记录日志
             DB::commit();
             return true;
@@ -331,7 +331,7 @@ class FamilyService extends BaseService
         $paginatedData = $data->slice($offset, $limit)->values();
         // 确保 $data 是集合或数组
         $count = is_array($data) || $data instanceof \Countable ? $data->count() : 0;
-        
+
         return [
             'count' => $count,
             'data' => $paginatedData
@@ -346,6 +346,10 @@ class FamilyService extends BaseService
      */
     protected function parseTsvFile($filePath)
     {
+        if (!file_exists($filePath)) {
+            return []; // 文件不存在时返回空数组
+        }
+
         $rows = array_map('str_getcsv', file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES), array_fill(0, count(file($filePath)), "\t"));
         if(empty($rows)){
             return [];

@@ -7,4 +7,6 @@ return [
     'sample_analysis_run_command_pl' => '/akdata/script/paternity-test/run_qinzi.pl', // 样本分析命令文件
     'family_analysis_run_command_pl' => '/akdata/script/paternity-test/bin/parse_perbase.pl', // 家系分析命令文件
     'family_analysis_run_command_call_r' => '/akdata/script/paternity-test/bin/cal.r', // 家系分析命令文件
+    'family_analysis_run_command_default_r' => 4,
+    'family_analysis_run_command_default_s' => 0.008,
 ];
