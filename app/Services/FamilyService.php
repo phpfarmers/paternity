@@ -299,7 +299,7 @@ class FamilyService extends BaseService
         }
 
         return [
-            'count' => $data->count(),
+            'count' => $data ? $data->count() : 0,
             'data' => $paginatedData
         ];
     }
@@ -331,7 +331,7 @@ class FamilyService extends BaseService
         $paginatedData = $data->slice($offset, $limit)->values();
 
         return [
-            'count' => $data->count(),
+            'count' => $data ? $data->count() : 0,
             'data' => $paginatedData
         ];
     }
