@@ -447,9 +447,18 @@ class FamilyService extends BaseService
         if (!empty($diffSamples)) {
             throw new \Exception('样本不存在或未分析成功：' . implode(',', $diffSamples));
         }
+        
+        // 是否是新家系
+        $isNewFamily = false;
+        foreach ($family->samples as $sample) { 
+            if(!in_array($sample->sample_name, [$newFatherSample, $newChildSample, $newMontherSample])) {
+                $isNewFamily = true;
+                break;
+            }
+        }
         // 执行分析
 
-        return $this->run($newFatherSample, $newSamples[$newFatherSample], $newChildSample, $newSamples[$newChildSample], $newMontherSample, $newSamples[$newMontherSample] ?? '', $newr, $news);
+        return $this->run($newFatherSample, $newSamples[$newFatherSample], $newChildSample, $newSamples[$newChildSample], $newMontherSample, $newSamples[$newMontherSample] ?? '', $newr, $news, $isNewFamily,  $family);
     }
 
     /**
@@ -496,7 +505,8 @@ class FamilyService extends BaseService
         $motherOutputDir = '',
         $r = 4,
         $s = 0.008,
-        $familyId = 0
+        $isNewFamily = false,
+        $family
     ) {
         $analysisProject = config('data')['analysis_project']; // 本地样本分析目录
         $secondAnalysisProject = config('data')['second_analysis_project']; // 二级分析目录
@@ -522,25 +532,17 @@ class FamilyService extends BaseService
         exec($command, $output, $returnVar);
 
         if ($returnVar === 0) {
-            // 符合条件-更新检测结果状态为成功
-            if ($familyId > 0) {
-                // 更新family表
-                Family::where('id', $familyId)->update([
-                    'report_result' => Family::REPORT_RESULT_SUCCESS,
-                    'report_time' => date('Y-m-d')
-                ]);
+            // 验证只是修改滑窗，则要修改数据库
+            if ($isNewFamily) {
+                $family->r = $r;
+                $family->s = $s;
+                $family->save();
             }
-            Log::info('search-success:' . implode("\n", $output));
+            // 符合条件-更新检测结果状态为成功
+            Log::info('search-success');
             return true;
         } else {
-            // 不符合条件-更新检测结果状态为失败
-            if ($familyId > 0) {
-                // 更新family表
-                Family::where('id', $familyId)->update([
-                    'report_result' => Family::REPORT_RESULT_FAIL
-                ]);
-            }
-            Log::info('search-fail:' . implode("\n", $output));
+            Log::info('search-fail');
             return false;
         }
     }
