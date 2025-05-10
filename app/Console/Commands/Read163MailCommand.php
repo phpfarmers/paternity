@@ -64,7 +64,9 @@ class Read163MailCommand extends Command
 
                 $textBody = $message->getTextBody();
                 // 使用正则表达式匹配 oss:// 路径
-                preg_match_all('/oss:\/\/[^\s]+/', $textBody, $matches);
+                // preg_match_all('/oss:\/\/[^\s]+/', $textBody, $matches);
+                // 使用正则表达式匹配以 oss://skyseq-product/C1830885909785473024/ 开头的路径
+                preg_match_all('/oss:\/\/skyseq-product\/C1830885909785473024\/[^\s]*/', $textBody, $matches);
                 // 输出匹配到的 oss:// 路径
                 foreach ($matches[0] as $match) {
                     $match = escapeshellarg($match);
