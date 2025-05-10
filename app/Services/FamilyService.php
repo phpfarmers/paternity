@@ -533,7 +533,7 @@ class FamilyService extends BaseService
 
         if ($returnVar === 0) {
             // 验证只是修改滑窗，则要修改数据库
-            if ($isNewFamily) {
+            if (!$isNewFamily) {
                 $family->r = $r;
                 $family->s = $s;
                 $family->save();
