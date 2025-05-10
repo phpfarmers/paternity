@@ -22,13 +22,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('mail:read163')
         ->everyMinute()  // 每分钟执行一次
         ->appendOutputTo(storage_path('logs/mail_read163_cron'.$date.'.log'));
-        // 每20分钟执行一次 样本分析
+        // 每2分钟执行一次 样本分析
         $schedule->command('sample:analysis:run')
-        ->cron('*/20 * * * *')  // 每20分钟执行一次
+        ->cron('*/2 * * * *')  // 每2分钟执行一次
         ->appendOutputTo(storage_path('logs/sample_analysis_run_cron'.$date.'.log'));
         // 每1分钟执行一次 样本检测
         $schedule->command('sample:check')
-        ->cron('*/5 * * * *')  // 第一分钟执行一次
+        ->cron('*/3 * * * *')  // 第3分钟执行一次
         ->appendOutputTo(storage_path('logs/sample_check_cron'.$date.'.log'));
         // 第1小时执行全量下载
         $schedule->command('sample:download')
