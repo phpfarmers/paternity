@@ -58,18 +58,8 @@ class FamilyAnalysisRunJob implements ShouldQueue
             ->get()->toArray();
         // 将样本信息用家系id分组
         $samplesGroupByFamilyId = [];
-        $canAnalysis = true;
         foreach ($samples as $sample) {
             $samplesGroupByFamilyId[$sample['family_id']][$sample['sample_type']] = $sample;
-            if ($sample['analysis_result'] != Sample::ANALYSIS_RESULT_SUCCESS) {
-                Log::error('样本未分析成功，请先分析样本:' . $sample['sample_name']);
-                $canAnalysis = false;
-                break;
-            }
-        }
-        if (!$canAnalysis) {
-            Log::error('存在未分析成功的样本，请先分析后再执行分析');
-            return;
         }
 
         try {
@@ -88,6 +78,20 @@ class FamilyAnalysisRunJob implements ShouldQueue
                     $family->save();
                     continue;
                 }
+                // 有未完成分析的样本，跳过此家系分析
+                $canAnalysis = true;
+                foreach ($samplesGroupByFamilyId[$family->id] as $sample) {
+                    if ($sample['analysis_result'] != Sample::ANALYSIS_RESULT_SUCCESS) {
+                        Log::info('家系分析家系：' . $family->name . '，样本：' . $sample['sample_name'] . '-未分析');
+                        $canAnalysis = false;
+                        break;
+                    }
+                }
+                if (!$canAnalysis) {
+                    continue;
+                }
+                // 脚本放队列统一处理
+                FamilyAnalysisRunJob::dispatch($family->id)->onQueue('family_analysis_run');
                 // TODO:脚本
                 // shell命令参数
                 // cd {分析目录} && /path/script/parse_perbase.pl -r 2 -s 0.003 -n All.baseline.tsv -b /path/{胎儿编号}.base.txt -m /path/{母本编号}.base.txt -f /path/{父本编号}.base.txt -o {输出前缀名，可以是胎儿编号} && Rscript /path/script/cal.r --args {输出前缀名，可以是胎儿编号}.result.tsv > {输出前缀名，可以是胎儿编号}.summary
