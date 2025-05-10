@@ -40,7 +40,7 @@
                     <select name="check_result" class="layui-select" lay-ignore style="width: 190px;">
                         <option value="">请选择</option>
                         @foreach($check_result_map_names as $key => $value)
-                            <option value="{{ $key }}">{{ $value }}</option>
+                        <option value="{{ $key }}">{{ $value }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -51,9 +51,9 @@
                     <select name="analysis_result" class="layui-select" lay-ignore style="width: 190px;">
                         <option value="">请选择</option>
                         @foreach($analysis_result_map_names as $key => $value)
-                            <option value="{{ $key }}">{{ $value }}</option>
+                        <option value="{{ $key }}">{{ $value }}</option>
                         @endforeach
-                    </select> 
+                    </select>
                 </div>
             </div>
             <div class="layui-inline">
@@ -72,7 +72,9 @@
     <table id="familyTable" lay-filter="familyTable"></table>
 
     <script>
-        layui.use(['layer', 'upload', 'laydate' , 'jquery', 'form', 'table'], function(){
+        // 定义全局变量
+        var tableIns;
+        layui.use(['layer', 'upload', 'laydate', 'jquery', 'form', 'table'], function() {
             var layer = layui.layer;
             var upload = layui.upload;
             var laydate = layui.laydate;
@@ -81,105 +83,137 @@
             var table = layui.table;
 
             // 初始化表格
-            table.render({
+            tableIns = table.render({
                 elem: '#familyTable',
                 url: '{{ route("family.table-data") }}',
                 method: 'GET',
                 page: true,
                 limit: 10,
                 limits: [10, 20, 50, 100],
-                cols: [[
-                    {field: 'name', width:140, title: '家系名称'},
-                    {field: 'samples', width:160, title: '家系成员', templet: function(d){
-                        var samples = '';
-                        layui.each(d.samples, function(index, sample){
-                            samples += '<div>' + sample.sample_name + '</div>';
-                        });
-                        return samples;
-                    }},
-                    {field: 'sample_type', width:80, title: '称谓', templet: function(d){
-                        var sample_type = '';
-                        layui.each(d.samples, function(index, sample){
-                            sample_type += '<div>' + sample.sample_type_name + '</div>';
-                        });
-                        return sample_type;
-                    }},
-                    {field: 'off_machine_time', title: '下机时间', templet: function(d){
-                        var off_machine_time = '<div>';
-                        layui.each(d.samples, function(index, sample){
-                            if(sample.check_result == 2){
-                                off_machine_time += '<span class="layui-badge layui-bg-green">已检测</span>' + sample.off_machine_time ;
-                            }else if(sample.check_result == 1){
-                                off_machine_time += '<span class="layui-badge layui-bg-orange">检测中</span>' ;
-                            }else if(sample.check_result == 3){
-                                off_machine_time += '<span class="layui-badge layui-bg-blue">检测失败</span>';
-                                off_machine_time += ' <a class="layui-btn layui-btn-xs sample-check-rerun" data-sample-id="'+sample.id+'">重新检测</a>';
-                            }else{
-                                off_machine_time += '<span class="layui-badge layui-bg-red">未检测</span>';
-                                off_machine_time += ' <a class="layui-btn layui-btn-xs sample-check-run" data-sample-id="'+sample.id+'">检测</a>';
+                cols: [
+                    [{
+                            field: 'name',
+                            width: 140,
+                            title: '家系名称'
+                        },
+                        {
+                            field: 'samples',
+                            width: 160,
+                            title: '家系成员',
+                            templet: function(d) {
+                                var samples = '';
+                                layui.each(d.samples, function(index, sample) {
+                                    samples += '<div>' + sample.sample_name + '</div>';
+                                });
+                                return samples;
                             }
-                        });
-                        off_machine_time += '</div>';
-                        return off_machine_time;
-                    }},
-                    {field: 'off_machine_data', width:100, title: '下机数据量', templet: function(d){
-                        var off_machine_data = '';
-                        layui.each(d.samples, function(index, sample){
-                            off_machine_data += '<div>' + sample.off_machine_data + '</div>';
-                        });
-                        return off_machine_data;
-                    }},
-                    {field: 'analysis_time', title: '分析时间', templet: function(d){
-                        var analysis_time = '';
-                        layui.each(d.samples, function(index, sample){
-                            if(sample.analysis_result == 2){
-                                analysis_time += '<div><span class="layui-badge layui-bg-green">已分析</span>' + sample.analysis_time + '</div>';
-                            }else if(sample.analysis_result == 1){
-                                analysis_time += '<div><span class="layui-badge layui-bg-orange">分析中</span></div>' ;
-                            }else if(sample.analysis_result == 3){
-                                analysis_time += '<div><span class="layui-badge layui-bg-blue">分析失败</span>';
-                                analysis_time += ' <a class="layui-btn layui-btn-xs sample-analysis-rerun" data-sample-id="'+sample.id+'">重新分析</a></div>';
-                            }else{
-                                analysis_time += '<div><span class="layui-badge layui-bg-red">未分析</span>';
-                                analysis_time += ' <a class="layui-btn layui-btn-xs sample-analysis-run" data-sample-id="'+sample.id+'">分析</a></div>';
+                        },
+                        {
+                            field: 'sample_type',
+                            width: 80,
+                            title: '称谓',
+                            templet: function(d) {
+                                var sample_type = '';
+                                layui.each(d.samples, function(index, sample) {
+                                    sample_type += '<div>' + sample.sample_type_name + '</div>';
+                                });
+                                return sample_type;
                             }
-                        });
-                        
-                        return analysis_time;
-                    }},
-                    {field: 'report_time', title: '报告时间', templet: function(d){
-                        var report_time = '';
-                        if(d.report_result == 2){
-                            report_time += '<div><span class="layui-badge layui-bg-green">已分析</span>' + d.report_time + '</div>';
-                        }else if(d.report_result == 1){
-                            report_time += '<div><span class="layui-badge layui-bg-orange">分析中</span></div>' ;
-                        }else if(d.report_result == 3){
-                            report_time += '<div><span class="layui-badge layui-bg-blue">分析失败</span>';
-                            report_time += ' <a class="layui-btn layui-btn-xs family-analysis-rerun" data-family-id="'+d.id+'">重新分析</a></div>';
-                        }else{
-                            report_time += '<div><span class="layui-badge layui-bg-red">未分析</span>';
-                            report_time += ' <a class="layui-btn layui-btn-xs family-analysis-run" data-family-id="'+d.id+'">分析</a></div>';
+                        },
+                        {
+                            field: 'off_machine_time',
+                            title: '下机时间',
+                            templet: function(d) {
+                                var off_machine_time = '<div>';
+                                layui.each(d.samples, function(index, sample) {
+                                    if (sample.check_result == 2) {
+                                        off_machine_time += '<span class="layui-badge layui-bg-green">已检测</span>' + sample.off_machine_time;
+                                    } else if (sample.check_result == 1) {
+                                        off_machine_time += '<span class="layui-badge layui-bg-orange">检测中</span>';
+                                    } else if (sample.check_result == 3) {
+                                        off_machine_time += '<span class="layui-badge layui-bg-blue">检测失败</span>';
+                                        off_machine_time += ' <a class="layui-btn layui-btn-xs sample-check-rerun" data-sample-id="' + sample.id + '">重新检测</a>';
+                                    } else {
+                                        off_machine_time += '<span class="layui-badge layui-bg-red">未检测</span>';
+                                        off_machine_time += ' <a class="layui-btn layui-btn-xs sample-check-run" data-sample-id="' + sample.id + '">检测</a>';
+                                    }
+                                });
+                                off_machine_time += '</div>';
+                                return off_machine_time;
+                            }
+                        },
+                        {
+                            field: 'off_machine_data',
+                            width: 100,
+                            title: '下机数据量',
+                            templet: function(d) {
+                                var off_machine_data = '';
+                                layui.each(d.samples, function(index, sample) {
+                                    off_machine_data += '<div>' + sample.off_machine_data + '</div>';
+                                });
+                                return off_machine_data;
+                            }
+                        },
+                        {
+                            field: 'analysis_time',
+                            title: '分析时间',
+                            templet: function(d) {
+                                var analysis_time = '';
+                                layui.each(d.samples, function(index, sample) {
+                                    if (sample.analysis_result == 2) {
+                                        analysis_time += '<div><span class="layui-badge layui-bg-green">已分析</span>' + sample.analysis_time + '</div>';
+                                    } else if (sample.analysis_result == 1) {
+                                        analysis_time += '<div><span class="layui-badge layui-bg-orange">分析中</span></div>';
+                                    } else if (sample.analysis_result == 3) {
+                                        analysis_time += '<div><span class="layui-badge layui-bg-blue">分析失败</span>';
+                                        analysis_time += ' <a class="layui-btn layui-btn-xs sample-analysis-rerun" data-sample-id="' + sample.id + '">重新分析</a></div>';
+                                    } else {
+                                        analysis_time += '<div><span class="layui-badge layui-bg-red">未分析</span>';
+                                        analysis_time += ' <a class="layui-btn layui-btn-xs sample-analysis-run" data-sample-id="' + sample.id + '">分析</a></div>';
+                                    }
+                                });
+
+                                return analysis_time;
+                            }
+                        },
+                        {
+                            field: 'report_time',
+                            title: '报告时间',
+                            templet: function(d) {
+                                var report_time = '';
+                                if (d.report_result == 2) {
+                                    report_time += '<div><span class="layui-badge layui-bg-green">已分析</span>' + d.report_time + '</div>';
+                                } else if (d.report_result == 1) {
+                                    report_time += '<div><span class="layui-badge layui-bg-orange">分析中</span></div>';
+                                } else if (d.report_result == 3) {
+                                    report_time += '<div><span class="layui-badge layui-bg-blue">分析失败</span>';
+                                    report_time += ' <a class="layui-btn layui-btn-xs family-analysis-rerun" data-family-id="' + d.id + '">重新分析</a></div>';
+                                } else {
+                                    report_time += '<div><span class="layui-badge layui-bg-red">未分析</span>';
+                                    report_time += ' <a class="layui-btn layui-btn-xs family-analysis-run" data-family-id="' + d.id + '">分析</a></div>';
+                                }
+
+                                return report_time;
+                            }
+                        },
+                        {
+                            field: 'report_result',
+                            title: '报告解读',
+                            templet: function(d) {
+                                if (d.report_result == 2) {
+                                    return '<a href="{{ route("family.detail") }}?id=' + d.id + '" class="layui-btn layui-btn-xs">进入</a>';
+                                } else {
+                                    return '<span class="layui-badge layui-bg-red">未解读</span>';
+                                }
+                            }
                         }
-                        
-                        return report_time;
-                    }},
-                    {field: 'report_result', title: '报告解读', templet: function(d){
-                        if(d.report_result == 2){
-                            return '<a href="{{ route("family.detail") }}?id=' + d.id + '" class="layui-btn layui-btn-xs">进入</a>';
-                        } else {
-                            return '<span class="layui-badge layui-bg-red">未解读</span>';
-                        }
-                    }}
-                ]]
+                    ]
+                ]
             });
 
             // 搜索按钮点击事件
             $('#searchBtn').on('click', function() {
-                var formData = $('#searchForm').serializeArray();
-                var params = {};
-                $.each(formData, function(i, field){
-                    params[field.name] = field.value;
-                });
+                var params = getFormData();
                 table.reload('familyTable', {
                     where: params
                 });
@@ -190,18 +224,24 @@
                 url: '{{ route("sample.import") }}', // 导入的URL
                 accept: 'file', // 允许上传的文件类型
                 exts: 'xls|xlsx', // 允许的文件后缀
-                done: function(res){
-                    if(res.code === 0){
-                        layer.msg('导入成功', {icon: 1});
-                        setTimeout(function(){
+                done: function(res) {
+                    if (res.code === 0) {
+                        layer.msg('导入成功', {
+                            icon: 1
+                        });
+                        setTimeout(function() {
                             window.location.reload();
                         }, 1000);
                     } else {
-                        layer.msg(res.message, {icon: 2});
+                        layer.msg(res.message, {
+                            icon: 2
+                        });
                     }
                 },
-                error: function(){
-                    layer.msg('导入失败，请稍后重试', {icon: 2});
+                error: function() {
+                    layer.msg('导入失败，请稍后重试', {
+                        icon: 2
+                    });
                 }
             });
 
@@ -210,7 +250,7 @@
                 elem: '#off_machine_time',
                 type: 'date',
                 range: true,
-                done: function(value, date, endDate){
+                done: function(value, date, endDate) {
                     // 设置下机时间范围
                     $('input[name="off_machine_time"]').val(value);
                 }
@@ -220,7 +260,7 @@
                 elem: '#analysis_time',
                 type: 'date',
                 range: true,
-                done: function(value, date, endDate){
+                done: function(value, date, endDate) {
                     // 设置分析时间范围
                     $('input[name="analysis_time"]').val(value);
                 }
@@ -230,18 +270,18 @@
                 elem: '#report_time',
                 type: 'date',
                 range: true,
-                done: function(value, date, endDate){
+                done: function(value, date, endDate) {
                     // 设置报告时间范围
                     $('input[name="report_time"]').val(value);
                 }
             });
             // 样本检测运行按钮点击事件
-            $(document).on('click', '.sample-check-run', function(){
+            $(document).on('click', '.sample-check-run', function() {
                 var sampleId = $(this).data('sample-id');
                 layer.confirm('确定要运行样本检测吗？', {
                     btn: ['确定', '取消'],
                     title: '运行样本检测'
-                }, function(){
+                }, function() {
                     $.ajax({
                         url: '{{ route("sample.checkRun") }}',
                         type: 'get',
@@ -249,35 +289,45 @@
                             sample_id: sampleId
                         },
                         dataType: 'json',
-                        beforeSend: function(){
-                            layer.load(1);
+                        beforeSend: function() {
+                            layer.load(2);
                         },
-                        success: function(res){
+                        success: function(res) {
                             layer.closeAll();
-                            if(res.code === 0){
-                                layer.msg('运行成功', {icon: 1});
-                                setTimeout(function(){
-                                    window.location.reload();
-                                }, 1000);
+                            if (res.code === 0) {
+                                layer.msg('运行成功', {
+                                    icon: 1
+                                });
+                                // 加载表格数据
+                                var params = getFormData(1);
+                                table.reload('familyTable', {
+                                    where: params
+                                });
+                                // setTimeout(function() {
+                                //     window.location.reload();
+                                // }, 1000);
                             } else {
-                                layer.msg(res.message, {icon: 2});
+                                layer.msg(res.message, {
+                                    icon: 2
+                                });
                             }
                         },
-                        error: function(){  // 请求失败
-                            layer.msg('运行失败，请稍后重试', {icon: 2});
+                        error: function() { // 请求失败
+                            layer.msg('运行失败，请稍后重试', {
+                                icon: 2
+                            });
                             layer.closeAll();
                         }
                     })
-                }
-                )
+                })
             });
             // 样本检测重新运行按钮点击事件
-            $(document).on('click', '.sample-check-rerun', function(){
+            $(document).on('click', '.sample-check-rerun', function() {
                 var sampleId = $(this).data('sample-id');
                 layer.confirm('确定要重新运行样本检测吗？', {
                     btn: ['确定', '取消'],
                     title: '重新运行样本检测'
-                }, function(){
+                }, function() {
                     $.ajax({
                         url: '{{ route("sample.checkRerun") }}',
                         type: 'get',
@@ -285,35 +335,45 @@
                             sample_id: sampleId
                         },
                         dataType: 'json',
-                        beforeSend: function(){
-                            layer.load(1);
+                        beforeSend: function() {
+                            layer.load(2);
                         },
-                        success: function(res){
+                        success: function(res) {
                             layer.closeAll();
-                            if(res.code === 0){
-                                layer.msg('重新运行成功', {icon: 1});
-                                setTimeout(function(){
-                                    window.location.reload();
-                                }, 1000);
+                            if (res.code === 0) {
+                                layer.msg('重新运行成功', {
+                                    icon: 1
+                                });
+                                // 加载表格数据
+                                var params = getFormData(1);
+                                table.reload('familyTable', {
+                                    where: params
+                                });
+                                // setTimeout(function() {
+                                //     window.location.reload();
+                                // }, 1000);
                             } else {
-                                layer.msg(res.message, {icon: 2});
+                                layer.msg(res.message, {
+                                    icon: 2
+                                });
                             }
                         },
-                        error: function(){  // 请求失败 
-                            layer.msg('重新运行失败，请稍后重试', {icon: 2});
+                        error: function() { // 请求失败 
+                            layer.msg('重新运行失败，请稍后重试', {
+                                icon: 2
+                            });
                             layer.closeAll();
                         }
                     })
-                }
-                )
+                })
             });
             // 样本分析运行按钮点击事件
-            $(document).on('click', '.sample-analysis-run', function(){
+            $(document).on('click', '.sample-analysis-run', function() {
                 var sampleId = $(this).data('sample-id');
                 layer.confirm('确定要运行样本分析吗？', {
                     btn: ['确定', '取消'],
                     title: '运行样本分析'
-                }, function(){
+                }, function() {
                     $.ajax({
                         url: '{{ route("sample.analysisRun") }}',
                         type: 'get',
@@ -321,35 +381,45 @@
                             sample_id: sampleId
                         },
                         dataType: 'json',
-                        beforeSend: function(){
-                            layer.load(1);
+                        beforeSend: function() {
+                            layer.load(2);
                         },
-                        success: function(res){
+                        success: function(res) {
                             layer.closeAll();
-                            if(res.code === 0){
-                                layer.msg('运行成功', {icon: 1});
-                                setTimeout(function(){
-                                    window.location.reload();
-                                }, 1000);
-                            }else{
-                                layer.msg(res.message, {icon: 2});
+                            if (res.code === 0) {
+                                layer.msg('运行成功', {
+                                    icon: 1
+                                });
+                                // 加载表格数据
+                                var params = getFormData(1);
+                                table.reload('familyTable', {
+                                    where: params
+                                });
+                                // setTimeout(function() {
+                                //     window.location.reload();
+                                // }, 1000);
+                            } else {
+                                layer.msg(res.message, {
+                                    icon: 2
+                                });
                             }
                         },
-                        error: function(){  // 请求失败
-                            layer.msg('运行失败，请稍后重试', {icon: 2});
+                        error: function() { // 请求失败
+                            layer.msg('运行失败，请稍后重试', {
+                                icon: 2
+                            });
                             layer.closeAll();
                         }
                     })
-                }
-                )
+                })
             });
             // 样本分析重新运行按钮点击事件
-            $(document).on('click', '.sample-analysis-rerun', function(){
+            $(document).on('click', '.sample-analysis-rerun', function() {
                 var sampleId = $(this).data('sample-id');
                 layer.confirm('确定要重新运行样本分析吗？', {
                     btn: ['确定', '取消'],
                     title: '重新运行样本分析'
-                }, function(){
+                }, function() {
                     $.ajax({
                         url: '{{ route("sample.analysisRerun") }}',
                         type: 'get',
@@ -357,71 +427,91 @@
                             sample_id: sampleId
                         },
                         dataType: 'json',
-                        beforeSend: function(){
-                            layer.load(1);
+                        beforeSend: function() {
+                            layer.load(2);
                         },
-                        success: function(res){
+                        success: function(res) {
                             layer.closeAll();
-                            if(res.code === 0){
-                                layer.msg('重新运行成功', {icon: 1});
-                                setTimeout(function(){
-                                    window.location.reload();
-                                }, 1000);
-                            }else{
-                                layer.msg(res.message, {icon: 2});
+                            if (res.code === 0) {
+                                layer.msg('重新运行成功', {
+                                    icon: 1
+                                });
+                                // 加载表格数据
+                                var params = getFormData(1);
+                                table.reload('familyTable', {
+                                    where: params
+                                });
+                                // setTimeout(function() {
+                                //     window.location.reload();
+                                // }, 1000);
+                            } else {
+                                layer.msg(res.message, {
+                                    icon: 2
+                                });
                             }
                         },
-                        error: function(){  // 请求失败 
-                            layer.msg('重新运行失败，请稍后重试', {icon: 2});
+                        error: function() { // 请求失败 
+                            layer.msg('重新运行失败，请稍后重试', {
+                                icon: 2
+                            });
                             layer.closeAll();
                         }
                     })
-                }
-                )
+                })
             });
             // 报告分析运行按钮点击事件
-            $(document).on('click', '.family-analysis-run', function(){
+            $(document).on('click', '.family-analysis-run', function() {
                 var familyId = $(this).data('family-id');
                 layer.confirm('确定要运行报告分析吗？', {
                     btn: ['确定', '取消'],
                     title: '运行报告分析'
-                }, function(){
+                }, function() {
                     $.ajax({
                         url: '{{ route("family.analysisRun") }}',
                         type: 'get',
                         data: {
                             family_id: familyId
-                       },
-                        dataType: 'json',
-                        beforeSend: function(){
-                            layer.load(1);
                         },
-                        success: function(res){
+                        dataType: 'json',
+                        beforeSend: function() {
+                            layer.load(2);
+                        },
+                        success: function(res) {
                             layer.closeAll();
-                            if(res.code === 0){
-                                layer.msg('运行成功', {icon: 1});
-                                setTimeout(function(){
-                                    window.location.reload();
-                                }, 1000);
-                            }else{
-                                layer.msg(res.message, {icon: 2});
+                            if (res.code === 0) {
+                                layer.msg('运行成功', {
+                                    icon: 1
+                                });
+                                // 加载表格数据
+                                var params = getFormData(1);
+                                table.reload('familyTable', {
+                                    where: params
+                                });
+                                // setTimeout(function() {
+                                //     window.location.reload();
+                                // }, 1000);
+                            } else {
+                                layer.msg(res.message, {
+                                    icon: 2
+                                });
                             }
                         },
-                        error: function(){  // 请求失败 
-                            layer.msg('运行失败，请稍后重试', {icon: 2});
+                        error: function() { // 请求失败 
+                            layer.msg('运行失败，请稍后重试', {
+                                icon: 2
+                            });
                             layer.closeAll();
                         }
                     })
-                }
-                )
+                })
             });
             // 报告分析重新运行按钮点击事件
-            $(document).on('click', '.family-analysis-rerun', function(){
+            $(document).on('click', '.family-analysis-rerun', function() {
                 var familyId = $(this).data('family-id');
                 layer.confirm('确定要重新运行报告分析吗？', {
                     btn: ['确定', '取消'],
                     title: '重新运行报告分析'
-                }, function(){
+                }, function() {
                     $.ajax({
                         url: '{{ route("family.analysisRerun") }}',
                         type: 'get',
@@ -429,28 +519,54 @@
                             family_id: familyId
                         },
                         dataType: 'json',
-                        beforeSend: function(){
-                            layer.load(1);
+                        beforeSend: function() {
+                            layer.load(2);
                         },
-                        success: function(res){
+                        success: function(res) {
                             layer.closeAll();
-                            if(res.code === 0){
-                                layer.msg('重新运行成功', {icon: 1});
-                                setTimeout(function(){
-                                    window.location.reload();
-                                }, 1000);
-                            }else{
-                                layer.msg(res.message, {icon: 2});
+                            if (res.code === 0) {
+                                layer.msg('重新运行成功', {
+                                    icon: 1
+                                });
+                                // 加载表格数据
+                                var params = getFormData(1);
+                                table.reload('familyTable', {
+                                    where: params
+                                });
+                                // setTimeout(function() {
+                                //     window.location.reload();
+                                // }, 1000);
+                            } else {
+                                layer.msg(res.message, {
+                                    icon: 2
+                                });
                             }
                         },
-                        error: function(){  // 请求失败 
-                            layer.msg('重新运行失败，请稍后重试', {icon: 2});
+                        error: function() { // 请求失败 
+                            layer.msg('重新运行失败，请稍后重试', {
+                                icon: 2
+                            });
                             layer.closeAll();
                         }
                     })
-                }
-                )
+                })
             });
+
+            // 获取表单搜索条件
+            function getFormData(addPageSize = 0) {
+                var formData = $('#searchForm').serializeArray();
+                var params = {};
+                $.each(formData, function(i, field) {
+                    params[field.name] = field.value;
+                });
+                // 获取当前页码、页数
+                if (addPageSize > 0) {
+                    params['page'] = tableIns.config.page.curr;
+                    params['limit'] = tableIns.config.limit;
+                }
+                console.log('fomdata', params);
+                return params;
+            }
         });
     </script>
-@endsection
+    @endsection

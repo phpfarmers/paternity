@@ -271,11 +271,17 @@
                     elem: elem,
                     url: url, // 使用新添加的路由
                     page: true, // 开启分页
+                    beforeSend: function(xhr) { 
+                        layer.load(2); // 显示加载层
+                    },
                     limit: 10, // 每页显示的条数
                     limits: [10, 20, 30], // 每页条数的选择项
                     where: where,
                     cols: cols,
-                    id: 'page_' + index
+                    id: 'page_' + index,
+                    done: function(res, curr, count) {
+                        layer.closeAll('loading'); // 关闭加载层
+                    },
                 });
             }
             // 切换图片
@@ -314,6 +320,9 @@
                         type: "get",
                         url: '{{ route("family.pic", $family->id) }}',
                         dataType: "json",
+                        beforeSend: function() {
+                            layer.load(2); // 显示加载层
+                        },
                         data: {
                             type: type,
                             father_sample: father_sample,
@@ -323,12 +332,17 @@
                             slider_s: slider_s
                         },
                         success: function(data) {
+                            layer.closeAll('loading'); // 关闭加载层
                             if (data.code == 0) {
                                 // 获取图片数据成功
                                 let html = '<div><button type="button" class="layui-btn layui-btn-primary downloadImgBtn" style="float:right">下载</button></div>';
                                 html += "<img src ='" + data.data + "' width='800px'>";
                                 $('div.layui-tab-item').eq(index).html(html);
                             }
+                        },
+                        error: function(xhr, status, error) {
+                            layer.closeAll('loading'); // 关闭加载层
+                            layer.msg('获取图片数据失败');
                         }
                     })
                 }
@@ -345,11 +359,15 @@
                     url: '{{ route("family.search", $family->id) }}',
                     type: 'get',
                     data: params,
+                    beforeSend: function(xhr) {
+                        layer.load(2); // 显示加载层
+                    },
                     dataType: 'json',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // 从表单中获取 CSRF 令牌
                     },
                     success: function(res) {
+                        layer.closeAll('loading'); // 关闭加载层
                         console.log(res);
                         if (res.code == 0) {
                             // 成功
@@ -367,6 +385,12 @@
                                 icon: 5
                             });
                         }
+                    },
+                    error: function(xhr, status, error) {
+                        layer.closeAll('loading'); // 关闭加载层
+                        layer.msg('请求失败，请稍后再试', {
+                            icon: 5
+                        });
                     }
                 });
             });

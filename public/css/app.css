@@ -4,6 +4,9 @@ body, h1, h2, h3, p, ul, li {
     padding: 0;
     box-sizing: border-box;
 }
+a  {
+    cursor: pointer;
+}
 
 /* 页面布局 */
 .container {
