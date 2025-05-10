@@ -89,7 +89,7 @@ class FamilyController extends Controller
     public function analysisRerun(Request $request)
     {
         $request->validate([
-            'id' => 'required|integer'
+            'family_id' => 'required|integer'
         ]);
         // 运行分析
         $this->familyService->analysisRerun($request);

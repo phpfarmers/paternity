@@ -166,7 +166,7 @@ class FamilyService extends BaseService
     public function analysisRerun(Request $request)
     {
         // 验证家系信息
-        $family = Family::find($request->input('id'));
+        $family = Family::find($request->input('family_id'));
         throw_unless($family, new ApiException(1, '家庭信息不存在！'));
         // 验证家系报告结果-仅未分析状态可运行
         $reportResult = Family::REPORT_RESULT_MAP_NAMES[$family->report_result] ?? '';
