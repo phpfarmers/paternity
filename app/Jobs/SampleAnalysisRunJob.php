@@ -80,6 +80,9 @@ class SampleAnalysisRunJob implements ShouldQueue
                 // $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} 2>&1";
                 Log::info('开始执行命令：'.$command);
                 // 执行shell命令
+                
+                putenv(config('data')['perl_path']);
+                putenv(config('data')['perl_perl5ltb']);
                 exec($command, $output, $returnVar);
                 Log::info('命令执行完成，返回码：'.$returnVar);
 

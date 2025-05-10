@@ -13,9 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class FamilyService extends BaseService
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * 获取首页初始数据
@@ -48,7 +46,7 @@ class FamilyService extends BaseService
                 $q->whereBetween('off_machine_time', [$offMachineTime[0], $offMachineTime[1]]);
             });
         }
-        
+
         if ($request->has('analysis_time') && $request->input('analysis_time') != '') {
             $analysisTime = explode(' - ', $request->input('analysis_time'));
             // 查询样本表的分析时间，关联到家系表
@@ -113,9 +111,9 @@ class FamilyService extends BaseService
                 $sample->sample_type_name = Sample::SAMPLE_TYPE_MAP_NAMES[$sample->sample_type] ?? '未知类型';
                 $sampleTypes[$sample->sample_type] = $sample;
             }
-            $family->samples = $sampleTypes;    
+            $family->samples = $sampleTypes;
         }
-        
+
         return $family;
     }
 
@@ -131,16 +129,16 @@ class FamilyService extends BaseService
         $family = Family::with(['samples'])->find($request->input('family_id'));
         throw_unless($family, new ApiException(1, '家庭信息不存在！'));
         // 验证家系报告结果-仅未分析状态可运行
-        $reportResult = Family::REPORT_RESULT_MAP_NAMES[$family->report_result]??'';
-        throw_if($family->report_result != Family::REPORT_RESULT_UNKNOWN, new ApiException(1, $reportResult.'状态，不能操作运行！'));
+        $reportResult = Family::REPORT_RESULT_MAP_NAMES[$family->report_result] ?? '';
+        throw_if($family->report_result != Family::REPORT_RESULT_UNKNOWN, new ApiException(1, $reportResult . '状态，不能操作运行！'));
         // 检查各样本的分析结果
         $samples = $family->samples;
         $analysisResult = array_unique(array_column($samples->toArray(), 'analysis_result'));
         throw_if(count($analysisResult) > 1, new ApiException(1, '此家系内样本的分析结果含未完成状态，不能运行！'));
         throw_if(count($analysisResult) == 0, new ApiException(1, '此家系内的样本分析结果为空，不能运行！'));
         $sampleAnalysisResult = Sample::ANALYSIS_RESULT_MAP_NAMES[$analysisResult[0]] ?? '';
-        throw_if($analysisResult[0] != Sample::ANALYSIS_RESULT_SUCCESS, new ApiException(1, '此家系内的样本的分析结果为'.$sampleAnalysisResult.'，不能运行！'));
-        
+        throw_if($analysisResult[0] != Sample::ANALYSIS_RESULT_SUCCESS, new ApiException(1, '此家系内的样本的分析结果为' . $sampleAnalysisResult . '，不能运行！'));
+
         // DB::beginTransaction();
         try {
             // 更新家系报告结果
@@ -153,7 +151,7 @@ class FamilyService extends BaseService
             // 记录日志
             // DB::commit();
             return true;
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             // DB::rollBack();
             throw new ApiException(1, $e->getMessage());
         }
@@ -171,9 +169,9 @@ class FamilyService extends BaseService
         $family = Family::find($request->input('id'));
         throw_unless($family, new ApiException(1, '家庭信息不存在！'));
         // 验证家系报告结果-仅未分析状态可运行
-        $reportResult = Family::REPORT_RESULT_MAP_NAMES[$family->report_result]??'';
-        throw_if($family->report_result != Family::REPORT_RESULT_FAIL, new ApiException(1, $reportResult.'状态，不能操作重运行！'));
-        
+        $reportResult = Family::REPORT_RESULT_MAP_NAMES[$family->report_result] ?? '';
+        throw_if($family->report_result != Family::REPORT_RESULT_FAIL, new ApiException(1, $reportResult . '状态，不能操作重运行！'));
+
         DB::beginTransaction();
         try {
             // 更新家系报告结果
@@ -186,7 +184,7 @@ class FamilyService extends BaseService
             // 记录日志
             DB::commit();
             return true;
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             throw new ApiException(1, $e->getMessage());
         }
@@ -288,15 +286,15 @@ class FamilyService extends BaseService
         foreach ($paginatedData as $kk => $item) {
             foreach ($item as $key => $value) {
                 // 特殊处理错配位点数
-                if('A/N' == $key){
+                if ('A/N' == $key) {
                     $replaceKey = str_replace('/', '_', $key);
                     $replaceValue = explode('/', $value);
                     $item[$replaceKey] = $replaceValue[1] ?? '';
                     unset($item[$key]);
                 }
                 // 特殊处理父本
-                if('Pairs' == $key){
-                    $item[$key] = explode('_vs_',$value)[0] ?? '';
+                if ('Pairs' == $key) {
+                    $item[$key] = explode('_vs_', $value)[0] ?? '';
                 }
             }
             $paginatedData[$kk] = $item;
@@ -308,7 +306,7 @@ class FamilyService extends BaseService
         ];
     }
 
-    
+
     /**
      * SNP表格
      *
@@ -355,7 +353,7 @@ class FamilyService extends BaseService
         }
 
         $rows = array_map('str_getcsv', file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES), array_fill(0, count(file($filePath)), "\t"));
-        if(empty($rows)){
+        if (empty($rows)) {
             return [];
         }
         $header = array_shift($rows);
@@ -364,7 +362,7 @@ class FamilyService extends BaseService
         $headerCount = count($header);
         $rowCount =  isset($rows) ? count($rows[0] ?? 0) : 0;
         $minLenght = 0;
-        if($headerCount != $minLenght){
+        if ($headerCount != $minLenght) {
             $minLenght = min($headerCount, $rowCount);
             $header = array_slice($header, 0, $minLenght);
         }
@@ -373,16 +371,16 @@ class FamilyService extends BaseService
 
         foreach ($rows as $row) {
             // 长度不一致处理
-            if($minLenght > 0){
+            if ($minLenght > 0) {
                 $row = array_slice($row, 0, $minLenght);
             }
 
             $data[] =  array_combine($header, $row);
         }
-        
+
         return $data;
     }
-    
+
     public function getPicData($familyId, $request)
     {
         $type = $request->input('type', '');
@@ -417,7 +415,7 @@ class FamilyService extends BaseService
             default:
                 break;
         }
-        $picFilePath = $dataDir.$fileExt;
+        $picFilePath = $dataDir . $fileExt;
 
         return $picFilePath;
     }
@@ -436,7 +434,7 @@ class FamilyService extends BaseService
         if (!$family) {
             throw new \Exception('Family not found');
         }
-        
+
         $newSamples = Sample::whereIn('sample_name', [$newFatherSample, $newChildSample, $newMontherSample])
             ->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)
             ->pluck('output_dir', 'sample_name')
@@ -459,10 +457,10 @@ class FamilyService extends BaseService
      */
     public function downloadTable($request)
     {
-         // 组装路径
+        // 组装路径
         $dataDir = config('data')['second_analysis_project'] . $request->input('father_sample', '') . '_vs_' . $request->input('child_sample', '');
         // $dataDir = config('data')['second_analysis_project'] . 'PPA20250300041F1-2_vs_PPA20250300041S1.report';
-        
+
         $data = $this->parseTsvFile($dataDir . '.report.tsv');
 
         $keys = [
@@ -471,7 +469,7 @@ class FamilyService extends BaseService
             'GT_Father',
             'GT_Mother',
             'GT_Baby',
-            'Match',            
+            'Match',
         ];
         $header   = [
             '检测位点编号',
@@ -481,7 +479,7 @@ class FamilyService extends BaseService
             '胎儿基因型',
             '是否错配'
         ];
-        
+
         $final_name = generateFileSavePath(public_path('/static/download/files/'), 'snp_' . date('Ymd_His') . '.xls');
         $excel      = new Excel(['save_path' => $final_name]);
         $excel->generateXls($data, $header, $keys);
@@ -499,49 +497,50 @@ class FamilyService extends BaseService
         $r = 4,
         $s = 0.008,
         $familyId = 0
-    )
-    {
+    ) {
         $analysisProject = config('data')['analysis_project']; // 本地样本分析目录
         $secondAnalysisProject = config('data')['second_analysis_project']; // 二级分析目录
         $secondAnalysisProjectDir = escapeshellarg($secondAnalysisProject); //转义后的二级分析目录
 
         // 胎儿编号
-        $childPath = escapeshellarg($analysisProject.$childOutputDir . '/' . $childSample . '.base.txt');
+        $childPath = escapeshellarg($analysisProject . $childOutputDir . '/' . $childSample . '.base.txt');
         // 母本编号-可能为空
         $motherPath = '';
         if (!empty($motherSample)) {
-            $motherPath = ' m '.escapeshellarg($analysisProject.$motherOutputDir . '/' . $motherSample . '.base.txt');
+            $motherPath = ' m ' . escapeshellarg($analysisProject . $motherOutputDir . '/' . $motherSample . '.base.txt');
         }
         // 父本编号
-        $fatherPath = escapeshellarg($analysisProject.$fatherOutputDir . '/' . $fatherSample . '.base.txt'); //绝对路径
+        $fatherPath = escapeshellarg($analysisProject . $fatherOutputDir . '/' . $fatherSample . '.base.txt'); //绝对路径
 
         $commandPl = config('data')['family_analysis_run_command_pl'];
-        
+
         $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r {$r} -s {$s} -b {$childPath}{$motherPath} -f {$fatherPath} 2>log";
-        Log::info('search-command:'.$command);
+        Log::info('search-command:' . $command);
         // 执行shell命令
+        putenv(config('data')['perl_path']);
+        putenv(config('data')['perl_perl5ltb']);
         exec($command, $output, $returnVar);
 
         if ($returnVar === 0) {
             // 符合条件-更新检测结果状态为成功
-            if($familyId > 0){
+            if ($familyId > 0) {
                 // 更新family表
                 Family::where('id', $familyId)->update([
                     'report_result' => Family::REPORT_RESULT_SUCCESS,
                     'report_time' => date('Y-m-d')
                 ]);
             }
-            Log::info('search-success:'.implode("\n", $output));
+            Log::info('search-success:' . implode("\n", $output));
             return true;
         } else {
             // 不符合条件-更新检测结果状态为失败
-            if($familyId > 0){
+            if ($familyId > 0) {
                 // 更新family表
                 Family::where('id', $familyId)->update([
                     'report_result' => Family::REPORT_RESULT_FAIL
                 ]);
             }
-            Log::info('search-fail:'.implode("\n", $output));
+            Log::info('search-fail:' . implode("\n", $output));
             return false;
         }
     }

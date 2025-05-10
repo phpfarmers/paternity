@@ -123,6 +123,8 @@ class FamilyAnalysisRunJob implements ShouldQueue
                 $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r {$r} -s {$s} -b {$childPath}{$m} -f {$fatherPath} 2>log";
                 Log::info('执行命令：' . $command);
                 // 执行shell命令
+                putenv(config('data')['perl_path']);
+                putenv(config('data')['perl_perl5ltb']);
                 exec($command, $output, $returnVar);
 
                 if ($returnVar === 0) {
