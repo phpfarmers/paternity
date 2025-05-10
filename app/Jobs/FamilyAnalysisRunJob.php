@@ -90,8 +90,6 @@ class FamilyAnalysisRunJob implements ShouldQueue
                 if (!$canAnalysis) {
                     continue;
                 }
-                // 脚本放队列统一处理
-                FamilyAnalysisRunJob::dispatch($family->id)->onQueue('family_analysis_run');
                 // TODO:脚本
                 // shell命令参数
                 // cd {分析目录} && /path/script/parse_perbase.pl -r 2 -s 0.003 -n All.baseline.tsv -b /path/{胎儿编号}.base.txt -m /path/{母本编号}.base.txt -f /path/{父本编号}.base.txt -o {输出前缀名，可以是胎儿编号} && Rscript /path/script/cal.r --args {输出前缀名，可以是胎儿编号}.result.tsv > {输出前缀名，可以是胎儿编号}.summary
