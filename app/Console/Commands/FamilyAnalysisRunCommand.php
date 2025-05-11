@@ -79,6 +79,8 @@ class FamilyAnalysisRunCommand extends Command
                 if (!isset($samplesGroupByFamilyId[$family->id]) || count($samplesGroupByFamilyId[$family->id]) < 2) {
                     $this->info('自动-家系分析：' . $family->name . '，样本分析完成数量不正确');
                     Log::info('自动-家系分析：' . $family->name . '，样本分析完成数量不正确');
+                    $family->report_result = Family::REPORT_RESULT_FAIL;
+                    $family->save();
                     continue;
                 }
                 // 判断 有无样本未分析

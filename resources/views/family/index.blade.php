@@ -187,10 +187,14 @@
                                     report_time += '<div><span class="layui-badge layui-bg-orange">分析中</span></div>';
                                 } else if (d.report_result == 3) {
                                     report_time += '<div><span class="layui-badge layui-bg-blue">分析失败</span>';
-                                    report_time += ' <a class="layui-btn layui-btn-xs family-analysis-rerun" data-family-id="' + d.id + '">重新分析</a></div>';
+                                    if(d.samples.count > 1){
+                                        report_time += ' <a class="layui-btn layui-btn-xs family-analysis-rerun" data-family-id="' + d.id + '">重新分析</a></div>';
+                                    }
                                 } else {
                                     report_time += '<div><span class="layui-badge layui-bg-red">未分析</span>';
-                                    report_time += ' <a class="layui-btn layui-btn-xs family-analysis-run" data-family-id="' + d.id + '">分析</a></div>';
+                                    if(d.samples.count > 1){
+                                        report_time += ' <a class="layui-btn layui-btn-xs family-analysis-run" data-family-id="' + d.id + '">分析</a></div>';
+                                    }
                                 }
 
                                 return report_time;
