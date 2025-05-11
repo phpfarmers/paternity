@@ -50,8 +50,6 @@ Route::get('sample/check-rerun', [SampleController::class, 'checkRerun'])->name(
 Route::get('sample/analysis-run', [SampleController::class, 'analysisRun'])->name('sample.analysisRun');
 // 样本分析重运行
 Route::get('sample/analysis-rerun', [SampleController::class, 'analysisRerun'])->name('sample.analysisRerun');
-// 生成一个调用dispatch调用TestJob的示例
-Route::get('sample/test-job', [SampleController::class, 'testJob'])->name('sample.testJob');
 // 直接回调打印phpinfo
 Route::get('phpinfo',function(){
     phpinfo();

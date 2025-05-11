@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\TestJob;
 use App\Services\SampleService;
 use Illuminate\Http\Request;
 
@@ -118,12 +117,5 @@ class SampleController extends Controller
             'code' => 0,
             'message' => '分析重运行成功！'
         ]);
-    }
-
-    public function testJob(){
-        $result = TestJob::dispatch(1)->onQueue('test');
-        echo "<pre>";
-        var_dump($result);
-        exit;
     }
 }
