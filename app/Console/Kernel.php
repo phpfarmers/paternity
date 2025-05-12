@@ -28,7 +28,7 @@ class Kernel extends ConsoleKernel
         ->appendOutputTo(storage_path('logs/sample_analysis_run_cron'.$date.'.log'));
         // 每1分钟执行一次 样本检测
         $schedule->command('sample:check')
-        ->cron('*/3 * * * *')  // 第3分钟执行一次
+        ->everyMinute()
         ->appendOutputTo(storage_path('logs/sample_check_cron'.$date.'.log'));
         // 第1小时执行全量下载
         $schedule->command('sample:download')
