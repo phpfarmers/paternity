@@ -76,7 +76,7 @@ class SampleCheckCommand extends Command
                         // 获取文件名
                         $fileName = basename($file);
                         Log::info($sample->sample_name . ":" . $file);
-                        Log::info($sample->sample_name . ":" . $fileName);
+                        // Log::info($sample->sample_name . ":" . $fileName);
                         // r1文件路径
                         if ((strpos($fileName, '1.fq.gz') !== false || strpos($fileName, '1.fastq.gz') !== false) && empty($r1Url)) {
                             $r1Url = $file;
