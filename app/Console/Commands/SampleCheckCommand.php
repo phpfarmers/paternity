@@ -55,11 +55,12 @@ class SampleCheckCommand extends Command
                 $sample->save();
                 
                 // shell命令参数
-                $searchPattern = '*'.$sample->sample_name.'*.gz'; // 搜索模式-样本名
+                $searchPattern = escapeshellarg('*'.$sample->sample_name.'*.gz'); // 搜索模式-样本名
                 // $searchPattern = escapeshellarg('*Ignition.php'); // 测试
                 $searchPath = escapeshellarg($ossData); // 搜索路径
                 // $command = "find {$searchPath} -name {$searchPattern} -type f -printf '%T@ %p\n' | sort -nr | cut -d' ' -f2-";
-                $command = "find {$searchPath} -name {$searchPattern} -type f";
+                // $command = "find {$searchPath} -name {$searchPattern} -type f";
+                $command = sprintf('find %s -type f -regex "%s"', $searchPath, $searchPattern);
                 $this->info('执行命令：'.$command);
                 Log::info('执行命令：'.$command);
                 // 执行shell命令
