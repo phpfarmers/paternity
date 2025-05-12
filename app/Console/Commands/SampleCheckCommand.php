@@ -55,7 +55,7 @@ class SampleCheckCommand extends Command
                 $sample->save();
                 
                 // shell命令参数
-                $searchPattern = escapeshellarg('*{$sample->sample_name}*.gz'); // 搜索模式-样本名
+                $searchPattern = escapeshellarg("*{$sample->sample_name}*.gz"); // 搜索模式-样本名
                 // $searchPattern = escapeshellarg('*Ignition.php'); // 测试
                 $searchPath = escapeshellarg($ossData); // 搜索路径
                 // $command = "find {$searchPath} -name {$searchPattern} -type f -printf '%T@ %p\n' | sort -nr | cut -d' ' -f2-";
