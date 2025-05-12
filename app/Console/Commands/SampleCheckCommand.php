@@ -55,7 +55,7 @@ class SampleCheckCommand extends Command
                 $sample->save();
                 
                 // shell命令参数
-                $searchPattern = escapeshellarg('*'.$sample->sample_name.'*.gz'); // 搜索模式-样本名
+                $searchPattern = '*'.$sample->sample_name.'*.gz'; // 搜索模式-样本名
                 // $searchPattern = escapeshellarg('*Ignition.php'); // 测试
                 $searchPath = escapeshellarg($ossData); // 搜索路径
                 // $command = "find {$searchPath} -name {$searchPattern} -type f -printf '%T@ %p\n' | sort -nr | cut -d' ' -f2-";
@@ -72,18 +72,20 @@ class SampleCheckCommand extends Command
                     
                     foreach ($output as $file) {
                         $this->info($file);
-                        Log::info($sample->sample_name . ":" . $file);
                         // 获取文件名
                         $fileName = basename($file);
+                        Log::info($sample->sample_name . ":" . $fileName);
                         // r1文件路径
                         if((strpos($fileName, '1.fq.gz') !== false || strpos($fileName, '1.fastq.gz') !== false) && empty($r1Url)){
                             $r1Url = $file;
                             $this->info('r1Url:'.$r1Url);
+                            Log::info($sample->sample_name . ":" . 'r1Url:'.$r1Url);
                         }
                         // r2文件路径
                         if((strpos($fileName, '2.fq.gz') !== false || strpos($fileName, '2.fastq.gz') !== false) && empty($r2Url)){
                             $r2Url = $file;
                             $this->info('r2Url:'.$r2Url);
+                            Log::info($sample->sample_name . ":" . 'r2Url:'.$r2Url);
                         }
                         $this->info($fileName);
                     }
