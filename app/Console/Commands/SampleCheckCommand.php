@@ -55,7 +55,7 @@ class SampleCheckCommand extends Command
                 $sample->check_times += 1;
                 $sample->save();
 
-                $this->aa();
+                $this->aa($sample->sample_name);
                 continue;
                 // shell命令参数
                 $searchPattern = escapeshellarg("*{$sample->sample_name}*.gz"); // 搜索模式-样本名
