@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Sample;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\Process\Process;
 
 class SampleCheckCommand extends Command
 {
@@ -53,7 +54,9 @@ class SampleCheckCommand extends Command
                 $sample->check_result = Sample::CHECK_RESULT_CHECKING;
                 $sample->check_times += 1;
                 $sample->save();
-                
+
+                $this->aa();
+                continue;
                 // shell命令参数
                 $searchPattern = escapeshellarg("*{$sample->sample_name}*.gz"); // 搜索模式-样本名
                 // $searchPattern = escapeshellarg('*Ignition.php'); // 测试
@@ -118,5 +121,34 @@ class SampleCheckCommand extends Command
             $this->info('检测样本出错：'.$e->getMessage());
         }
         return 0;
+    }
+
+    public function aa($sampleName){
+        $process = new Process(["/usr/bin/find", "/akdata/oss_data/", "-type", "f", "-name", "*".$sampleName."*.gz"]);
+        $process->run();
+
+        if ($process->isSuccessful()) {
+            $files = array_filter(explode("\n", trim($process->getOutput())));
+            foreach ($files as $file) {
+                $fileName = basename($file);
+                Log::info($sampleName . ":" . $file);
+                // Log::info($sample->sample_name . ":" . $fileName);
+                // r1文件路径
+                if ((strpos($fileName, '1.fq.gz') !== false || strpos($fileName, '1.fastq.gz') !== false) && empty($r1Url)) {
+                    $r1Url = $file;
+                    $this->info('r1Url:' . $r1Url);
+                    Log::info($sampleName . ":" . 'r1Url:' . $r1Url);
+                }
+                // r2文件路径
+                if ((strpos($fileName, '2.fq.gz') !== false || strpos($fileName, '2.fastq.gz') !== false) && empty($r2Url)) {
+                    $r2Url = $file;
+                    $this->info('r2Url:' . $r2Url);
+                    Log::info($sampleName . ":" . 'r2Url:' . $r2Url);
+                }
+            }
+        } else {
+            echo "执行失败: " . $process->getErrorOutput();
+        }
+
     }
 }
