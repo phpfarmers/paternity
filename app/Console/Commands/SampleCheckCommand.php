@@ -60,7 +60,7 @@ class SampleCheckCommand extends Command
                 $searchPath = escapeshellarg($ossData); // 搜索路径
                 // $command = "find {$searchPath} -name {$searchPattern} -type f -printf '%T@ %p\n' | sort -nr | cut -d' ' -f2-";
                 // $command = "find {$searchPath} -name {$searchPattern} -type f";
-                $command = sprintf('find %s -type f -regex "%s"', $searchPath, $searchPattern);
+                $command = sprintf('find %s -type f -name %s', $searchPath, $searchPattern);
                 $this->info('执行命令：'.$command);
                 Log::info('执行命令：'.$command);
                 // 执行shell命令
