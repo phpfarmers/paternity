@@ -94,6 +94,11 @@ class FamilyAnalysisRunCommand extends Command
                     }
                 }
                 if (!$canAnalysis) {
+                    // 有未分析的样本，重新放入队列
+                    if($family->report_result == Family::REPORT_RESULT_ANALYZING){
+                        $family->report_result = Family::REPORT_RESULT_UNKNOWN;
+                        $family->save();
+                    }
                     continue;
                 }
                 // 脚本放队列统一处理
