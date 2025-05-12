@@ -71,15 +71,18 @@ class SampleCheckCommand extends Command
                     
                     foreach ($output as $file) {
                         $this->info($file);
+                        Log::info($sample->sample_name . ":" . $file);
                         // 获取文件名
                         $fileName = basename($file);
                         // r1文件路径
                         if((strpos($fileName, '1.fq.gz') !== false || strpos($fileName, '1.fastq.gz') !== false) && empty($r1Url)){
                             $r1Url = $file;
+                            $this->info('r1Url:'.$r1Url);
                         }
                         // r2文件路径
                         if((strpos($fileName, '2.fq.gz') !== false || strpos($fileName, '2.fastq.gz') !== false) && empty($r2Url)){
                             $r2Url = $file;
+                            $this->info('r2Url:'.$r2Url);
                         }
                         $this->info($fileName);
                     }
