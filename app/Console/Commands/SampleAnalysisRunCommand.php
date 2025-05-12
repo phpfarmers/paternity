@@ -48,7 +48,7 @@ class SampleAnalysisRunCommand extends Command
         } else {
             $samples = $samples->where('analysis_result', Sample::ANALYSIS_RESULT_UNKNOWN);
         }
-        $samples = $samples->orderBy('analysis_times', 'asc')->orderBy('id', 'asc')->limit(100)->get();
+        $samples = $samples->orderBy('analysis_times', 'asc')->orderBy('id', 'asc')->limit(10)->get();
         if ($samples->isEmpty()) {
             $this->info('没有要分析的样本');
             Log::info('没有要分析的样本');
