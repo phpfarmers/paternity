@@ -55,8 +55,8 @@ class SampleCheckCommand extends Command
                 $sample->check_times += 1;
                 $sample->save();
 
-                $this->aa($sample->sample_name);
-                continue;
+                $this->doProcess($sample);
+                /* continue;
                 // shell命令参数
                 $searchPattern = escapeshellarg("*{$sample->sample_name}*.gz"); // 搜索模式-样本名
                 // $searchPattern = escapeshellarg('*Ignition.php'); // 测试
@@ -114,7 +114,7 @@ class SampleCheckCommand extends Command
                     // 不符合条件-更新检测结果状态为失败
                     $sample->check_result = Sample::CHECK_RESULT_FAIL;
                     $sample->save();
-                }
+                } */
                 $this->info('检测样本完成-'.date('Y-m-d H:i:s'));
             }
         } catch (\Exception $e) {
@@ -123,7 +123,8 @@ class SampleCheckCommand extends Command
         return 0;
     }
 
-    public function aa($sampleName){
+    public function doProcess($sample){
+        $sampleName = $sample->sample_name;
         $process = new Process(["/usr/bin/find", "/akdata/oss_data/", "-type", "f", "-name", "*".$sampleName."*.gz"]);
         $process->run();
 
@@ -146,9 +147,28 @@ class SampleCheckCommand extends Command
                     Log::info($sampleName . ":" . 'r2Url:' . $r2Url);
                 }
             }
+            
+            // 符合条件-更新检测结果状态为成功
+            if(!empty($r1Url) && !empty($r2Url)){
+                $sample->check_result = Sample::CHECK_RESULT_SUCCESS;
+                $sample->off_machine_time = date('Y-m-d');
+                $sample->r1_url = $r1Url;
+                $sample->r2_url = $r2Url;
+                $sample->save();
+            }else{
+                // 未下机-变为未检测-继续检测
+                $this->info("文件数量不正确:r1url:{$r1Url}-r2url:{$r2Url}");
+                Log::info("文件数量不正确:r1url:{$r1Url}-r2url:{$r2Url}");
+                $sample->check_result = Sample::CHECK_RESULT_UNKNOWN;
+                $sample->save();
+            }
         } else {
-            echo "执行失败: " . $process->getErrorOutput();
+            Log::error("执行失败: " . $process->getErrorOutput());
+            // 不符合条件-更新检测结果状态为失败
+            $sample->check_result = Sample::CHECK_RESULT_FAIL;
+            $sample->save();
         }
 
+        return true;
     }
 }
