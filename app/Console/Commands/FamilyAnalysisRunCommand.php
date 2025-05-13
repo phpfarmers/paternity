@@ -72,8 +72,6 @@ class FamilyAnalysisRunCommand extends Command
                 Log::info('自动-家系分析开始：' . $family->id . '-' . $family->name . '-' . date('Y-m-d H:i:s'));
                 // 家系分析变为分析中
                 $family->report_result = Family::REPORT_RESULT_ANALYZING;
-                $family->s = config('data')['family_analysis_run_command_default_s'] ?? '';
-                $family->r = config('data')['family_analysis_run_command_default_r'] ?? '';
                 $family->report_times  += 1;
                 $family->save();
                 if (!isset($samplesGroupByFamilyId[$family->id]) || count($samplesGroupByFamilyId[$family->id]) < 2) {
