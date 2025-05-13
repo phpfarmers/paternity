@@ -126,8 +126,8 @@ class FamilyAnalysisRunJob implements ShouldQueue
                 // $command = "cd {$secondAnalysisProjectDir} && ".$commandPl." -r 4 -s 0.008 -n All.baseline.tsv -b {$childPath} -m {$motherPath} -f {$fatherPath} -o {$childSample} 2>log && Rscript ".$commandCalR." --args {$childTsv} > {$childSummary} 2>&1";
                 $defaultR = $hasUmi ? config('data')['family_analysis_run_command_umi_default_r'] : config('data')['family_analysis_run_command_default_r'];
                 $defaultS = $hasUmi ? config('data')['family_analysis_run_command_umi_default_s'] : config('data')['family_analysis_run_command_default_s'];
-                $r = !empty($family->r) ? $family->r : escapeshellarg($defaultR); // 默认r值
-                $s = !empty($family->s) ? $family->s : escapeshellarg($defaultS); // 默认s值
+                $r = !empty($family->r) ? $family->r : $defaultR; // 默认r值
+                $s = !empty($family->s) ? $family->s : $defaultS; // 默认s值
                 $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r {$r} -s {$s} -b {$childPath}{$m} -f {$fatherPath} 2>log";
                 Log::info('执行命令：' . $command);
                 // 执行shell命令
@@ -140,6 +140,8 @@ class FamilyAnalysisRunJob implements ShouldQueue
                     
                     // 符合条件-更新检测结果状态为成功
                     $family->report_result = Family::REPORT_RESULT_SUCCESS;
+                    $family->r = $r;
+                    $family->s = $s;
                     $family->report_time = date('Y-m-d');
                     $family->save();
                 } else {
