@@ -61,7 +61,7 @@ class FamilyAnalysisRunJob implements ShouldQueue
         $hasUmi = false;//样本含有
         foreach ($samples as $sample) {
             $samplesGroupByFamilyId[$sample['family_id']][$sample['sample_type']] = $sample;
-            if(!empty(trim($sample['analysis_process']))){
+            if(!empty($sample['analysis_process'])){
                 $hasUmi = true;
             }
         }
