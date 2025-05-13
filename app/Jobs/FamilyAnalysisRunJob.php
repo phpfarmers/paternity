@@ -58,8 +58,12 @@ class FamilyAnalysisRunJob implements ShouldQueue
             ->get()->toArray();
         // 将样本信息用家系id分组
         $samplesGroupByFamilyId = [];
+        $hasUmi = false;//样本含有
         foreach ($samples as $sample) {
             $samplesGroupByFamilyId[$sample['family_id']][$sample['sample_type']] = $sample;
+            if(!empty(trim($sample['analysis_process']))){
+                $hasUmi = true;
+            }
         }
 
         try {
@@ -120,8 +124,10 @@ class FamilyAnalysisRunJob implements ShouldQueue
                 // shell命令参数
                 // $command = "cd /QinZiProject && ~/scripts/parse_perbase.pl -r 4 -s 0.008 -n /share/guoyuntao/workspace/QinZi_20241125/wbc_baseline_noumi_20250225/All.baseline.tsv -b AKT103-S.1G/AKT103-S.1G.base.txt -m parent_bases/AKT103-M.base.txt -f parent_bases/AKT103-F.base.txt -o AKT103-S.1G.xxx 2>log && Rscript /path/script/cal.r --args AKT103-S.1G.xxx.result.tsv > AKT103-S.1G.xxx.summary";
                 // $command = "cd {$secondAnalysisProjectDir} && ".$commandPl." -r 4 -s 0.008 -n All.baseline.tsv -b {$childPath} -m {$motherPath} -f {$fatherPath} -o {$childSample} 2>log && Rscript ".$commandCalR." --args {$childTsv} > {$childSummary} 2>&1";
-                $r = !empty($family->r) ? $family->r : escapeshellarg(config('data')['family_analysis_run_command_default_r']); // 默认r值
-                $s = !empty($family->s) ? $family->s : escapeshellarg(config('data')['family_analysis_run_command_default_s']); // 默认s值
+                $defaultR = $hasUmi ? config('data')['family_analysis_run_command_umi_default_r'] : config('data')['family_analysis_run_command_default_r'];
+                $defaultS = $hasUmi ? config('data')['family_analysis_run_command_umi_default_s'] : config('data')['family_analysis_run_command_default_s'];
+                $r = !empty($family->r) ? $family->r : escapeshellarg($defaultR); // 默认r值
+                $s = !empty($family->s) ? $family->s : escapeshellarg($defaultS); // 默认s值
                 $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r {$r} -s {$s} -b {$childPath}{$m} -f {$fatherPath} 2>log";
                 Log::info('执行命令：' . $command);
                 // 执行shell命令

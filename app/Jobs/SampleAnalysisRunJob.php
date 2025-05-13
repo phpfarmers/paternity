@@ -68,8 +68,7 @@ class SampleAnalysisRunJob implements ShouldQueue
                 $sampleName = escapeshellarg($sample->sample_name);
                 $r1Url = escapeshellarg($sample->r1_url);
                 $r2Url = escapeshellarg($sample->r2_url);
-                $analysisProcess = escapeshellarg($sample->analysis_process);
-                $u = empty(trim($sample->analysis_process)) ? '' : ' -u '.$analysisProcess; // 默认分析流程
+                $u = empty(trim($sample->analysis_process)) ? '' : ' -u '; // 默认分析流程
 
                 $ossAnalysisProjectLocal = config('data')['analysis_project']; // 本地样本分析目录
                 $outputDir = $sample->output_dir; // 输出路径
