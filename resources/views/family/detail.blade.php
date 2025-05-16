@@ -210,7 +210,7 @@
                                 },
                                 {
                                     field: 'cffDNA_Content',
-                                    title: '胎儿浓度，',
+                                    title: '胎儿浓度',
                                     sort: false
                                 },
                                 {
