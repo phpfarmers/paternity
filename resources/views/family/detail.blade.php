@@ -209,15 +209,15 @@
                                     sort: false
                                 },
                                 {
+                                    field: 'cffDNA_Content',
+                                    title: '胎儿浓度，',
+                                    sort: false
+                                },
+                                {
                                     field: 'CPI',
                                     title: '父权值',
                                     sort: false
-                                },
-                                // {
-                                //     field: 'column3',
-                                //     title: ' 深度',
-                                //     sort: false
-                                // },
+                                }
                                 // 根据TSV文件的列数添加更多列
                             ]
                         ];
