@@ -70,6 +70,7 @@
             <li>总表</li>
             <li>父本排查</li>
             <li>同一认定</li>
+            <li>Y染色体排查</li>
         </ul>
         <div class="layui-tab-content">
             <div class="layui-tab-item layui-show">
@@ -94,7 +95,7 @@
             <!-- SNP匹配表 -->
             <div class="layui-tab-item">
                 <div class="layui-form-item">
-                    <button type="button" class="layui-btn layui-btn-primary downloadTableBtn" style="float:right;">
+                    <button type="button" class="layui-btn layui-btn-primary downloadTableBtn" download-type='report' style="float:right;">
                         下载</button>
                 </div>
                 <table id="tsvSNPTable" lay-filter="tsvSNPTable">
@@ -114,6 +115,24 @@
             <div class="layui-tab-item"></div>
             <!-- 同一认定 -->
             <div class="layui-tab-item"></div>
+            <!-- Y染色体排查 -->
+            <div class="layui-tab-item">
+                <div class="layui-form-item">
+                    <button type="button" class="layui-btn layui-btn-primary downloadTableBtn" download-type='chrY' style="float:right;">
+                        下载
+                    </button>
+                </div>
+                <table id="chrYTable" lay-filter="chrYTable">
+                    <thead>
+                        <tr>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 数据会通过表格组件自动填充 -->
+                    </tbody>
+                </table>
+                <div id="page_8"></div>
+            </div>
         </div>
     </div>
 
@@ -164,6 +183,10 @@
                         console.log('切换到SNP匹配表');
                         break;
                         // 其他选项卡...
+                    case 8:
+                        switchTable(8);
+                        console.log('切换到Y染色体排查');
+                        break;
                     default:
                         console.log('切换到其他选项卡');
                         break;
@@ -264,6 +287,60 @@
                             ]
                         ];
                         break;
+                    case 8:
+                        elem = '#chrYTable';
+                        url = '{{ route("family.tsv", $family->id) }}';
+                        where = {
+                            type: 'chrY',
+                            father_sample: father_sample,
+                            child_sample: child_sample,
+                            mother_sample: mother_sample,
+                            slider_r: slider_r,
+                            slider_s: slider_s,
+                        };
+                        cols = [
+                            [{
+                                    field: 'ID',
+                                    title: 'ID',
+                                    sort: false
+                                },
+                                {
+                                    field: 'Chr',
+                                    title: 'Chr',
+                                    sort: false
+                                },
+                                {
+                                    field: 'Loc',
+                                    title: 'Loc',
+                                    sort: false
+                                },
+                                {
+                                    field: 'RefBase',
+                                    title: 'RefBase',
+                                },
+                                {
+                                    field: 'AltBase',
+                                    title: 'AltBase',
+                                },
+                                {
+                                    field: 'GT_Father',
+                                    title: 'GT_Father',
+                                },
+                                {
+                                    field: 'GT_Baby',
+                                    title: 'GT_Baby',
+                                },
+                                {
+                                    field: 'Deciside',
+                                    title: 'Deciside',
+                                },
+                                {
+                                    field: 'Depth',
+                                    title: 'Depth',
+                                }
+                            ]
+                        ];
+                        break;
                 }
 
                 // 初始化表格
@@ -271,7 +348,7 @@
                     elem: elem,
                     url: url, // 使用新添加的路由
                     page: true, // 开启分页
-                    beforeSend: function(xhr) { 
+                    beforeSend: function(xhr) {
                         layer.load(2); // 显示加载层
                     },
                     limit: 10, // 每页显示的条数
@@ -335,7 +412,7 @@
                             layer.closeAll('loading'); // 关闭加载层
                             if (data.code == 0) {
                                 // 获取图片数据成功
-                                let html = '<div><button type="button" class="layui-btn layui-btn-primary downloadImgBtn" style="float:right">下载</button></div>';
+                                let html = '<div><button type="button" class="layui-btn layui-btn-primary downloadImgBtn" download-type="' + type + '" style="float:right">下载</button></div>';
                                 html += "<img src ='" + data.data + "' width='800px'>";
                                 $('div.layui-tab-item').eq(index).html(html);
                             }
@@ -399,6 +476,7 @@
             $(document).on('click', '.downloadImgBtn', function() {
                 // 获取图片的URL
                 var imageUrl = $(this).parents('.layui-tab-item').find('img').attr('src');
+                var type = $(this).attr('download-type');
                 // 使用 fetch API 获取图片数据
                 fetch(imageUrl)
                     .then(response => {
@@ -411,7 +489,9 @@
                         // 创建一个隐藏的<a>标签，并设置其href属性为生成的Blob URL
                         var link = document.createElement('a');
                         link.href = URL.createObjectURL(blob);
-                        link.download = 'image.png'; // 设置下载文件的名称
+                        // 获取imageUrl文件名
+
+                        link.download = father_sample + '_vs_' + child_sample + '.' + type + '.png'; // 设置下载文件的名称
 
                         // 模拟点击<a>标签以触发下载
                         document.body.appendChild(link);
@@ -429,14 +509,25 @@
             // 下载表格
             $(document).on('click', '.downloadTableBtn', async function() {
                 try {
+                    var type = $(this).attr('download-type');
                     // 调用下载函数
-                    const blob = await downloadProjectExcel();
+                    const blob = await downloadProjectExcel(type);
 
                     // 创建下载链接
                     const link = document.createElement('a');
                     link.style.display = 'none';
                     link.href = URL.createObjectURL(blob);
-                    link.setAttribute('download', 'snp匹配表.xlsx');
+
+                    var fileName = 'snp匹配表.xlsx';
+                    switch (type) {
+                        case 'chrY':
+                            fileName = 'Y染色体排查.xlsx';
+                            break;
+
+                        default:
+                            break;
+                    }
+                    link.setAttribute('download', fileName);
 
                     // 触发下载
                     document.body.appendChild(link);
@@ -452,10 +543,11 @@
             });
 
             // 下载 Excel 文件
-            async function downloadProjectExcel() {
+            async function downloadProjectExcel(type) {
                 const params = {
                     father_sample: father_sample,
                     child_sample: child_sample,
+                    type: type,
                 };
 
                 // 将参数拼接到 URL 中

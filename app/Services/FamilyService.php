@@ -224,10 +224,14 @@ class FamilyService extends BaseService
                 case 'report':
                     $fileExt = '.report.tsv';
                     break;
+                // Y染色体排查
+                case 'chrY':
+                    $fileExt = '.chrY.result.tsv';
+                    break;
                 // 总表
                 default:
                     $fileExt = '.result.tsv';
-                    break;
+                    break;                    
             }
             $tsvFilePath = $dataDir . $fileExt;
 
@@ -243,6 +247,9 @@ class FamilyService extends BaseService
                     break;
                 case 'report':
                     $tsvData = $this->getReportTsvFile($tsvFilePath, $request);
+                    break;
+                case 'chrY':
+                    $tsvData = $this->getChrYTsvFile($tsvFilePath, $request);
                     break;
                 default:
                     $tsvData = [];
@@ -310,6 +317,39 @@ class FamilyService extends BaseService
      * @return void
      */
     protected function getReportTsvFile($filePath, $request)
+    {
+        $page = $request->input('page', 1);
+        $limit = $request->input('limit', 10);
+        $offset = ($page - 1) * $limit;
+
+        $search = [];
+
+        // 将数组转换为集合
+        $data = collect($this->parseTsvFile($filePath))->when($search, function ($collection) use ($search) {
+            return $collection->filter(function ($item) use ($search) {
+                // 根据搜索条件过滤数据
+                // return Str::contains($item['title'], $search); // 搜索title字段
+            });
+        });
+
+        // 分页处理
+        $paginatedData = $data->slice($offset, $limit)->values();
+        // 确保 $data 是集合或数组
+        $count = is_array($data) || $data instanceof \Countable ? $data->count() : 0;
+
+        return [
+            'count' => $count,
+            'data' => $paginatedData
+        ];
+    }
+
+    /**
+     * chrY表格
+     *
+     * @param [type] $filePath
+     * @return void
+     */
+    protected function getChrYTsvFile($filePath, $request)
     {
         $page = $request->input('page', 1);
         $limit = $request->input('limit', 10);
@@ -463,29 +503,75 @@ class FamilyService extends BaseService
     public function downloadTable($request)
     {
         // 组装路径
-        $dataDir = config('data')['second_analysis_project'] . $request->input('father_sample', '') . '_vs_' . $request->input('child_sample', '');
+        $fileName = $request->input('father_sample', '') . '_vs_' . $request->input('child_sample', '');
+        $dataDir = config('data')['second_analysis_project'] . $fileName;
         // $dataDir = config('data')['second_analysis_project'] . 'PPA20250300041F1-2_vs_PPA20250300041S1.report';
 
-        $data = $this->parseTsvFile($dataDir . '.report.tsv');
+        $type = $request->input('type', '');
+        $keys = $header = [];
+        switch ($type) {
+            // 简单报告数据
+            case 'summary':
+                $fileExt = '.result.summary.tsv';
+                break;
+            // SNP匹配表
+            case 'report':
+                $keys = [
+                    'ID',
+                    'CHR',
+                    'GT_Father',
+                    'GT_Mother',
+                    'GT_Baby',
+                    'cffDNA_Content',
+                    'Match',
+                ];
+                $header   = [
+                    '检测位点编号',
+                    '染色体',
+                    '父本基因型',
+                    '母本基因型',
+                    '胎儿基因型',
+                    '胎儿浓度',
+                    '是否错配'
+                ];
+                $fileExt = '.report.tsv';
+                break;
+            // Y染色体排查
+            case 'chrY':
+                $keys = [
+                    'ID',
+                    'Chr',
+                    'Loc',
+                    'RefBase',
+                    'AltBase',
+                    'GT_Father',
+                    'GT_Baby',
+                    'Deciside',
+                    'Depth',
+                ];
+                $header   = [
+                    'ID',
+                    'Chr',
+                    'Loc',
+                    'RefBase',
+                    'AltBase',
+                    'GT_Father',
+                    'GT_Baby',
+                    'Deciside',
+                    'Depth',
+                ];
+                $fileExt = '.chrY.result.tsv';
+                break;
+            // 总表
+            default:
+                $fileExt = '.result.tsv';
+                break;                    
+        }
 
-        $keys = [
-            'ID',
-            'CHR',
-            'GT_Father',
-            'GT_Mother',
-            'GT_Baby',
-            'Match',
-        ];
-        $header   = [
-            '检测位点编号',
-            '染色体',
-            '父本基因型',
-            '母本基因型',
-            '胎儿基因型',
-            '是否错配'
-        ];
+        $data = $this->parseTsvFile($dataDir . $fileExt);
 
-        $final_name = generateFileSavePath(public_path('/static/download/files/'), 'snp_' . date('Ymd_His') . '.xls');
+
+        $final_name = generateFileSavePath(public_path('/static/download/files/'), $fileName. $fileExt . $type . '.xls');
         $excel      = new Excel(['save_path' => $final_name]);
         $excel->generateXls($data, $header, $keys);
 
