@@ -527,7 +527,7 @@
                         default:
                             break;
                     }
-                    link.setAttribute('download', fileName);
+                    link.setAttribute('download', father_sample + '_vs_' + child_sample +fileName);
 
                     // 触发下载
                     document.body.appendChild(link);
