@@ -522,7 +522,6 @@ class FamilyService extends BaseService
                     'GT_Father',
                     'GT_Mother',
                     'GT_Baby',
-                    'cffDNA_Content',
                     'Match',
                 ];
                 $header   = [
@@ -531,7 +530,6 @@ class FamilyService extends BaseService
                     '父本基因型',
                     '母本基因型',
                     '胎儿基因型',
-                    '胎儿浓度',
                     '是否错配'
                 ];
                 $fileExt = '.report.tsv';
