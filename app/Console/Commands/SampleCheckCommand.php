@@ -50,6 +50,13 @@ class SampleCheckCommand extends Command
         try {
             foreach ($samples as $sample) {
                 $this->info('检测样本开始：'.$sample->id).'-'.date('Y-m-d H:i:s');
+                // 检测次数大于3000次-更新检测结果状态为失败
+                if ($sample->check_times >= 3000) {
+                    $sample->check_result = Sample::CHECK_RESULT_FAIL;
+                    $sample->save();
+                    continue;
+                }
+                
                 // 样本测试变为检测中
                 $sample->check_result = Sample::CHECK_RESULT_CHECKING;
                 $sample->check_times += 1;

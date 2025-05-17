@@ -142,7 +142,7 @@ class FamilyAnalysisRunJob implements ShouldQueue
                     $family->report_result = Family::REPORT_RESULT_SUCCESS;
                     $family->r = $r;
                     $family->s = $s;
-                    $family->report_time = date('Y-m-d');
+                    $family->report_time = date('Y-m-d H:i:s');
                     $family->save();
                 } else {
                     Log::info("未找到文件或命令执行失败");

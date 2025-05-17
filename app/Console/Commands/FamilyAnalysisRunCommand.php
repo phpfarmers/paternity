@@ -70,6 +70,15 @@ class FamilyAnalysisRunCommand extends Command
             foreach ($families as $family) {
                 $this->info('自动-家系分析开始：' . $family->id . '-' . $family->name . '-' . date('Y-m-d H:i:s'));
                 Log::info('自动-家系分析开始：' . $family->id . '-' . $family->name . '-' . date('Y-m-d H:i:s'));
+                // 次数大于3000，标记为失败
+                if ($family->report_times > 3000) {
+                    $this->info('自动-家系分析：' . $family->name . '，次数大于3000，标记为失败');
+                    Log::info('自动-家系分析：' . $family->name . '，次数大于3000，标记为失败');
+                    $family->report_result = Family::REPORT_RESULT_FAIL;
+                    $family->save();
+                    continue;
+                }
+                
                 // 家系分析变为分析中
                 $family->report_result = Family::REPORT_RESULT_ANALYZING;
                 $family->report_times  += 1;

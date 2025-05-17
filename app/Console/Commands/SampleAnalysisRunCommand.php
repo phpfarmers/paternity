@@ -66,6 +66,13 @@ class SampleAnalysisRunCommand extends Command
             foreach ($samples as $sample) {
                 $this->info('样本分析开始：'.$sample->id).'-'.date('Y-m-d H:i:s');
                 Log::info('样本分析开始：'.$sample->id).'-'.date('Y-m-d H:i:s');
+                // 次数大于3000次，标记为失败
+                if ($sample->analysis_times > 3000) {
+                    $sample->analysis_result = Sample::ANALYSIS_RESULT_FAIL;
+                    $sample->save();
+                    continue;
+                }
+                
                 // 样本分析变为分析中
                 $sample->analysis_result = Sample::ANALYSIS_RESULT_ANALYZING;
                 $sample->analysis_times += 1;
