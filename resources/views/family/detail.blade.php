@@ -615,7 +615,7 @@
             });
 
             // 父本排查按钮点击事件
-            $('#fatherForm').on('click', function() {
+            $('#fatherBtn').on('click', function() {
                 var formData = $('#fatherForm').serializeArray();
                 var params = {};
                 $.each(formData, function(i, field) {
