@@ -39,6 +39,10 @@ Route::get('/family/{id}/pic', [FamilyController::class, 'getPicData'])->name('f
 Route::get('/family/{id}/search', [FamilyController::class, 'searchData'])->name('family.search');
 // 下载表格
 Route::get('/family/downloadTable', [FamilyController::class, 'downloadTable'])->name('family.download');
+// 父本排查
+Route::get('/family/{id}/father-search', [FamilyController::class, 'fatherSearch'])->name('family.fatherSearch');
+// 父本排查表格
+Route::get('/family/father-search-table', [FamilyController::class, 'fatherSearchTable'])->name('family.fatherSearchTable');
 
 // 样本
 Route::post('sample/import', [SampleController::class, 'import'])->name('sample.import');

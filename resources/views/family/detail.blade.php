@@ -112,7 +112,30 @@
             <!-- 总表 -->
             <div class="layui-tab-item"></div>
             <!-- 父本排查 -->
-            <div class="layui-tab-item"></div>
+            <div class="layui-tab-item">
+                <div class="layui-form">
+                    <form id="fatherForm" class="layui-form">
+                        <div class="layui-form-item"> 
+                            <label class="layui-form-label">父本数：</label>
+                            <div class="layui-input-inline" style="width: 200px;">
+                                <input type="text" name="father_num" placeholder="请输入最近父本数" value="50" class="layui-input">
+                            </div>
+                            <div class="layui-input-inline">
+                                <button type="button" id="fatherBtn" class="layui-btn">排查</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <table id="fatherTable" lay-filter="fatherTable">
+                    <thead>
+                        <tr>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 数据会通过表格组件自动填充 -->
+                    </tbody>
+                </table>
+            </div>
             <!-- 同一认定 -->
             <div class="layui-tab-item"></div>
             <!-- Y染色体排查 -->
@@ -589,6 +612,106 @@
             $('#sliderValue').on('input', function() {
                 var value = $(this).val();
                 slider.setValue('#slider', value);
+            });
+
+            // 父本排查按钮点击事件
+            $('#fatherForm').on('click', function() {
+                var formData = $('#fatherForm').serializeArray();
+                var params = {};
+                $.each(formData, function(i, field) {
+                    params[field.name] = field.value;
+                });
+                
+                params['father_sample'] = father_sample;
+                params['child_sample'] = child_sample;
+                // 提交接口
+                $.ajax({
+                    url: '{{ route("family.fatherSearch", $family->id) }}',
+                    type: 'get',
+                    data: params,
+                    beforeSend: function(xhr) {
+                        layer.load(2); // 显示加载层
+                    },
+                    dataType: 'json',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // 从表单中获取 CSRF 令牌
+                    },
+                    success: function(res) {
+                        layer.closeAll('loading'); // 关闭加载层
+                        console.log(res);
+                        if (res.code == 0) {
+                            let elem = '#fatchTable';
+                            let url = '{{ route("family.fatherSearchTable") }}';
+                            let where = {
+                                father_sample_names: res.data.father_sample_names,
+                                child_sample: child_sample,
+                                // mother_sample: mother_sample,
+                            };
+                            let cols = [
+                                [{
+                                        field: 'Pairs',
+                                        title: '父本名称',
+                                        sort: false
+                                    },
+                                    {
+                                        field: 'Site',
+                                        title: '有效位点数',
+                                        sort: false
+                                    },
+                                    {
+                                        field: 'A_N',
+                                        title: '错配位点数',
+                                        sort: false
+                                    },
+                                    {
+                                        field: 'MismatchRate',
+                                        title: '错配率',
+                                        sort: false
+                                    },
+                                    {
+                                        field: 'cffDNA_Content',
+                                        title: '胎儿浓度',
+                                        sort: false
+                                    },
+                                    {
+                                        field: 'CPI',
+                                        title: '父权值',
+                                        sort: false
+                                    }
+                                    // 根据TSV文件的列数添加更多列
+                                ]
+                            ];
+                            // 初始化表格
+                            table.render({
+                                elem: elem,
+                                url: url, // 使用新添加的路由
+                                page: true, // 开启分页
+                                beforeSend: function(xhr) {
+                                    layer.load(2); // 显示加载层
+                                },
+                                limit: 30, // 每页显示的条数
+                                limits: [30, 60, 90], // 每页条数的选择项
+                                where: where,
+                                cols: cols,
+                                id: 'fatherTable',
+                                done: function(res, curr, count) {
+                                    layer.closeAll('loading'); // 关闭加载层
+                                },
+                            });
+                        } else {
+                            // 失败
+                            layer.msg(res.msg, {
+                                icon: 5
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        layer.closeAll('loading'); // 关闭加载层
+                        layer.msg('请求失败，请稍后再试', {
+                            icon: 5
+                        });
+                    }
+                });
             });
         });
     </script>

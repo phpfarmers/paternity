@@ -193,4 +193,64 @@ class FamilyController extends Controller
         
         return response()->download($filePath, $file_name);
     }
+
+    /**
+     * 父本排查
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function fatherSearch(Request $request, $id)
+    {
+         $request->validate([
+            'father_num' => 'required|integer',
+            'child_sample' => 'required|string',
+            'father_sample' => 'required|string',
+            // 'slider_r' => 'required',
+            // 'slider_s' => 'required',
+        ]);
+        
+        try {
+            $data = $this->familyService->fatherSearchData($id, $request);
+        } catch (\Exception $e) {
+            return response()->json([
+                'code' => 1,
+                'msg' => $e->getMessage()
+            ]);
+        }
+       
+        return response()->json([
+            'code' => 0,
+            'msg' => '',
+            'data' => $data
+        ]);
+    }
+
+    
+    /**
+     * 父本排查表格
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function fatherSearchTable(Request $request)
+    {
+        try {
+            $result = $this->familyService->fatherSearchTable($request);
+            // 父本排查表格
+            return response()->json([
+                'code' => 0,
+                'msg' => '',
+                'count' => $result['count'] ?? 0,
+                'data' => $result['data'] ?? []
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'code' => 1,
+                'msg' => '无数据'.$e->getMessage(),
+                'count' => 0,
+                'data' => []
+            ]);
+        }
+    }
 }

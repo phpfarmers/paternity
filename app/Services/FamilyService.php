@@ -626,4 +626,115 @@ class FamilyService extends BaseService
             return false;
         }
     }
+
+    public function fatherSearchData($id, $request)
+    {
+        $newFatherSample = $request->input('father_sample', '');
+        $newChildSample = $request->input('child_sample', '');
+        $fatherNum = $request->input('father_num', 30);
+        $newr = $request->input('slider_r', '');
+        $news = $request->input('slider_s', '');
+        $family = Family::with('samples')->find($id);
+        if (!$family) {
+            throw new \Exception('Family not found');
+        }
+        $familyFatherName = '';
+        $familyChild = '';
+        foreach ($family->samples as $sample) {
+            if ($sample->sample_type == Sample::SAMPLE_TYPE_FATHER) {
+                $familyFatherName = $sample->sample_name;
+            }
+            if ($sample->sample_type == Sample::SAMPLE_TYPE_CHILD) {
+                $familyChild = $sample;
+            }
+        }
+        if (empty($familyChild)) {
+            throw new \Exception('无胎儿样本');
+        }
+        $fatherSamples = Sample::whereNotIn('sample_name', [$newFatherSample, $familyFatherName])
+            ->where('sample_type', Sample::SAMPLE_TYPE_FATHER)
+            ->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)
+            ->orderBy('id', 'desc')
+            ->take($fatherNum)
+            ->get(['output_dir', 'sample_name']);
+
+        if ($fatherSamples->isEmpty()) {
+            throw new \Exception('无相近的父本');
+        }
+        $fatherSampleNames = [];
+        foreach ($fatherSamples as $fatherSample) {
+            if ($this->run($fatherSample->sample_name, $fatherSample->output_dir, $familyChild['sample_name'], $familyChild['output_dir'], '', '', $newr, $news, true,  $family)) {
+                $fatherSampleNames[] = $fatherSample->sample_name;
+            }
+        }
+        return [
+            'father_sample_names' => $fatherSampleNames
+        ];
+    }
+    
+
+    /**
+     * 父本排查表格
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|array
+     */
+    public function fatherSearchTable($request)
+    {
+        try {
+            $childSample = $request->input('child_sample', '');
+            $fatherSamples = $request->input('father_sample_names', []);
+            $returnData = [];
+            foreach ($fatherSamples as $fatherSample) {
+                // 组装路径
+                $dataDir = config('data')['second_analysis_project'] . $fatherSample . '_vs_' . $childSample;
+                // 文件后缀
+                $fileExt = '.result.summary.tsv';
+                $tsvFilePath = $dataDir . $fileExt;
+
+                if (!file_exists($tsvFilePath)) {
+                    throw new ApiException(1, 'TSV file not found');
+                }
+                // 本地测试文件
+                // $tsvFilePath = storage_path('a.tsv');
+
+                $search = [];
+
+                // 将数组转换为集合
+                $data = collect($this->parseTsvFile($tsvFilePath))->when($search, function ($collection) use ($search) {
+                    return $collection->filter(function ($item) use ($search) {
+                        // 根据搜索条件过滤数据
+                        // return Str::contains($item['title'], $search); // 搜索title字段
+                    });
+                });
+
+                // 分页处理
+                $paginatedData = $data->values();
+                foreach ($paginatedData as $kk => $item) {
+                    foreach ($item as $key => $value) {
+                        // 特殊处理错配位点数
+                        if ('A/N' == $key) {
+                            $replaceKey = str_replace('/', '_', $key);
+                            $replaceValue = explode('/', $value);
+                            $item[$replaceKey] = $replaceValue[1] ?? '';
+                            unset($item[$key]);
+                        }
+                        // 特殊处理父本
+                        if ('Pairs' == $key) {
+                            $item[$key] = explode('_vs_', $value)[0] ?? '';
+                        }
+                    }
+                    $paginatedData[$kk] = $item;
+                }
+                $returnData = array_merge($returnData, $paginatedData->toArray());
+            }
+
+            return [
+                'count' => $returnData ? count($returnData) : 0,
+                'data' => $returnData
+            ];
+        } catch (\Exception $e) {
+            throw new ApiException(1, $e->getMessage());
+        }
+    }
 }
