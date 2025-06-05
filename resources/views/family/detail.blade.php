@@ -115,10 +115,10 @@
             <div class="layui-tab-item">
                 <div class="layui-form">
                     <form id="fatherForm" class="layui-form">
-                        <div class="layui-form-item"> 
+                        <div class="layui-form-item">
                             <label class="layui-form-label">父本数：</label>
                             <div class="layui-input-inline" style="width: 200px;">
-                                <input type="text" name="father_num" placeholder="请输入最近父本数" value="50" class="layui-input">
+                                <input type="text" name="father_num" placeholder="请输入最近父本数" value="10" class="layui-input">
                             </div>
                             <div class="layui-input-inline">
                                 <button type="button" id="fatherBtn" class="layui-btn">排查</button>
@@ -550,7 +550,7 @@
                         default:
                             break;
                     }
-                    link.setAttribute('download', father_sample + '_vs_' + child_sample +fileName);
+                    link.setAttribute('download', father_sample + '_vs_' + child_sample + fileName);
 
                     // 触发下载
                     document.body.appendChild(link);
@@ -621,7 +621,7 @@
                 $.each(formData, function(i, field) {
                     params[field.name] = field.value;
                 });
-                
+
                 params['father_sample'] = father_sample;
                 params['child_sample'] = child_sample;
                 // 提交接口
@@ -640,64 +640,8 @@
                         layer.closeAll('loading'); // 关闭加载层
                         console.log(res);
                         if (res.code == 0) {
-                            let elem = '#fatchTable';
-                            let url = '{{ route("family.fatherSearchTable") }}';
-                            let where = {
-                                father_sample_names: res.data.father_sample_names,
-                                child_sample: child_sample,
-                                // mother_sample: mother_sample,
-                            };
-                            let cols = [
-                                [{
-                                        field: 'Pairs',
-                                        title: '父本名称',
-                                        sort: false
-                                    },
-                                    {
-                                        field: 'Site',
-                                        title: '有效位点数',
-                                        sort: false
-                                    },
-                                    {
-                                        field: 'A_N',
-                                        title: '错配位点数',
-                                        sort: false
-                                    },
-                                    {
-                                        field: 'MismatchRate',
-                                        title: '错配率',
-                                        sort: false
-                                    },
-                                    {
-                                        field: 'cffDNA_Content',
-                                        title: '胎儿浓度',
-                                        sort: false
-                                    },
-                                    {
-                                        field: 'CPI',
-                                        title: '父权值',
-                                        sort: false
-                                    }
-                                    // 根据TSV文件的列数添加更多列
-                                ]
-                            ];
-                            // 初始化表格
-                            table.render({
-                                elem: elem,
-                                url: url, // 使用新添加的路由
-                                page: true, // 开启分页
-                                beforeSend: function(xhr) {
-                                    layer.load(2); // 显示加载层
-                                },
-                                limit: 30, // 每页显示的条数
-                                limits: [30, 60, 90], // 每页条数的选择项
-                                where: where,
-                                cols: cols,
-                                id: 'fatherTable',
-                                done: function(res, curr, count) {
-                                    layer.closeAll('loading'); // 关闭加载层
-                                },
-                            });
+                            console.log('res.data.father_sample_names', res.data.father_sample_names);
+                            getFatherSearchTable(res.data.father_sample_names);
                         } else {
                             // 失败
                             layer.msg(res.msg, {
@@ -713,6 +657,106 @@
                     }
                 });
             });
+
+            function getFatherSearchTable(father_sample_names) {
+                let elem = '#fatherTable';
+                let url = '{{ route("family.fatherSearchTable") }}';
+                let where = {
+                    father_sample_names: father_sample_names,
+                    child_sample: child_sample,
+                    // mother_sample: mother_sample,
+                };
+                let cols = [
+                    [{
+                            field: 'Pairs',
+                            title: '父本名称',
+                            sort: false
+                        },
+                        {
+                            field: 'Site',
+                            title: '有效位点数',
+                            sort: false
+                        },
+                        {
+                            field: 'A_N',
+                            title: '错配位点数',
+                            sort: false
+                        },
+                        {
+                            field: 'MismatchRate',
+                            title: '错配率',
+                            sort: false
+                        },
+                        {
+                            field: 'cffDNA_Content',
+                            title: '胎儿浓度',
+                            sort: false
+                        },
+                        {
+                            field: 'CPI',
+                            title: '父权值',
+                            sort: false
+                        }
+                        // 根据TSV文件的列数添加更多列
+                    ]
+                ];
+
+                // 等待DOM加载完成
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // 确保目标元素存在
+                        if (document.querySelector(elem)) {
+                            // 初始化表格
+                            table.render({
+                                elem: elem,
+                                url: url,
+                                page: true,
+                                beforeSend: function(xhr) {
+                                    alert('beforeSend');
+                                    layer.load(2);
+                                },
+                                limit: 30,
+                                limits: [30, 60, 90],
+                                where: where,
+                                cols: cols,
+                                id: 'fatherTable',
+                                done: function(res, curr, count) {
+                                    layer.closeAll('loading');
+                                },
+                            });
+                        }
+                    });
+                } else {
+                    console.log('document.querySelector(elem)',document.querySelector(elem));
+                    // 如果DOM已加载则直接执行
+                    console.log('查找元素:', elem);
+                    const targetElement = document.querySelector(elem);
+                    if (!targetElement) {
+                        console.error(`未找到元素: ${elem}`);
+                        console.log('当前DOM结构:', document.body.innerHTML);
+                    } else {
+                        console.log('找到元素:', targetElement);
+                        // 初始化表格
+                        table.render({
+                            elem: elem,
+                            url: url,
+                            page: true,
+                            beforeSend: function(xhr) {
+                                alert('beforeSend');
+                                layer.load(2);
+                            },
+                            limit: 30,
+                            limits: [30, 60, 90],
+                            where: where,
+                            cols: cols,
+                            id: 'fatherTable',
+                            done: function(res, curr, count) {
+                                layer.closeAll('loading');
+                            },
+                        });
+                    }
+                }
+            }
         });
     </script>
     @endsection
