@@ -292,6 +292,36 @@
                             slider_r: slider_r,
                             slider_s: slider_s,
                         };
+                        cols = [
+                            [{
+                                    field: 'Raw_reads',
+                                    title: 'Raw_reads',
+                                    sort: false
+                                },
+                                {
+                                    field: 'Raw_bases(bp)',
+                                    title: 'Raw_bases(bp)',
+                                    sort: false
+                                },
+                                {
+                                    field: 'Raw_Q20(%)',
+                                    title: 'Raw_Q20(%)',
+                                    sort: false
+                                },
+                                {
+                                    field: 'Raw_Q30(%)',
+                                    title: 'Raw_Q30(%)',
+                                },
+                                {
+                                    field: 'Raw_GC(%)',
+                                    title: 'Raw_GC(%)',
+                                },
+                                {
+                                    field: 'Clean_reads',
+                                    title: 'Clean_reads',
+                                }
+                            ]
+                        ];
                         break
                     case 4:
                         elem = '#tsvSNPTable';
