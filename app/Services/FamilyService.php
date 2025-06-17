@@ -338,14 +338,18 @@ class FamilyService extends BaseService
         // 读取txt文件内容
         $fileContent = file_get_contents($filePath);
         $lines = explode("\n", $fileContent);
-        $header = explode("\t", $lines[0]);
         $collection = collect($lines);
         $total = $collection->count();
         $data = $collection->slice($offset, $limit)->values();
+        $header = explode("\t", $data[0]);
         $data = $data->map(function ($line) {
             return explode("\t", $line);
         });
         $data = $data->map(function ($line) use ($header) {
+            // 空$line为空数组时，返回空数组
+            if (empty($line)) {
+                return [];
+            }
             $result = [];
             foreach ($line as $key => $value) {
                 $result[$header[$key]] = $value;
