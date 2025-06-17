@@ -253,4 +253,31 @@ class FamilyController extends Controller
             ]);
         }
     }
+    
+    /**
+     * 获取TXT数据
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getTxtData(Request $request, $id)
+    {
+        try {
+            $result = $this->familyService->getTxtData($id, $request);
+            // 获取tsv数据
+            return response()->json([
+                'code' => 0,
+                'msg' => '',
+                'count' => $result['count'] ?? 0,
+                'data' => $result['data'] ?? []
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'code' => 1,
+                'msg' => '无数据'.$e->getMessage(),
+                'count' => 0,
+                'data' => []
+            ]);
+        }
+    }
 }

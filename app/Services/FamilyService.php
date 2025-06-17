@@ -263,6 +263,94 @@ class FamilyService extends BaseService
     }
 
     /**
+     * 获取TXT数据
+     *
+     * @param int $familyId
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|array
+     */
+    public function getTxtData($familyId, $request)
+    {
+        try {
+            $type = $request->input('type', '');
+
+            $family = Family::with('samples')->findOrFail($familyId);
+            if (!$family) {
+                throw new ApiException(1, 'Family not found');
+            }
+            // 组装路径等相关参数
+            /* $samples = $family->samples;
+            $sampleTypes = array_column($samples->toArray(), 'sample_name', 'sample_type');
+            $fatherSample = $sampleTypes[Sample::SAMPLE_TYPE_FATHER] ?? '';
+            // $motherSample = $sampleTypes[Sample::SAMPLE_TYPE_MOTHER] ?? '';
+            $childSample = $sampleTypes[Sample::SAMPLE_TYPE_CHILD] ?? ''; */
+
+            $fatherSample = $request->input('father_sample', '');
+            $childSample = $request->input('child_sample', '');
+            // 组装路径
+            $dataDir = config('data')['qc_data_dir'] . $childSample;
+            // 文件后缀
+            $fileExt = '';
+            switch ($type) {
+                // 样本质控表
+                case 'qc':
+                    $fileExt = '.qc.txt';
+                    break;
+                // 总表
+                default:
+                    $fileExt = '';
+                    break;                    
+            }
+            $txtFilePath = $dataDir . $fileExt;
+
+            if (!file_exists($txtFilePath)) {
+                throw new ApiException(1, 'TXT file not found');
+            }
+            // 本地测试文件
+            // $tsvFilePath = storage_path('a.tsv');
+
+            switch ($type) {
+                case 'qc':
+                    $txtData = $this->getQcTxtFile($txtFilePath, $request);
+                    break;
+                default:
+                    $txtData = [];
+                    break;
+            }
+            return $txtData;
+        } catch (\Exception $e) {
+            throw new ApiException(1, $e->getMessage());
+        }
+    }
+
+    /**
+     * 样本质控表
+     *
+     * @param [type] $filePath
+     * @return void
+     */
+    protected function getQcTxtFile($filePath, $request)
+    {
+        $page = $request->input('page', 1);
+        $limit = $request->input('limit', 10);
+        $offset = ($page - 1) * $limit;
+
+        // 读取txt文件内容
+        $fileContent = file_get_contents($filePath);
+        $lines = explode("\n", $fileContent);
+        $collection = collect($lines);
+        $total = $collection->count();
+        $data = $collection->slice($offset, $limit)->values();
+        $data = $data->map(function ($line) {
+            return explode("\t", $line);
+        });
+
+        return [
+            'count' => $total,
+            'data' => $data
+        ];
+    }
+/**
      * 简单报告表格
      *
      * @param [type] $filePath

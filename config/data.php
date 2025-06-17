@@ -12,5 +12,6 @@ return [
     'family_analysis_run_command_umi_default_r' => 2,
     'family_analysis_run_command_umi_default_s' => 0.002,
     'perl_path' => 'PATH=/akdata/software/bin:/akdata/software/bin:/akdata/software/bin:/akdata/software/micromamba/condabin:/akdata/software/bin:/home/labserver2/.local/bin:/home/labserver2/bin:/sbin:/bin:/usr/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin',
-    'perl_perl5ltb' => 'PERL5LIB=/akdata/software/micromamba/envs/qinzi/lib/perl5/5.32/site_perl:/akdata/software/micromamba/envs/qinzi/lib/perl5/site_perl:/akdata/software/micromamba/envs/qinzi/lib/perl5/5.32/vendor_perl:/akdata/software/micromamba/envs/qinzi/lib/perl5/vendor_perl:/akdata/software/micromamba/envs/qinzi/lib/perl5/5.32/core_perl:/akdata/software/micromamba/envs/qinzi/lib/perl5/core_perl'
+    'perl_perl5ltb' => 'PERL5LIB=/akdata/software/micromamba/envs/qinzi/lib/perl5/5.32/site_perl:/akdata/software/micromamba/envs/qinzi/lib/perl5/site_perl:/akdata/software/micromamba/envs/qinzi/lib/perl5/5.32/vendor_perl:/akdata/software/micromamba/envs/qinzi/lib/perl5/vendor_perl:/akdata/software/micromamba/envs/qinzi/lib/perl5/5.32/core_perl:/akdata/software/micromamba/envs/qinzi/lib/perl5/core_perl',
+    'qc_data_dir' => '/home/labserver2/qcfile/',//样本质控数据目录
 ];

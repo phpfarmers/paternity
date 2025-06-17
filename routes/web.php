@@ -33,6 +33,8 @@ Route::get('family/analysis-run', [FamilyController::class, 'analysisRun'])->nam
 Route::get('family/analysis-rerun', [FamilyController::class, 'analysisRerun'])->name('family.analysisRerun');
 // 获取表格数据-ajax使用
 Route::get('/family/{id}/tsv', [FamilyController::class, 'getTsvData'])->name('family.tsv');
+// 获取表格数据-ajax使用-txt
+Route::get('/family/{id}/txt', [FamilyController::class, 'getTxtData'])->name('family.txt');
 // 获取图片
 Route::get('/family/{id}/pic', [FamilyController::class, 'getPicData'])->name('family.pic');
 // 筛选

@@ -63,7 +63,7 @@
     <div class="layui-tab" lay-filter="detailTab" id="sliderTab">
         <ul class="layui-tab-title">
             <li class="layui-this">简单报告</li>
-            <li>胎儿深度图</li>
+            <li>样本质控表</li>
             <li>家系图</li>
             <li>匹配图</li>
             <li>SNP匹配表</li>
@@ -86,8 +86,19 @@
                 </table>
                 <div id="page_0"></div>
             </div>
-            <!-- 胎儿深度图 -->
-            <div class="layui-tab-item"></div>
+            <!-- 样本质控表 -->
+            <div class="layui-tab-item">
+                
+                <table id="qcTable" lay-filter="qcTable">
+                    <thead>
+                        <tr>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 数据会通过表格组件自动填充 -->
+                    </tbody>
+                </table>
+            </div>
             <!-- 家系图 -->
             <div class="layui-tab-item"></div>
             <!-- 匹配图 -->
@@ -190,8 +201,9 @@
                         switchTable(0);
                         console.log('切换到简单报告');
                         break;
-                    case 1: // 胎儿深度图
-                        console.log('切换到胎儿深度图');
+                    case 1: // 样本质控表
+                        switchTable(1);
+                        console.log('切换到样本质控表');
                         break;
                     case 2: // 家系图
                         switchImage(2);
@@ -268,6 +280,19 @@
                             ]
                         ];
                         break;
+                    case 1:
+                        // qc表
+                        elem = '#qcTable';
+                        url = '{{ route("family.txt", $family->id) }}';
+                        where = {
+                            type: 'qc',
+                            father_sample: father_sample,
+                            child_sample: child_sample,
+                            mother_sample: mother_sample,
+                            slider_r: slider_r,
+                            slider_s: slider_s,
+                        };
+                        break
                     case 4:
                         elem = '#tsvSNPTable';
                         url = '{{ route("family.tsv", $family->id) }}';
