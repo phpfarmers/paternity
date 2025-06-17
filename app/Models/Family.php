@@ -22,11 +22,19 @@ class Family extends Model
         self::REPORT_RESULT_FAIL      => '分析失败'
     ];
 
+    const IS_FATHER_UNKNOWN = '0'; // 未知
+    const IS_FATHER_YES     = '1'; // 是
+    const IS_FATHER_NO      = '2'; // 否
+    // 家系分析结果-对应的中文名称
+
     protected $fillable = [
         'name',
         'report_time',
         'report_result',
         'report_times',
+        'is_father',
+        'auto_father_filter',
+        'auto_father_filter_num',
     ];
 
     public function samples()

@@ -136,8 +136,32 @@ class FamilyAnalysisRunJob implements ShouldQueue
                 exec($command, $output, $returnVar);
 
                 if ($returnVar === 0) {
-                    Log::info("找到以下文件:");
-                    
+                    Log::info("读取家系分析结果文件中的:");
+                    // 检测简单报告文件是否存在
+                    $summaryPath = config('data')['second_analysis_project'] . $fatherSample . '_vs_' . $childSample . '.result.summary.tsv';
+                    if (file_exists($summaryPath)) {
+                        Log::info("找到文件: " . $summaryPath);
+                        // 将数组转换为集合
+                        $rows = array_map('str_getcsv', file($summaryPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES), array_fill(0, count(file($summaryPath)), "\t"));
+                        if (!empty($rows) && isset($rows[1])) {
+                            // 判断是否是真父：CPI >= 10000 为真父, 否则为假父
+                            $header = array_shift($rows);
+                            // 获取CPI列索引
+                            $cpiIndex = array_search('CPI', $header);
+                            if ($cpiIndex !== false) {
+                                $cpi = $rows[1][$cpiIndex];
+                                if ($cpi >= 10000) {
+                                    Log::info("家系分析结果：真父");
+                                    $family->is_father = Family::IS_FATHER_YES;
+                                } else {
+                                    Log::info("家系分析结果：假父");
+                                    $family->is_father = Family::IS_FATHER_NO;
+                                }
+                            }
+                        }
+                    } else {
+                        Log::info("未找到文件: " . $summaryPath);
+                    }
                     // 符合条件-更新检测结果状态为成功
                     $family->report_result = Family::REPORT_RESULT_SUCCESS;
                     $family->r = $r;

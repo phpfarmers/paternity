@@ -6,6 +6,7 @@ use App\Console\Tools\Office\Excel;
 use App\Exceptions\ApiException;
 use App\Jobs\FamilyAnalysisRunJob;
 use App\Models\Family;
+use App\Models\FatherFilter;
 use App\Models\Sample;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -640,12 +641,14 @@ class FamilyService extends BaseService
         }
         $familyFatherName = '';
         $familyChild = '';
+        $familyChildId = 0;
         foreach ($family->samples as $sample) {
             if ($sample->sample_type == Sample::SAMPLE_TYPE_FATHER) {
                 $familyFatherName = $sample->sample_name;
             }
             if ($sample->sample_type == Sample::SAMPLE_TYPE_CHILD) {
-                $familyChild = $sample;
+                $familyChild = $sample->sample_name;
+                $familyChildId = $sample->id;
             }
         }
         if (empty($familyChild)) {
@@ -661,14 +664,40 @@ class FamilyService extends BaseService
         if ($fatherSamples->isEmpty()) {
             throw new \Exception('无相近的父本');
         }
+        // 获取已排查列表
+        $fatherFilterFatherSamples = [];
+        if($familyChildId > 0) {
+            $fatherFilterFatherSamples = FatherFilter::where('child_id', $familyChildId)->pluck('father_name')->toArray();
+        }
         $fatherSampleNames = [];
         foreach ($fatherSamples as $fatherSample) {
+            // 已检测，跳过
+            if (in_array($fatherSample->sample_name, $fatherFilterFatherSamples)) {
+                continue;
+            }
             if ($this->run($fatherSample->sample_name, $fatherSample->output_dir, $familyChild['sample_name'], $familyChild['output_dir'], '', '', $newr, $news, true,  $family)) {
                 $fatherSampleNames[] = $fatherSample->sample_name;
             }
         }
+        // 追加父本排查表
+        if(!empty($fatherSampleNames)){
+            $insertFatherFilterParams = [];
+            foreach ($fatherSampleNames as $fatherSampleName) {
+                $insertFatherFilterParams[] = [
+                    'family_id' => $family->id,
+                    'child_id' => $familyChildId,
+                    'child_sample' => $familyChild,
+                    'father_name' => $fatherSampleName,
+                ];
+            }
+            FatherFilter::insert($insertFatherFilterParams);
+        }
+        $totalFatherSamples = array_merge($fatherSampleNames, $fatherFilterFatherSamples);
+        // 标记已排查过
+        $family->auto_father_filter = 1;
+        $family->save();
         return [
-            'father_sample_names' => $fatherSampleNames
+            'father_sample_names' => $totalFatherSamples
         ];
     }
     
