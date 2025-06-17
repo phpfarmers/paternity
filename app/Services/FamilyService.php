@@ -338,10 +338,12 @@ class FamilyService extends BaseService
         // 读取txt文件内容
         $fileContent = file_get_contents($filePath);
         $lines = explode("\n", $fileContent);
+        $header = array_shift($lines);
+        $header = explode("\t", $header);
+        
         $collection = collect($lines);
         $total = $collection->count();
         $data = $collection->slice($offset, $limit)->values();
-        $header = explode("\t", $data[0]);
         $data = $data->map(function ($line) {
             return explode("\t", $line);
         });
