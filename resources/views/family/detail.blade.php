@@ -339,90 +339,112 @@
                                 {
                                     field: 'Insert_size(bp)',
                                     title: 'Insert_size(bp)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Duplicate(%)',
                                     title: 'Duplicate(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'MappedRatio(%)',
                                     title: 'MappedRatio(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'ProperlyMappedRatio(%)',
                                     title: 'ProperlyMappedRatio(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'PE_mapped(%)',
                                     title: 'PE_mapped(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'SE_mapped(%)',
                                     title: 'SE_mapped(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Initial_bases_on_target(bp)',
                                     title: 'Initial_bases_on_target(bp)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Total_effective_yield(Mb)',
                                     title: 'Total_effective_yield(Mb)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Total_effective_yield(%)',
                                     title: 'Total_effective_yield(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'AvDepth(x)',
                                     title: 'AvDepth(x)',
+                                    hide: true
                                 },
                                 {
                                     field: 'AvDepthDedup(x)',
                                     title: 'AvDepthDedup(x)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Bases_covered_on_target	Cov_4x(%)',
                                     title: 'Bases_covered_on_target	Cov_4x(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Cov_10x(%)',
                                     title: 'Cov_10x(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Cov_20x(%)',
                                     title: 'Cov_20x(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Cov_30x(%)',
                                     title: 'Cov_30x(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Cov_100x(%)',
                                     title: 'Cov_100x(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Cov_300x(%)',
                                     title: 'Cov_300x(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Cov_500x(%)',
                                     title: 'Cov_500x(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Cov_1000x(%)',
                                     title: 'Cov_1000x(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Cov_3000x(%)',
                                     title: 'Cov_3000x(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Cov_5000x(%)',
                                     title: 'Cov_5000x(%)',
+                                    hide: true
                                 },
                                 {
                                     field: 'Cov_10000x(%)',
                                     title: 'Cov_10000x(%)',
+                                    hide: true
                                 }
                             ]
                         ];
