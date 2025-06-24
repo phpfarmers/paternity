@@ -319,6 +319,110 @@
                                 {
                                     field: 'Clean_reads',
                                     title: 'Clean_reads',
+                                },
+                                {
+                                    field: 'Clean_bases(bp)',
+                                    title: 'Clean_bases(bp)',
+                                },
+                                {
+                                    field: 'Clean_Q20(%)',
+                                    title: 'Clean_Q20(%)',
+                                },
+                                {
+                                    field: 'Clean_Q30(%)',
+                                    title: 'Clean_Q30(%)',
+                                },
+                                {
+                                    field: 'Clean_GC(%)',
+                                    title: 'Clean_GC(%)',
+                                },
+                                {
+                                    field: 'Insert_size(bp)',
+                                    title: 'Insert_size(bp)',
+                                },
+                                {
+                                    field: 'Duplicate(%)',
+                                    title: 'Duplicate(%)',
+                                },
+                                {
+                                    field: 'MappedRatio(%)',
+                                    title: 'MappedRatio(%)',
+                                },
+                                {
+                                    field: 'ProperlyMappedRatio(%)',
+                                    title: 'ProperlyMappedRatio(%)',
+                                },
+                                {
+                                    field: 'PE_mapped(%)',
+                                    title: 'PE_mapped(%)',
+                                },
+                                {
+                                    field: 'SE_mapped(%)',
+                                    title: 'SE_mapped(%)',
+                                },
+                                {
+                                    field: 'Initial_bases_on_target(bp)',
+                                    title: 'Initial_bases_on_target(bp)',
+                                },
+                                {
+                                    field: 'Total_effective_yield(Mb)',
+                                    title: 'Total_effective_yield(Mb)',
+                                },
+                                {
+                                    field: 'Total_effective_yield(%)',
+                                    title: 'Total_effective_yield(%)',
+                                },
+                                {
+                                    field: 'AvDepth(x)',
+                                    title: 'AvDepth(x)',
+                                },
+                                {
+                                    field: 'AvDepthDedup(x)',
+                                    title: 'AvDepthDedup(x)',
+                                },
+                                {
+                                    field: 'Bases_covered_on_target	Cov_4x(%)',
+                                    title: 'Bases_covered_on_target	Cov_4x(%)',
+                                },
+                                {
+                                    field: 'Cov_10x(%)',
+                                    title: 'Cov_10x(%)',
+                                },
+                                {
+                                    field: 'Cov_20x(%)',
+                                    title: 'Cov_20x(%)',
+                                },
+                                {
+                                    field: 'Cov_30x(%)',
+                                    title: 'Cov_30x(%)',
+                                },
+                                {
+                                    field: 'Cov_100x(%)',
+                                    title: 'Cov_100x(%)',
+                                },
+                                {
+                                    field: 'Cov_300x(%)',
+                                    title: 'Cov_300x(%)',
+                                },
+                                {
+                                    field: 'Cov_500x(%)',
+                                    title: 'Cov_500x(%)',
+                                },
+                                {
+                                    field: 'Cov_1000x(%)',
+                                    title: 'Cov_1000x(%)',
+                                },
+                                {
+                                    field: 'Cov_3000x(%)',
+                                    title: 'Cov_3000x(%)',
+                                },
+                                {
+                                    field: 'Cov_5000x(%)',
+                                    title: 'Cov_5000x(%)',
+                                },
+                                {
+                                    field: 'Cov_10000x(%)',
+                                    title: 'Cov_10000x(%)',
                                 }
                             ]
                         ];
