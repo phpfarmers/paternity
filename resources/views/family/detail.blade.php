@@ -334,49 +334,49 @@
                                     field: 'Clean_bases(bp)',
                                     title: 'Clean_bases(bp)',
                                     fixed:'left',
-                                    width: 130
+                                    width: 140
                                 },
                                 {
                                     field: 'Clean_Q20(%)',
                                     title: 'Clean_Q20(%)',
                                     fixed:'left',
-                                    width: 120
+                                    width: 130
                                 },
                                 {
                                     field: 'Clean_Q30(%)',
                                     title: 'Clean_Q30(%)',
                                     fixed:'left',
-                                    width: 120
+                                    width: 130
                                 },
                                 {
                                     field: 'Clean_GC(%)',
                                     title: 'Clean_GC(%)',
                                     fixed:'left',
-                                    width: 120
+                                    width: 130
                                 },
                                 {
                                     field: 'Insert_size(bp)',
                                     title: 'Insert_size(bp)',
                                     // hide: true,
-                                    width: 130
+                                    width: 140
                                 },
                                 {
                                     field: 'Duplicate(%)',
                                     title: 'Duplicate(%)',
                                     // hide: true,
-                                    width: 120
+                                    width: 130
                                 },
                                 {
                                     field: 'MappedRatio(%)',
                                     title: 'MappedRatio(%)',
                                     // hide: true,
-                                    width: 130
+                                    width: 140
                                 },
                                 {
                                     field: 'ProperlyMappedRatio(%)',
                                     title: 'ProperlyMappedRatio(%)',
                                     // hide: true,
-                                    width: 150
+                                    width: 200
                                 },
                                 {
                                     field: 'PE_mapped(%)',
@@ -394,97 +394,97 @@
                                     field: 'Initial_bases_on_target(bp)',
                                     title: 'Initial_bases_on_target(bp)',
                                     // hide: true,
-                                    width: 180
+                                    width: 200
                                 },
                                 {
                                     field: 'Total_effective_yield(Mb)',
                                     title: 'Total_effective_yield(Mb)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 200
                                 },
                                 {
                                     field: 'Total_effective_yield(%)',
                                     title: 'Total_effective_yield(%)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 200
                                 },
                                 {
                                     field: 'AvDepth(x)',
                                     title: 'AvDepth(x)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 120
                                 },
                                 {
                                     field: 'AvDepthDedup(x)',
                                     title: 'AvDepthDedup(x)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 150
                                 },
                                 {
                                     field: 'Bases_covered_on_target	Cov_4x(%)',
                                     title: 'Bases_covered_on_target	Cov_4x(%)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 240
                                 },
                                 {
                                     field: 'Cov_10x(%)',
                                     title: 'Cov_10x(%)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 120
                                 },
                                 {
                                     field: 'Cov_20x(%)',
                                     title: 'Cov_20x(%)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 120
                                 },
                                 {
                                     field: 'Cov_30x(%)',
                                     title: 'Cov_30x(%)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 120
                                 },
                                 {
                                     field: 'Cov_100x(%)',
                                     title: 'Cov_100x(%)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 120
                                 },
                                 {
                                     field: 'Cov_300x(%)',
                                     title: 'Cov_300x(%)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 120
                                 },
                                 {
                                     field: 'Cov_500x(%)',
                                     title: 'Cov_500x(%)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 120
                                 },
                                 {
                                     field: 'Cov_1000x(%)',
                                     title: 'Cov_1000x(%)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 140
                                 },
                                 {
                                     field: 'Cov_3000x(%)',
                                     title: 'Cov_3000x(%)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 140
                                 },
                                 {
                                     field: 'Cov_5000x(%)',
                                     title: 'Cov_5000x(%)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 140
                                 },
                                 {
                                     field: 'Cov_10000x(%)',
                                     title: 'Cov_10000x(%)',
                                     // hide: true,
-                                    width: '100%'
+                                    width: 160
                                 }
                             ]
                         ];
