@@ -57,6 +57,17 @@
                 </div>
             </div>
             <div class="layui-inline">
+                <label class="layui-form-label">报告状态：</label>
+                <div class="layui-input-inline">
+                    <select name="report_result" class="layui-select" lay-ignore style="width: 190px;">
+                        <option value="">请选择</option>
+                        @foreach($report_result_map_names as $key => $value)
+                        <option value="{{ $key }}">{{ $value }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
                 <button type="button" class="layui-btn" id="searchBtn">搜索</button>
             </div>
             <!-- 重置 -->

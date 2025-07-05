@@ -26,7 +26,8 @@ class FamilyService extends BaseService
         return [
             'sample_type_map_names' => Sample::SAMPLE_TYPE_MAP_NAMES,
             'check_result_map_names' => Sample::CHECK_RESULT_MAP_NAMES,
-            'analysis_result_map_names' => Sample::ANALYSIS_RESULT_MAP_NAMES
+            'analysis_result_map_names' => Sample::ANALYSIS_RESULT_MAP_NAMES,
+            'report_result_map_names' => Family::REPORT_RESULT_MAP_NAMES
         ];
     }
 
