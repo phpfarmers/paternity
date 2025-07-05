@@ -56,9 +56,9 @@ class SampleAnalysisRunCommand extends Command
         }
         // 如果正在分析中的样本数量大50，停止1分钟，再从start位置开始执行
         $analyzingCount = Sample::where('analysis_result', Sample::ANALYSIS_RESULT_ANALYZING)->count();
-        if ($analyzingCount > 50) {
-            $this->info('正在分析中的样本数量大于50，停止1分钟');
-            Log::info('正在分析中的样本数量大于50，停止1分钟');
+        if ($analyzingCount > 100) {
+            $this->info('正在分析中的样本数量大于100，停止1分钟');
+            Log::info('正在分析中的样本数量大于100，停止1分钟');
             sleep(60);
             goto start;
         }
