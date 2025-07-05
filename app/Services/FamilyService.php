@@ -80,6 +80,10 @@ class FamilyService extends BaseService
             // 查询报告结果
             $query->where('report_result', $request->input('report_result'));
         }
+        if ($request->has('family_name_like') && $request->input('family_name_like') != '') {
+            // 查询报告结果
+            $query->where('name', 'like', '%' . $request->input('family_name_like') . '%');
+        }
 
         $total = $query->count();
         $data = $query->orderBy('id', 'desc')->paginate((int)$request->input('limit', 10))->items();

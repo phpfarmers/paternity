@@ -17,6 +17,12 @@
     <form class="layui-form" id="searchForm" style="margin-bottom: 20px;">
         <div class="layui-form-item">
             <div class="layui-inline">
+                <label class="layui-form-label">家系名称：</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="family_name_like" id="family_name_like" class="layui-input" placeholder="家系名称模糊匹配" value="{{ request('family_name_like') }}">
+                </div>
+            </div>
+            <div class="layui-inline">
                 <label class="layui-form-label">下机时间：</label>
                 <div class="layui-input-inline">
                     <input type="text" name="off_machine_time" id="off_machine_time" class="layui-input" placeholder="下机时间" value="{{ request('off_machine_time') }}">
