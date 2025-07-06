@@ -158,7 +158,7 @@ class SampleCheckCommand extends Command
             // 符合条件-更新检测结果状态为成功
             if(!empty($r1Url) && !empty($r2Url)){
                 $sample->check_result = Sample::CHECK_RESULT_SUCCESS;
-                $sample->off_machine_time = date('Y-m-d');
+                $sample->off_machine_time = date('Y-m-d H:i:s');
                 $sample->r1_url = $r1Url;
                 $sample->r2_url = $r2Url;
                 $sample->save();

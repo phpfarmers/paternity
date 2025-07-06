@@ -136,7 +136,7 @@ class SampleService extends BaseService
             }
             // 检测成功-修改状态
             $sample->check_result = Sample::CHECK_RESULT_SUCCESS;
-            $sample->off_machine_time = date('Y-m-d');
+            $sample->off_machine_time = date('Y-m-d H:i:s');
             $sample->r1_url = $result['r1_url'];
             $sample->r2_url = $result['r2_url'];
             if($sample->isDirty()){
@@ -175,7 +175,7 @@ class SampleService extends BaseService
                 throw new ApiException(1, '样本检测失败！');
             }
             $sample->check_result = Sample::CHECK_RESULT_SUCCESS;
-            $sample->off_machine_time = date('Y-m-d');
+            $sample->off_machine_time = date('Y-m-d H:i:s');
             $sample->r1_url = $result['r1_url'];
             $sample->r2_url = $result['r2_url'];
             if($sample->isDirty()){
