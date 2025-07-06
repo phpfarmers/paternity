@@ -786,19 +786,19 @@ class FamilyService extends BaseService
                 continue;
             }
             // 放job队列
-            $jobs[] =  new ConcurrentFamilyAnalysisJob(
-                $fatherSample->sample_name, 
-                $fatherSample->output_dir,
-                $familyChild['sample_name'],
-                $familyChild['output_dir'],
-                $newr,
-                $news,
-                $family
-            );
+            // $jobs[] =  new ConcurrentFamilyAnalysisJob(
+            //     $fatherSample->sample_name, 
+            //     $fatherSample->output_dir,
+            //     $familyChild['sample_name'],
+            //     $familyChild['output_dir'],
+            //     $newr,
+            //     $news,
+            //     $family
+            // );
             // 执行分析
-            // if ($this->run($fatherSample->sample_name, $fatherSample->output_dir, $familyChild['sample_name'], $familyChild['output_dir'], '', '', $newr, $news, true,  $family)) {
-            //     $fatherSampleNames[] = $fatherSample->sample_name;
-            // }
+            if ($this->run($fatherSample->sample_name, $fatherSample->output_dir, $familyChild['sample_name'], $familyChild['output_dir'], '', '', $newr, $news, true,  $family)) {
+                $fatherSampleNames[] = $fatherSample->sample_name;
+            }
         }
         if(!empty($jobs)) {
             // 批量执行
@@ -814,6 +814,8 @@ class FamilyService extends BaseService
                 // 无论成功或失败都会执行
                 Log::info('finally:' , (array)$batch);
             })
+            ->onConnection('redis')  // 明确指定使用redis连接
+            ->onQueue('high')       // 可选，指定队列优先级
             ->dispatch();
         }
 
