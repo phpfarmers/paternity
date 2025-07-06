@@ -4,10 +4,14 @@ namespace App\Services;
 
 use App\Console\Tools\Office\Excel;
 use App\Exceptions\ApiException;
+use App\Jobs\ConcurrentFamilyAnalysisJob;
 use App\Jobs\FamilyAnalysisRunJob;
 use App\Models\Family;
 use App\Models\Sample;
+use Exception;
+use Illuminate\Bus\Batch;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -683,7 +687,7 @@ class FamilyService extends BaseService
         return $final_name;
     }
 
-    private function run(
+    public function run(
         $fatherSample,
         $fatherOutputDir,
         $childSample,
@@ -769,11 +773,50 @@ class FamilyService extends BaseService
             throw new \Exception('无相近的父本');
         }
         $fatherSampleNames = [];
+        $jobs = [];
         foreach ($fatherSamples as $fatherSample) {
-            if ($this->run($fatherSample->sample_name, $fatherSample->output_dir, $familyChild['sample_name'], $familyChild['output_dir'], '', '', $newr, $news, true,  $family)) {
-                $fatherSampleNames[] = $fatherSample->sample_name;
+            // 已生成过，不再运行，
+            $dataDir = config('data')['second_analysis_project'] . $fatherSample->sample_name . '_vs_' . $familyChild['sample_name'];
+            // 文件后缀
+            $fileExt = '.result.summary.tsv';
+            $tsvFilePath = $dataDir . $fileExt;
+
+            $fatherSampleNames[] = $fatherSample->sample_name;
+            if (file_exists($tsvFilePath)) {
+                continue;
             }
+            // 放job队列
+            $jobs[] =  new ConcurrentFamilyAnalysisJob(
+                $fatherSample->sample_name, 
+                $fatherSample->output_dir,
+                $familyChild['sample_name'],
+                $familyChild['output_dir'],
+                $newr,
+                $news,
+                $family
+            );
+            // 执行分析
+            // if ($this->run($fatherSample->sample_name, $fatherSample->output_dir, $familyChild['sample_name'], $familyChild['output_dir'], '', '', $newr, $news, true,  $family)) {
+            //     $fatherSampleNames[] = $fatherSample->sample_name;
+            // }
         }
+        if(!empty($jobs)) {
+            // 批量执行
+            $batch = Bus::batch($jobs)
+            ->then(function (Batch $batch) {
+                // 所有任务完成后的处理
+                Log::info('所有任务完成id:' . $batch->id, (array)$batch);
+            })
+            ->catch(function (Batch $batch, Exception $e) {
+                Log::info('任务失败id:' . $batch->id.';'.$e->getMessage(), (array)$batch);
+                // 批次中第一个任务失败时执行
+            })->finally(function (Batch $batch) {
+                // 无论成功或失败都会执行
+                Log::info('finally:' , (array)$batch);
+            })
+            ->dispatch();
+        }
+
         return [
             'father_sample_names' => $fatherSampleNames
         ];
