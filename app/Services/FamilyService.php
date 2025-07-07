@@ -810,14 +810,14 @@ class FamilyService extends BaseService
             $batch = Bus::batch($jobs)
             ->then(function (Batch $batch) {
                 // 所有任务完成后的处理
-                Log::info('所有任务完成id:' . $batch->id, (array)$batch);
+                Log::info('bus::batch-所有任务完成id:' . $batch->id, (array)$batch);
             })
             ->catch(function (Batch $batch, Exception $e) {
-                Log::info('任务失败id:' . $batch->id.';'.$e->getMessage(), (array)$batch);
+                Log::info('bus::batch-任务失败id:' . $batch->id.';'.$e->getMessage(), (array)$batch);
                 // 批次中第一个任务失败时执行
             })->finally(function (Batch $batch) {
                 // 无论成功或失败都会执行
-                Log::info('finally:' , (array)$batch);
+                Log::info('bus::batch-finally:' , (array)$batch);
             })
             ->onConnection('redis')  // 明确指定使用redis连接
             ->onQueue('father_filter')       // 可选，指定队列优先级
@@ -825,7 +825,22 @@ class FamilyService extends BaseService
 
             $batchId = $batch->id; // 获取批次ID
         }
-
+        // 有批量处理-获取批次完成进度
+        if(!empty($batchId)){
+            $batch = Bus::findBatch($batchId);
+            if ($batch) {
+                $startTime = time();
+                progress:
+                $progress = $batch->progress();
+                Log::info('bus::batch-progress:' . $progress, (array)$batch);
+                // 如果有进度，返回进度
+                if ($progress < 100 && (time() - $startTime) < 60) {
+                    goto progress;
+                }
+            } else {
+                Log::info('bus::batch-not-found:' . $batchId);
+            }
+        }
         return [
             'father_sample_names' => $fatherSampleNames,
             'batch_id' => $batchId,
