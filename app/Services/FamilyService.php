@@ -827,13 +827,13 @@ class FamilyService extends BaseService
         }
         // 有批量处理-获取批次完成进度
         if(!empty($batchId)){
+            $startTime = time();
+            progress:
             $batch = Bus::findBatch($batchId);
             if ($batch) {
-                $startTime = time();
-                progress:
                 $progress = $batch->progress();
-                Log::info('bus::batch-progress:' . $progress, (array)$batch);
-                // 如果有进度，返回进度
+                Log::info('bus::batch-progress:' . $progress);
+                // 未完成时循环
                 if ($progress < 100 && (time() - $startTime) < 60) {
                     goto progress;
                 }
