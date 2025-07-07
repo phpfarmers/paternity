@@ -11,6 +11,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "maatwebsite/excel": "^3.1",
+        "predis/predis": "^3.0",
         "webklex/laravel-imap": "^5.3"
     },
     "require-dev": {

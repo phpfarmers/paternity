@@ -780,26 +780,31 @@ class FamilyService extends BaseService
             // 文件后缀
             $fileExt = '.result.summary.tsv';
             $tsvFilePath = $dataDir . $fileExt;
-
+            // 去重
+            if(in_array($fatherSample->sample_name, $fatherSampleNames)){
+                continue;
+            }
             $fatherSampleNames[] = $fatherSample->sample_name;
+            // 已生成过，不再运行，
             if (file_exists($tsvFilePath)) {
                 continue;
             }
             // 放job队列
-            // $jobs[] =  new ConcurrentFamilyAnalysisJob(
-            //     $fatherSample->sample_name, 
-            //     $fatherSample->output_dir,
-            //     $familyChild['sample_name'],
-            //     $familyChild['output_dir'],
-            //     $newr,
-            //     $news,
-            //     $family
-            // );
+            $jobs[] =  new ConcurrentFamilyAnalysisJob(
+                $fatherSample->sample_name, 
+                $fatherSample->output_dir,
+                $familyChild['sample_name'],
+                $familyChild['output_dir'],
+                $newr,
+                $news,
+                $family
+            );
             // 执行分析
-            if ($this->run($fatherSample->sample_name, $fatherSample->output_dir, $familyChild['sample_name'], $familyChild['output_dir'], '', '', $newr, $news, true,  $family)) {
-                $fatherSampleNames[] = $fatherSample->sample_name;
-            }
+            // if ($this->run($fatherSample->sample_name, $fatherSample->output_dir, $familyChild['sample_name'], $familyChild['output_dir'], '', '', $newr, $news, true,  $family)) {
+            //     $fatherSampleNames[] = $fatherSample->sample_name;
+            // }
         }
+        $batchId = '';
         if(!empty($jobs)) {
             // 批量执行
             $batch = Bus::batch($jobs)
@@ -815,12 +820,15 @@ class FamilyService extends BaseService
                 Log::info('finally:' , (array)$batch);
             })
             ->onConnection('redis')  // 明确指定使用redis连接
-            ->onQueue('high')       // 可选，指定队列优先级
-            ->dispatch();
+            ->onQueue('father_filter')       // 可选，指定队列优先级
+            ->dispatch(); // 指定队列
+
+            $batchId = $batch->id; // 获取批次ID
         }
 
         return [
-            'father_sample_names' => $fatherSampleNames
+            'father_sample_names' => $fatherSampleNames,
+            'batch_id' => $batchId,
         ];
     }
     
