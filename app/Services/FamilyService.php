@@ -294,10 +294,14 @@ class FamilyService extends BaseService
             // $motherSample = $sampleTypes[Sample::SAMPLE_TYPE_MOTHER] ?? '';
             $childSample = $sampleTypes[Sample::SAMPLE_TYPE_CHILD] ?? ''; */
 
-            $fatherSample = $request->input('father_sample', '');
-            $childSample = $request->input('child_sample', '');
+            $sample_name = $request->input('sample_name', '');
+            if('child_sample' == $sample_name){
+                $sampleName = $request->input('child_sample', '');
+            }else{
+                $sampleName = $request->input('father_sample', '');
+            }
             // 组装路径
-            $dataDir = config('data')['qc_data_dir'] . $childSample;
+            $dataDir = config('data')['qc_data_dir'] . $sampleName;
             // 文件后缀
             $fileExt = '';
             switch ($type) {
@@ -344,33 +348,34 @@ class FamilyService extends BaseService
         $limit = $request->input('limit', 10);
         $offset = ($page - 1) * $limit;
 
-        // 读取txt文件内容
+        // 读取文件内容
         $fileContent = file_get_contents($filePath);
-        $lines = explode("\n", $fileContent);
-        $header = array_shift($lines);
-        $header = explode("\t", $header);
-        
+        $lines = array_filter(explode("\n", $fileContent)); // 过滤空行
+
+        // 获取表头（第一行）
+        $header = explode("\t", trim(array_shift($lines)));
+
+        // 处理数据行
         $collection = collect($lines);
         $total = $collection->count();
-        $data = $collection->slice($offset, $limit)->values();
-        $data = $data->map(function ($line) {
-            return explode("\t", $line);
-        });
-        $data = $data->map(function ($line) use ($header) {
-            // 空$line为空数组时，返回空数组
-            if (empty($line)) {
-                return [];
-            }
-            $result = [];
-            foreach ($line as $key => $value) {
-                $result[$header[$key]] = $value;
-            }
-            return $result;
-        });
 
+        $verticalData = $collection->slice($offset, $limit)
+            ->map(function ($line) use ($header) {
+                $values = explode("\t", trim($line));
+
+                return collect($header)->map(function ($column, $index) use ($values) {
+                    return [
+                        'column' => $column,
+                        'value' => $values[$index] ?? null
+                    ];
+                });
+            })
+            ->flatten(1) // 将多维集合展平
+            ->filter()
+            ->values();
         return [
-            'count' => $total,
-            'data' => $data
+            'count' => $total, // 总记录数 = 原行数 * 列数
+            'data' => $verticalData
         ];
     }
 /**
