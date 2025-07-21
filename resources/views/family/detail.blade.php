@@ -1,5 +1,6 @@
 @extends('layouts.app')
-
+<!-- 引入jQuery UI CSS -->
+<script src="/js/xm-select.js"></script>
 @section('content')
 <div class="layui-container">
     <div class="layui-row">
@@ -158,7 +159,34 @@
                 </table>
             </div>
             <!-- 同一认定 -->
-            <div class="layui-tab-item"></div>
+            <div class="layui-tab-item">
+                <div class="layui-form">
+                    <form id="tyzdForm" class="layui-form">
+                        <div class="layui-form-item" style="display: inline-block; width: 26%; vertical-align: top;">
+                            <label class="layui-form-label">目标样本</label>
+                            <div class="layui-input-block" style="width: 200px;">
+                                <select id="sampleASelect" name="sampleA" lay-verify="required" lay-filter="sampleA" lay-search>
+                                    <option value="">请选择目标样本</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="layui-form-item" style="display: inline-block; width: 28%; vertical-align: top;">
+                            <label class="layui-form-label">比较样本</label>
+                            <div class="layui-input-block" style="min-width: 300px;margin-left: 0;">
+                                <div class="layui-input-block" style="min-width: 300px;">
+                                    <div class="xm-select-demo"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 提交按钮 -->
+                        <div class="layui-form-item" style="display: inline-block; vertical-align: top; ">
+                            <div class="layui-input-block">
+                                <button class="layui-btn" id="tyzdBtn" lay-submit lay-filter="tyzdBtn">比较</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
             <!-- Y染色体排查 -->
             <div class="layui-tab-item">
                 <div class="layui-form-item">
@@ -229,6 +257,12 @@
                         console.log('切换到SNP匹配表');
                         break;
                         // 其他选项卡...
+                    case 7:
+                        // 同一认定
+                        console.log('切换到同一认定');
+                        // 获取样本数据
+                        initSampleA();
+                        break;
                     case 8:
                         switchTable(8);
                         console.log('切换到Y染色体排查');
@@ -808,6 +842,145 @@
                     }
                 }
             }
+            // 同一认定
+            // 在 layui.use 的回调函数中添加以下代码
+            
+            // 表单提交时获取选中值
+            form.on('submit(tyzdBtn)', function(data) {
+                // 获取选中的值 (数组)
+                var selectedValues = sampleBSelect.getValue('valueStr');
+                console.log('选中的值:', selectedValues);
+                // 获取目标样本的值
+                var sampleAValue = $('#sampleASelect').val();
+                console.log('目标样本的值:', sampleAValue);
+
+                // 其他表单验证和提交逻辑...
+                return false;
+            });
+            // ----------------sampleA----------------
+            // 目标样本单选初始化
+            function initSampleA() {
+                // 监听搜索框输入
+                $('#sampleASelect').next().find('input').on('input', function() {
+                    var value = $(this).val();
+                    searchSamples(value);
+                });
+
+                // 首次加载数据
+                searchSamples('');
+            }
+
+            // 搜索样本方法
+            function searchSamples(keyword) {
+                $.ajax({
+                    url: '{{ route("sample.getSampleOptions") }}',
+                    type: 'get',
+                    data: {
+                        search: keyword
+                    },
+                    beforeSend: function() {
+                        if(!keyword) {
+                            layer.load(2); // 仅首次加载显示loading
+                        }
+                    },
+                    success: function(res) {
+                        layer.closeAll('loading');
+                        if(res.code === 0) {
+                            var html = '<option value="">请选择目标样本</option>';
+                            res.data.forEach(function(item) {
+                                html += `<option value="${item.id}">${item.text}</option>`;
+                            });
+                            $('#sampleASelect').html(html);
+                            form.render('select'); // 重新渲染select
+                            
+                            // 如果是搜索状态,保持下拉框展开
+                            if(keyword) {
+                                $('#sampleASelect').next().addClass('layui-form-selected');
+                            }
+                        } else {
+                            layer.msg(res.msg || '获取样本列表失败');
+                        }
+                    },
+                    error: function() {
+                        layer.closeAll('loading');
+                        layer.msg('网络错误，请稍后重试');
+                    }
+                });
+            }
+
+            // ----------------sampleB----------------
+            // 比较样本多选初始化
+            var sampleBSelect = xmSelect.render({
+                el: '.xm-select-demo', 
+                filterable: true,
+                remoteSearch: true,
+                remoteMethod: function(val, cb, show){
+                    // 远程搜索方法
+                    $.ajax({
+                        url: '{{ route("sample.getSampleOptions") }}',
+                        type: 'get',
+                        data: {search: val},
+                        beforeSend: function() {
+                            // 这里不需要loading，xm-select有自己的加载效果
+                        },
+                        success: function(res){
+                            if(res.code === 0) {
+                                cb(res.data.map(item => ({
+                                    name: item.text,
+                                    value: item.id
+                                })));
+                            } else {
+                                layer.msg(res.msg || '获取样本列表失败');
+                            }
+                        },
+                        error: function() {
+                            layer.msg('网络错误，请稍后重试');
+                        }
+                    });
+                },
+                height: '500px',
+                style: {
+                    minHeight: '36px',
+                    lineHeight: '36px'
+                },
+                data: []
+            });
         });
     </script>
+    @endsection
+    <!-- css样式 -->
+    @section('css')
+    <style>
+        .xm-select-demo {
+            min-height: 36px;
+            line-height: 36px;
+        }
+        .xm-select {
+            border-radius: 2px !important;
+            border-color: #e6e6e6 !important;
+        }
+        .xm-select-label {
+            background-color: #5FB878 !important;
+            color: #fff !important;
+        }
+        .layui-form-select dl dd.layui-this {
+            background-color: #5FB878;
+        }
+        .layui-form-select dl dd:hover {
+            background-color: #f2f2f2;
+        }
+        .layui-form-select dl dd.layui-select-tips {
+            padding-left: 10px;
+            color: #999;
+        }
+        /* 下拉框最大高度 */
+        .layui-form-select dl {
+            max-height: 300px;
+        }
+        /* 搜索框样式 */
+        .layui-form-select .layui-input {
+            padding-right: 30px;
+            cursor: pointer;
+        }
+    </style>
     @endsection

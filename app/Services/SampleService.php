@@ -300,4 +300,18 @@ class SampleService extends BaseService
         }
     }
 
+    /**
+     * 获取样本筛选列表
+     *
+     * @param string $search
+     * @return collection
+     */
+    public function getSampleOptions($search)
+    { 
+        $samples = Sample::where('sample_name', 'like', "%{$search}%")
+        ->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)
+        ->limit(100)
+        ->get(['id', 'sample_name as text']);
+        return $samples;
+    }
 }

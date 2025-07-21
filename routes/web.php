@@ -56,6 +56,8 @@ Route::get('sample/check-rerun', [SampleController::class, 'checkRerun'])->name(
 Route::get('sample/analysis-run', [SampleController::class, 'analysisRun'])->name('sample.analysisRun');
 // 样本分析重运行
 Route::get('sample/analysis-rerun', [SampleController::class, 'analysisRerun'])->name('sample.analysisRerun');
+// 获取样本筛选列表
+Route::get('sample/get-sample-options', [SampleController::class, 'getSampleOptions'])->name('sample.getSampleOptions');
 // 直接回调打印phpinfo
 Route::get('phpinfo',function(){
     phpinfo();

@@ -118,4 +118,22 @@ class SampleController extends Controller
             'message' => '分析重运行成功！'
         ]);
     }
+
+    /**
+     * 获取样本分析选项
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getSampleOptions(Request $request)
+    {
+        $search = $request->input('search', '');
+        // 运行分析
+        $data = $this->sampleService->getSampleOptions($search);
+        return response()->json([
+            'code' => 0,
+            'message' => '获取样本分析选项成功！',
+            'data' => $data
+        ]);
+    }
 }
