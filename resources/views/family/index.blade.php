@@ -159,18 +159,18 @@
                                 return off_machine_time;
                             }
                         },
-                        {
-                            field: 'off_machine_data',
-                            width: 100,
-                            title: '下机数据量',
-                            templet: function(d) {
-                                var off_machine_data = '';
-                                layui.each(d.samples, function(index, sample) {
-                                    off_machine_data += '<div>' + sample.off_machine_data + '</div>';
-                                });
-                                return off_machine_data;
-                            }
-                        },
+                        // {
+                        //     field: 'off_machine_data',
+                        //     width: 100,
+                        //     title: '下机数据量',
+                        //     templet: function(d) {
+                        //         var off_machine_data = '';
+                        //         layui.each(d.samples, function(index, sample) {
+                        //             off_machine_data += '<div>' + sample.off_machine_data + '</div>';
+                        //         });
+                        //         return off_machine_data;
+                        //     }
+                        // },
                         {
                             field: 'analysis_time',
                             title: '分析时间',

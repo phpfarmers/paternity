@@ -68,7 +68,7 @@
             <li>家系图</li>
             <li>匹配图</li>
             <li>SNP匹配表</li>
-            <li>总表</li>
+            <li>胎儿浓度图</li>
             <li>父本排查</li>
             <li>同一认定</li>
             <li>Y染色体排查</li>
@@ -131,7 +131,7 @@
                 </table>
                 <div id="page_4"></div>
             </div>
-            <!-- 总表 -->
+            <!-- 胎儿浓度图 -->
             <div class="layui-tab-item"></div>
             <!-- 父本排查 -->
             <div class="layui-tab-item">
@@ -256,13 +256,17 @@
                         switchTable(4);
                         console.log('切换到SNP匹配表');
                         break;
-                        // 其他选项卡...
+                    case 5:
+                        switchImage(5);
+                        console.log('胎儿浓度图');
+                        break;
                     case 7:
                         // 同一认定
                         console.log('切换到同一认定');
                         // 获取样本数据
                         initSampleA();
                         break;
+                        // 其他选项卡...
                     case 8:
                         switchTable(8);
                         console.log('切换到Y染色体排查');
@@ -484,6 +488,9 @@
                         getImgData(3);
                         // 谱系图
                         break;
+                    case 5:
+                        getImgData(5);
+                        break;
                         // 其他选项卡...
                     default:
                         break;
@@ -497,6 +504,10 @@
                             break;
                         case 3:
                             type = 'child';
+                            break;
+                        case 5:
+                            type = 'child_qc';
+                            break;
 
                         default:
                             break;
