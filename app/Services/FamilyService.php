@@ -563,7 +563,13 @@ class FamilyService extends BaseService
             case 'child':
                 $fileExt = '.child.png';
                 break;
-            // 总表
+            // 胎儿浓度图
+            case 'child_qc':
+                // 样本
+                $sample = Sample::where('sample_name', $fatherSample)->where('family_name', $family->name)->first();
+                $dataDir = config('data')['analysis_project'] . $sample->output_dir . '/' . $childSample;
+                $fileExt = '.base_qc.png';
+                break;
             default:
                 break;
         }
