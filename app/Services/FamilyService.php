@@ -1017,12 +1017,7 @@ class FamilyService extends BaseService
                 });
             });
 
-            // 分页处理
-            $paginatedData = $data->values();
-            foreach ($paginatedData as $kk => $item) {
-                $paginatedData[$kk] = $item;
-            }
-            $returnData = array_merge($returnData, $paginatedData->toArray());
+            $returnData = $data->values();
 
             return [
                 'count' => $returnData ? count($returnData) : 0,
