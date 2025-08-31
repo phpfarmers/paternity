@@ -1018,6 +1018,11 @@ class FamilyService extends BaseService
             });
 
             $returnData = $data->values();
+            foreach ($returnData as $kk => $item) {
+                if(!isset($item['Sample_A'])){
+                    unset($returnData[$kk]);
+                }
+            }
 
             return [
                 'count' => $returnData ? count($returnData) : 0,
