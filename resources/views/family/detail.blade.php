@@ -1036,11 +1036,11 @@
                 data: []
             });
             // 同一认定表格
-            function getUnityTable(father_sample_names) {
+            function getUnityTable(sampleAValue) {
                 let elem = '#unityTable';
                 let url = '{{ route("family.unityTable", $family->id) }}';
                 let where = {
-                    sampleAId: $('#sampleASelect').val(),
+                    sampleAId: sampleAValue,
                 };
                 console.log('getUnityTable');
                 console.log('where', where);
@@ -1074,7 +1074,8 @@
                         // 根据TSV文件的列数添加更多列
                     ]
                 ];
-
+                // 先清空表格内容，避免重复渲染问题
+                $(elem).next('.layui-table-view').remove();
                 // 直接初始化表格，无需等待DOM加载完成（因为layui.use已经确保DOM加载完成）
                 table.render({
                     elem: elem,
@@ -1090,7 +1091,15 @@
                     id: 'unityTable', // 修改为与elem对应的唯一ID
                     done: function(res, curr, count) {
                         layer.closeAll('loading');
+                        console.log('表格渲染完成:', res);
                     },
+                    error: function(xhr, textStatus, errorThrown) {
+                        layer.closeAll('loading');
+                        console.error('表格渲染错误:', xhr, textStatus, errorThrown);
+                        layer.msg('表格加载失败', {
+                            icon: 5
+                        });
+                    }
                 });
             }
         });
