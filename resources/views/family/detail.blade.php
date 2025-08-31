@@ -1038,36 +1038,31 @@
                 };
                 console.log('getUnityTable');
                 console.log('where',where);
-                return false;
+                
                 let cols = [
                     [{
-                            field: 'Pairs',
-                            title: '父本名称',
+                            field: 'Sample_A',
+                            title: '目标样本',
                             sort: false
                         },
                         {
-                            field: 'Site',
-                            title: '有效位点数',
+                            field: 'Sample_B',
+                            title: '比较样本',
                             sort: false
                         },
                         {
-                            field: 'A_N',
-                            title: '错配位点数',
+                            field: 'IdentityRatio',
+                            title: '一致性',
                             sort: false
                         },
                         {
-                            field: 'MismatchRate',
-                            title: '错配率',
+                            field: 'Total',
+                            title: '位点数',
                             sort: false
                         },
                         {
-                            field: 'cffDNA_Content',
-                            title: '胎儿浓度',
-                            sort: false
-                        },
-                        {
-                            field: 'CPI',
-                            title: '父权值',
+                            field: 'Conclusion',
+                            title: '结论',
                             sort: false
                         }
                         // 根据TSV文件的列数添加更多列

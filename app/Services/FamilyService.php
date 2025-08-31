@@ -965,7 +965,7 @@ class FamilyService extends BaseService
 
         $commandPl = config('data')['family_synonym_run_command_pl']; // 运行perl脚本
         // 生成地址
-        $generateDir = $sampleAName.'_unity_out';
+        $generateDir = $sampleAName.'_unity_out.tsv';
 
         $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -b {$sampleAName} -f {$sampleBNames} -o {$generateDir} 2>log";
         Log::info('同一认定-command:' . $command);
@@ -992,10 +992,44 @@ class FamilyService extends BaseService
      */
     public function unityTable($request)
     {
-        $fatherSamples = Sample::where('sample_name', $request->sampleAId)->first();
+        try {
+            $fatherSample = Sample::where('sample_name', $request->sampleAId)->first();
+            $returnData = [];
+            // 组装路径
+            $dataDir = config('data')['analysis_project'] . $fatherSample->sample_name;
+            // 文件后缀
+            $fileExt = '_unity_out.tsv';
+            $tsvFilePath = $dataDir . $fileExt;
 
-        if ($fatherSamples->isEmpty()) {
-            throw new \Exception('无相近的父本');
+            if (!file_exists($tsvFilePath)) {
+                throw new ApiException(1, 'TSV file not found');
+            }
+            // 本地测试文件
+            // $tsvFilePath = storage_path('a.tsv');
+
+            $search = [];
+
+            // 将数组转换为集合
+            $data = collect($this->parseTsvFile($tsvFilePath))->when($search, function ($collection) use ($search) {
+                return $collection->filter(function ($item) use ($search) {
+                    // 根据搜索条件过滤数据
+                    // return Str::contains($item['title'], $search); // 搜索title字段
+                });
+            });
+
+            // 分页处理
+            $paginatedData = $data->values();
+            foreach ($paginatedData as $kk => $item) {
+                $paginatedData[$kk] = $item;
+            }
+            $returnData = array_merge($returnData, $paginatedData->toArray());
+
+            return [
+                'count' => $returnData ? count($returnData) : 0,
+                'data' => $returnData
+            ];
+        } catch (\Exception $e) {
+            throw new ApiException(1, $e->getMessage());
         }
     }
 }
