@@ -993,6 +993,10 @@ class FamilyService extends BaseService
     public function unityTable($request)
     {
         try {
+            $page = $request->input('page', 1);
+            $limit = $request->input('limit', 10);
+            $offset = ($page - 1) * $limit;
+
             $fatherSample = Sample::where('id', $request->sampleAId)->first();
             $returnData = [];
             // 组装路径
@@ -1017,15 +1021,12 @@ class FamilyService extends BaseService
                 });
             });
 
-            $returnData = $data->values();
-            foreach ($returnData as $kk => $item) {
-                if(!isset($item['Sample_A'])){
-                    unset($returnData[$kk]);
-                }
-            }
+            $returnData = $data->slice($offset, $limit)->values();
+            // 确保 $data 是集合或数组
+            $count = is_array($data) || $data instanceof \Countable ? $data->count() : 0;
 
             return [
-                'count' => $returnData ? count($returnData) : 0,
+                'count' => $count,
                 'data' => $returnData
             ];
         } catch (\Exception $e) {
