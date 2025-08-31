@@ -1038,7 +1038,7 @@
                 };
                 console.log('getUnityTable');
                 console.log('where',where);
-                
+
                 let cols = [
                     [{
                             field: 'Sample_A',
@@ -1087,7 +1087,7 @@
                                 limits: [30, 60, 90],
                                 where: where,
                                 cols: cols,
-                                id: 'fatherTable',
+                                id: 'unityTable',
                                 done: function(res, curr, count) {
                                     layer.closeAll('loading');
                                 },
@@ -1117,7 +1117,7 @@
                             limits: [30, 60, 90],
                             where: where,
                             cols: cols,
-                            id: 'fatherTable',
+                            id: 'unityTable',
                             done: function(res, curr, count) {
                                 layer.closeAll('loading');
                             },
