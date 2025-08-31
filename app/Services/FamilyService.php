@@ -993,7 +993,7 @@ class FamilyService extends BaseService
     public function unityTable($request)
     {
         try {
-            $fatherSample = Sample::where('sample_name', $request->sampleAId)->first();
+            $fatherSample = Sample::where('id', $request->sampleAId)->first();
             $returnData = [];
             // 组装路径
             $dataDir = config('data')['analysis_project'] . $fatherSample->sample_name;
