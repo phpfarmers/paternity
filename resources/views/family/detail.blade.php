@@ -1076,31 +1076,51 @@
                 ];
                 // 先清空表格内容，避免重复渲染问题
                 $(elem).next('.layui-table-view').remove();
-                // 直接初始化表格，无需等待DOM加载完成（因为layui.use已经确保DOM加载完成）
+                // 使用静态数据测试
                 table.render({
                     elem: elem,
-                    url: url,
                     page: true,
-                    beforeSend: function(xhr) {
-                        layer.load(2);
-                    },
                     limit: 30,
                     limits: [30, 60, 90],
-                    where: where,
                     cols: cols,
-                    id: 'unityTable', // 修改为与elem对应的唯一ID
+                    data: [{
+                        "Sample_A": "测试样本A",
+                        "Sample_B": "测试样本B",
+                        "IdentityRatio": "99.9%",
+                        "Total": "100",
+                        "Conclusion": "同一人"
+                    }],
+                    id: 'unityTable',
                     done: function(res, curr, count) {
                         layer.closeAll('loading');
-                        console.log('表格渲染完成:', res);
-                    },
-                    error: function(xhr, textStatus, errorThrown) {
-                        layer.closeAll('loading');
-                        console.error('表格渲染错误:', xhr, textStatus, errorThrown);
-                        layer.msg('表格加载失败', {
-                            icon: 5
-                        });
                     }
                 });
+                // 直接初始化表格，无需等待DOM加载完成（因为layui.use已经确保DOM加载完成）
+
+                // table.render({
+                //     elem: elem,
+                //     url: url,
+                //     page: true,
+                //     beforeSend: function(xhr) {
+                //         layer.load(2);
+                //     },
+                //     limit: 30,
+                //     limits: [30, 60, 90],
+                //     where: where,
+                //     cols: cols,
+                //     id: 'unityTable', // 修改为与elem对应的唯一ID
+                //     done: function(res, curr, count) {
+                //         layer.closeAll('loading');
+                //         console.log('表格渲染完成:', res);
+                //     },
+                //     error: function(xhr, textStatus, errorThrown) {
+                //         layer.closeAll('loading');
+                //         console.error('表格渲染错误:', xhr, textStatus, errorThrown);
+                //         layer.msg('表格加载失败', {
+                //             icon: 5
+                //         });
+                //     }
+                // });
             }
         });
     </script>
