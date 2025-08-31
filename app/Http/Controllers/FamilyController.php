@@ -323,8 +323,8 @@ class FamilyController extends Controller
         $data = $this->familyService->unityTable($request);
         return response()->json([
             'code' => 0,
-            'msg' => '',
-            'data' => $data
+            'msg' => $data['count'] ?? 0,
+            'data' => $data['data'] ?? []
         ]);
     }
 }
