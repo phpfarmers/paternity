@@ -923,4 +923,77 @@ class FamilyService extends BaseService
             throw new ApiException(1, $e->getMessage());
         }
     }
+    /**
+     * 同一认定
+     *
+     * @param Request $request
+     * @return bool
+     */
+    public function unityRun($request)
+    {
+        $sampleAId = $request->input('sampleAId', 0);
+        throw_if($sampleAId < 1 , new ApiException(1, '请选目标样本'));
+        $sampleIdStr = $request->input('sampleIds', '');
+        $sampleIds = array_unique(explode(',', $sampleIdStr));
+        throw_if(empty($sampleIds), new ApiException(1, '请选至少1个样本'));
+
+        // 将sampleAId加入到sampleIds中 
+        if (!in_array($sampleAId, $sampleIds)) {
+            $sampleIds[] = $sampleAId;
+        }
+
+        $samples = Sample::whereIn('id', $sampleIds)
+            ->where('sample_type', Sample::SAMPLE_TYPE_FATHER)
+            ->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)
+            ->pluck('sample_name', 'id');
+
+        if ($samples->isEmpty()) {
+            throw new \Exception('未找到匹配父本数据');
+        }
+        // sampleAId名称,单个样本名称
+        $sampleAName = $samples->get($sampleAId);
+        // 获取所有样本名称，除去sampleAId名称
+        $sampleIds = array_values(array_diff($sampleIds, array($sampleAId)));
+        $sampleBNames = $samples->filter(function ($key, $item) use ($sampleAId) {
+            return $key != $sampleAId;
+        });
+        // 用都好分隔sampleBNames
+        $sampleBNames = implode(',', $sampleBNames->all());
+        
+        $secondAnalysisProject = config('data')['analysis_project']; // 一级分析目录
+        $secondAnalysisProjectDir = escapeshellarg($secondAnalysisProject); //转义后的二级分析目录
+
+        $commandPl = config('data')['family_synonym_run_command_pl']; // 运行perl脚本
+
+        $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -b {$sampleAName} -f {$sampleBNames} -o out 2>log";
+        Log::info('同一认定-command:' . $command);
+        // 执行shell命令
+        putenv(config('data')['perl_path']);
+        putenv(config('data')['perl_perl5ltb']);
+        exec($command, $output, $returnVar);
+
+        if ($returnVar === 0) {
+            // 符合条件-更新检测结果状态为成功
+            Log::info('search-success');
+            return true;
+        } else {
+            Log::info('search-fail');
+            return false;
+        }
+    }
+    
+    /**
+     * 同一认定表格
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\JsonResponse|array
+     */
+    public function unityTable($request)
+    {
+        $fatherSamples = Sample::where('sample_name', $request->sampleAId)->first();
+
+        if ($fatherSamples->isEmpty()) {
+            throw new \Exception('无相近的父本');
+        }
+    }
 }

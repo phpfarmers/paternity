@@ -45,6 +45,10 @@ Route::get('/family/downloadTable', [FamilyController::class, 'downloadTable'])-
 Route::get('/family/{id}/father-search', [FamilyController::class, 'fatherSearch'])->name('family.fatherSearch');
 // 父本排查表格
 Route::get('/family/father-search-table', [FamilyController::class, 'fatherSearchTable'])->name('family.fatherSearchTable');
+// 同一认定
+Route::post('/family/{id}/unity-run', [FamilyController::class, 'unityRun'])->name('family.unityRun');
+// 同一认定表格
+Route::get('/family/{id}/unity-table', [FamilyController::class, 'unityTable'])->name('family.unityTable');
 
 // 样本
 Route::post('sample/import', [SampleController::class, 'import'])->name('sample.import');

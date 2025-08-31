@@ -161,7 +161,7 @@
             <!-- 同一认定 -->
             <div class="layui-tab-item">
                 <div class="layui-form">
-                    <form id="tyzdForm" class="layui-form">
+                    <form id="unityForm" class="layui-form">
                         <div class="layui-form-item" style="display: inline-block; width: 26%; vertical-align: top;">
                             <label class="layui-form-label">目标样本</label>
                             <div class="layui-input-block" style="width: 200px;">
@@ -181,11 +181,20 @@
                         <!-- 提交按钮 -->
                         <div class="layui-form-item" style="display: inline-block; vertical-align: top; ">
                             <div class="layui-input-block">
-                                <button class="layui-btn" id="tyzdBtn" lay-submit lay-filter="tyzdBtn">比较</button>
+                                <button class="layui-btn" id="unityBtn" lay-filter="unityBtn">比较</button>
                             </div>
                         </div>
                     </form>
                 </div>
+                <table id="unityTable" lay-filter="unityTable">
+                    <thead>
+                        <tr>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 数据会通过表格组件自动填充 -->
+                    </tbody>
+                </table>
             </div>
             <!-- Y染色体排查 -->
             <div class="layui-tab-item">
@@ -754,6 +763,7 @@
                 });
             });
 
+            // 获取父本排查表格
             function getFatherSearchTable(father_sample_names) {
                 let elem = '#fatherTable';
                 let url = '{{ route("family.fatherSearchTable") }}';
@@ -857,17 +867,80 @@
             // 在 layui.use 的回调函数中添加以下代码
             
             // 表单提交时获取选中值
-            form.on('submit(tyzdBtn)', function(data) {
-                // 获取选中的值 (数组)
+            $('#unityBtn').on('click', function(data) {
+                // 获取 xmSelect 的值 (比较样本)
                 var selectedValues = sampleBSelect.getValue('valueStr');
-                console.log('选中的值:', selectedValues);
+                console.log('选中的比较样本值:', selectedValues);
+                
                 // 获取目标样本的值
                 var sampleAValue = $('#sampleASelect').val();
                 console.log('目标样本的值:', sampleAValue);
 
-                // 其他表单验证和提交逻辑...
+                // 表单验证
+                if(!sampleAValue) {
+                    layer.msg('请选择目标样本', {
+                        icon: 5
+                    });
+                    return false; // 阻止表单提交
+                }
+                if(!selectedValues) {
+                    layer.msg('请选择待比较样本', {
+                        icon: 5
+                    });
+                    return false; // 阻止表单提交
+                }
+
+                // 没有问题,提交数据
+                $.ajax({
+                    url: '{{ route("family.unityRun", $family->id) }}',
+                    type: 'post',  // 改为 POST 请求，与后端一致
+                    data: {
+                        sampleAId: sampleAValue,
+                        sampleIds: selectedValues,
+                        _token: $('meta[name="csrf-token"]').attr('content')  // 添加 CSRF 令牌
+                    },
+                    beforeSend: function(xhr) {
+                        layer.load(2);
+                    },
+                    dataType: 'json',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(res) {
+                        console.log(res);
+                        layer.closeAll('loading');
+                        if(res.code == 0) {
+                            console.log(res.data);
+                            // 成功后，加载表格
+                            getUnityTable(sampleAValue);
+                            layer.msg('操作成功', {icon: 1});
+                        } else {
+                            layer.msg(res.msg, {
+                                icon: 5
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        layer.closeAll('loading');
+                        console.log('xhr:', xhr);
+                        if (xhr.status === 422) {
+                            // 处理验证错误
+                            var errors = xhr.responseJSON.errors;
+                            var errorMsg = '';
+                            $.each(errors, function(key, value) {
+                                errorMsg += value[0] + '\n';
+                            });
+                            layer.msg(errorMsg, {icon: 5});
+                        } else {
+                            layer.msg('请求失败', {
+                                icon: 5
+                            });
+                        }
+                    }
+                });
                 return false;
             });
+
             // ----------------sampleA----------------
             // 目标样本单选初始化
             function initSampleA() {
@@ -956,6 +1029,107 @@
                 },
                 data: []
             });
+            // 同一认定表格
+            function getUnityTable(father_sample_names) {
+                let elem = '#unityTable';
+                let url = '{{ route("family.unityTable") }}';
+                let where = {
+                    sampleAId: sampleAValue,
+                };
+                console.log('getUnityTable');
+                console.log('where',where);
+                return false;
+                let cols = [
+                    [{
+                            field: 'Pairs',
+                            title: '父本名称',
+                            sort: false
+                        },
+                        {
+                            field: 'Site',
+                            title: '有效位点数',
+                            sort: false
+                        },
+                        {
+                            field: 'A_N',
+                            title: '错配位点数',
+                            sort: false
+                        },
+                        {
+                            field: 'MismatchRate',
+                            title: '错配率',
+                            sort: false
+                        },
+                        {
+                            field: 'cffDNA_Content',
+                            title: '胎儿浓度',
+                            sort: false
+                        },
+                        {
+                            field: 'CPI',
+                            title: '父权值',
+                            sort: false
+                        }
+                        // 根据TSV文件的列数添加更多列
+                    ]
+                ];
+
+                // 等待DOM加载完成
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // 确保目标元素存在
+                        if (document.querySelector(elem)) {
+                            // 初始化表格
+                            table.render({
+                                elem: elem,
+                                url: url,
+                                page: true,
+                                beforeSend: function(xhr) {
+                                    alert('beforeSend');
+                                    layer.load(2);
+                                },
+                                limit: 30,
+                                limits: [30, 60, 90],
+                                where: where,
+                                cols: cols,
+                                id: 'fatherTable',
+                                done: function(res, curr, count) {
+                                    layer.closeAll('loading');
+                                },
+                            });
+                        }
+                    });
+                } else {
+                    console.log('document.querySelector(elem)', document.querySelector(elem));
+                    // 如果DOM已加载则直接执行
+                    console.log('查找元素:', elem);
+                    const targetElement = document.querySelector(elem);
+                    if (!targetElement) {
+                        console.error(`未找到元素: ${elem}`);
+                        console.log('当前DOM结构:', document.body.innerHTML);
+                    } else {
+                        console.log('找到元素:', targetElement);
+                        // 初始化表格
+                        table.render({
+                            elem: elem,
+                            url: url,
+                            page: true,
+                            beforeSend: function(xhr) {
+                                alert('beforeSend');
+                                layer.load(2);
+                            },
+                            limit: 30,
+                            limits: [30, 60, 90],
+                            where: where,
+                            cols: cols,
+                            id: 'fatherTable',
+                            done: function(res, curr, count) {
+                                layer.closeAll('loading');
+                            },
+                        });
+                    }
+                }
+            }
         });
     </script>
     @endsection

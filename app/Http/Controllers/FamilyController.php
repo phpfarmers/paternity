@@ -280,4 +280,51 @@ class FamilyController extends Controller
             ]);
         }
     }
+    /**
+     * 同一认定
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function unityRun(Request $request, $id)
+    {
+        $request->validate([
+            'sampleAId' => 'required|integer',
+            'sampleIds' => 'required|string',
+        ]);
+        
+        try {
+            $data = $this->familyService->unityRun($request);
+        } catch (\Exception $e) {
+            return response()->json([
+                'code' => 1,
+                'msg' => $e->getMessage()
+            ]);
+        }
+       
+        return response()->json([
+            'code' => 0,
+            'msg' => '',
+            'data' => $data
+        ]);
+    }
+
+    /**
+     * 同一认定表格
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function unityTable(Request $request, $id)
+    {
+        $request->validate([
+            'sampleAId' => 'required|integer',
+        ]);
+        $data = $this->familyService->unityTable($request);
+        return response()->json([
+            'code' => 0,
+            'msg' => '',
+            'data' => $data
+        ]);
+    }
 }

@@ -7,6 +7,7 @@ return [
     'second_analysis_project' => '/akdata/second_run_dir/', // 二级分析项目目录
     'sample_analysis_run_command_pl' => '/akdata/script/paternity-test/run_qinzi.pl', // 样本分析命令文件
     'family_analysis_run_command_pl' => '/akdata/script/paternity-test/bin/parse_perbase.pl', // 家系分析命令文件
+    'family_synonym_run_command_pl' => '/akdata/script/paternity-test/bin/synonym.pl', // 同一认定
     'family_analysis_run_command_call_r' => '/akdata/script/paternity-test/bin/cal.r', // 家系分析命令文件
     'family_analysis_run_command_default_r' => 4,
     'family_analysis_run_command_default_s' => 0.008,
