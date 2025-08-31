@@ -1032,7 +1032,7 @@
             // 同一认定表格
             function getUnityTable(father_sample_names) {
                 let elem = '#unityTable';
-                let url = '{{ route("family.unityTable") }}';
+                let url = '{{ route("family.unityTable", $family->id) }}';
                 let where = {
                     sampleAId: sampleAValue,
                 };
