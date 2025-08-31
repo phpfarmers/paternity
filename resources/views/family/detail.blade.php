@@ -1034,7 +1034,7 @@
                 let elem = '#unityTable';
                 let url = '{{ route("family.unityTable", $family->id) }}';
                 let where = {
-                    sampleAId: sampleAValue,
+                    sampleAId: $('#sampleASelect').val(),
                 };
                 console.log('getUnityTable');
                 console.log('where',where);

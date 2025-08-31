@@ -964,8 +964,10 @@ class FamilyService extends BaseService
         $secondAnalysisProjectDir = escapeshellarg($secondAnalysisProject); //转义后的二级分析目录
 
         $commandPl = config('data')['family_synonym_run_command_pl']; // 运行perl脚本
+        // 生成地址
+        $generateDir = $sampleAName.'_unity_out';
 
-        $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -b {$sampleAName} -f {$sampleBNames} -o out 2>log";
+        $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -b {$sampleAName} -f {$sampleBNames} -o {$generateDir} 2>log";
         Log::info('同一认定-command:' . $command);
         // 执行shell命令
         putenv(config('data')['perl_path']);
