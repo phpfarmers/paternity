@@ -350,7 +350,7 @@
                             mother_sample: mother_sample,
                             slider_r: slider_r,
                             slider_s: slider_s,
-                            sample_name:sampleName
+                            sample_name: sampleName
                         };
                         cols = [
                             [{
@@ -865,25 +865,25 @@
             }
             // 同一认定
             // 在 layui.use 的回调函数中添加以下代码
-            
+
             // 表单提交时获取选中值
             $('#unityBtn').on('click', function(data) {
                 // 获取 xmSelect 的值 (比较样本)
                 var selectedValues = sampleBSelect.getValue('valueStr');
                 console.log('选中的比较样本值:', selectedValues);
-                
+
                 // 获取目标样本的值
                 var sampleAValue = $('#sampleASelect').val();
                 console.log('目标样本的值:', sampleAValue);
 
                 // 表单验证
-                if(!sampleAValue) {
+                if (!sampleAValue) {
                     layer.msg('请选择目标样本', {
                         icon: 5
                     });
                     return false; // 阻止表单提交
                 }
-                if(!selectedValues) {
+                if (!selectedValues) {
                     layer.msg('请选择待比较样本', {
                         icon: 5
                     });
@@ -893,11 +893,11 @@
                 // 没有问题,提交数据
                 $.ajax({
                     url: '{{ route("family.unityRun", $family->id) }}',
-                    type: 'post',  // 改为 POST 请求，与后端一致
+                    type: 'post', // 改为 POST 请求，与后端一致
                     data: {
                         sampleAId: sampleAValue,
                         sampleIds: selectedValues,
-                        _token: $('meta[name="csrf-token"]').attr('content')  // 添加 CSRF 令牌
+                        _token: $('meta[name="csrf-token"]').attr('content') // 添加 CSRF 令牌
                     },
                     beforeSend: function(xhr) {
                         layer.load(2);
@@ -909,11 +909,13 @@
                     success: function(res) {
                         console.log(res);
                         layer.closeAll('loading');
-                        if(res.code == 0) {
+                        if (res.code == 0) {
                             console.log(res.data);
                             // 成功后，加载表格
                             getUnityTable(sampleAValue);
-                            layer.msg('操作成功', {icon: 1});
+                            layer.msg('操作成功', {
+                                icon: 1
+                            });
                         } else {
                             layer.msg(res.msg, {
                                 icon: 5
@@ -930,7 +932,9 @@
                             $.each(errors, function(key, value) {
                                 errorMsg += value[0] + '\n';
                             });
-                            layer.msg(errorMsg, {icon: 5});
+                            layer.msg(errorMsg, {
+                                icon: 5
+                            });
                         } else {
                             layer.msg('请求失败', {
                                 icon: 5
@@ -963,22 +967,22 @@
                         search: keyword
                     },
                     beforeSend: function() {
-                        if(!keyword) {
+                        if (!keyword) {
                             layer.load(2); // 仅首次加载显示loading
                         }
                     },
                     success: function(res) {
                         layer.closeAll('loading');
-                        if(res.code === 0) {
+                        if (res.code === 0) {
                             var html = '<option value="">请选择目标样本</option>';
                             res.data.forEach(function(item) {
                                 html += `<option value="${item.id}">${item.text}</option>`;
                             });
                             $('#sampleASelect').html(html);
                             form.render('select'); // 重新渲染select
-                            
+
                             // 如果是搜索状态,保持下拉框展开
-                            if(keyword) {
+                            if (keyword) {
                                 $('#sampleASelect').next().addClass('layui-form-selected');
                             }
                         } else {
@@ -995,20 +999,22 @@
             // ----------------sampleB----------------
             // 比较样本多选初始化
             var sampleBSelect = xmSelect.render({
-                el: '.xm-select-demo', 
+                el: '.xm-select-demo',
                 filterable: true,
                 remoteSearch: true,
-                remoteMethod: function(val, cb, show){
+                remoteMethod: function(val, cb, show) {
                     // 远程搜索方法
                     $.ajax({
                         url: '{{ route("sample.getSampleOptions") }}',
                         type: 'get',
-                        data: {search: val},
+                        data: {
+                            search: val
+                        },
                         beforeSend: function() {
                             // 这里不需要loading，xm-select有自己的加载效果
                         },
-                        success: function(res){
-                            if(res.code === 0) {
+                        success: function(res) {
+                            if (res.code === 0) {
                                 cb(res.data.map(item => ({
                                     name: item.text,
                                     value: item.id
@@ -1037,7 +1043,7 @@
                     sampleAId: $('#sampleASelect').val(),
                 };
                 console.log('getUnityTable');
-                console.log('where',where);
+                console.log('where', where);
 
                 let cols = [
                     [{
@@ -1069,61 +1075,23 @@
                     ]
                 ];
 
-                // 等待DOM加载完成
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', function() {
-                        // 确保目标元素存在
-                        if (document.querySelector(elem)) {
-                            // 初始化表格
-                            table.render({
-                                elem: elem,
-                                url: url,
-                                page: true,
-                                beforeSend: function(xhr) {
-                                    alert('beforeSend');
-                                    layer.load(2);
-                                },
-                                limit: 30,
-                                limits: [30, 60, 90],
-                                where: where,
-                                cols: cols,
-                                id: 'unityTable',
-                                done: function(res, curr, count) {
-                                    layer.closeAll('loading');
-                                },
-                            });
-                        }
-                    });
-                } else {
-                    console.log('document.querySelector(elem)', document.querySelector(elem));
-                    // 如果DOM已加载则直接执行
-                    console.log('查找元素:', elem);
-                    const targetElement = document.querySelector(elem);
-                    if (!targetElement) {
-                        console.error(`未找到元素: ${elem}`);
-                        console.log('当前DOM结构:', document.body.innerHTML);
-                    } else {
-                        console.log('找到元素:', targetElement);
-                        // 初始化表格
-                        table.render({
-                            elem: elem,
-                            url: url,
-                            page: true,
-                            beforeSend: function(xhr) {
-                                alert('beforeSend');
-                                layer.load(2);
-                            },
-                            limit: 30,
-                            limits: [30, 60, 90],
-                            where: where,
-                            cols: cols,
-                            id: 'unityTable',
-                            done: function(res, curr, count) {
-                                layer.closeAll('loading');
-                            },
-                        });
-                    }
-                }
+                // 直接初始化表格，无需等待DOM加载完成（因为layui.use已经确保DOM加载完成）
+                table.render({
+                    elem: elem,
+                    url: url,
+                    page: true,
+                    beforeSend: function(xhr) {
+                        layer.load(2);
+                    },
+                    limit: 30,
+                    limits: [30, 60, 90],
+                    where: where,
+                    cols: cols,
+                    id: 'unityTable', // 修改为与elem对应的唯一ID
+                    done: function(res, curr, count) {
+                        layer.closeAll('loading');
+                    },
+                });
             }
         });
     </script>
@@ -1135,28 +1103,35 @@
             min-height: 36px;
             line-height: 36px;
         }
+
         .xm-select {
             border-radius: 2px !important;
             border-color: #e6e6e6 !important;
         }
+
         .xm-select-label {
             background-color: #5FB878 !important;
             color: #fff !important;
         }
+
         .layui-form-select dl dd.layui-this {
             background-color: #5FB878;
         }
+
         .layui-form-select dl dd:hover {
             background-color: #f2f2f2;
         }
+
         .layui-form-select dl dd.layui-select-tips {
             padding-left: 10px;
             color: #999;
         }
+
         /* 下拉框最大高度 */
         .layui-form-select dl {
             max-height: 300px;
         }
+
         /* 搜索框样式 */
         .layui-form-select .layui-input {
             padding-right: 30px;
