@@ -33,9 +33,9 @@ class SampleAnalysisRunJob implements ShouldQueue
     {
         // 实现分析逻辑
         // 例如：调用 shell 脚本或 PHP 函数处理下载
-        Log::info("开始样本分析：{$this->id}-".date('Y-m-d H:i:s'));
+        // Log::info("开始样本分析：{$this->id}-".date('Y-m-d H:i:s'));
         $this->runAnalysis($this->id);
-        Log::info("样本分析结束：{$this->id}-".date('Y-m-d H:i:s'));
+        // Log::info("样本分析结束：{$this->id}-".date('Y-m-d H:i:s'));
     }
 
     protected function runAnalysis($id): void
@@ -46,7 +46,7 @@ class SampleAnalysisRunJob implements ShouldQueue
         $samples = $samples->where('id', $id)->where('analysis_result', '!=', Sample::ANALYSIS_RESULT_SUCCESS);
         $samples = $samples->orderBy('analysis_times', 'asc')->orderBy('id', 'asc')->limit(1)->get();
         if ($samples->isEmpty()) {
-            Log::info('没有要分析的样本');
+            // Log::info('没有要分析的样本');
             return;
         }
         // 如果正在分析中的样本数量大50，停止1分钟，再从start位置开始执行
@@ -58,10 +58,10 @@ class SampleAnalysisRunJob implements ShouldQueue
         }
         try {
             foreach ($samples as $sample) {
-                Log::info('样本分析开始：'.$sample->id).'-'.date('Y-m-d H:i:s');
+                // Log::info('样本分析开始：'.$sample->id).'-'.date('Y-m-d H:i:s');
                 // 次数大于3000，标记为失败
                 if ($sample->analysis_times > 3000) {
-                    Log::info('样本分析次数大于3000，标记为失败');
+                    // Log::info('样本分析次数大于3000，标记为失败');
                     $sample->analysis_result = Sample::ANALYSIS_RESULT_FAIL;
                     $sample->save();
                     continue;
@@ -85,28 +85,28 @@ class SampleAnalysisRunJob implements ShouldQueue
                 $commandPl = escapeshellarg(config('data')['sample_analysis_run_command_pl']);
                 $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url}{$u} -o {$outputFullDir} 2>&1";
                 // $command = $commandPl." -s {$sampleName} -r1 {$r1Url} -r2 {$r2Url} -u {$analysisProcess} 2>&1";
-                Log::info('开始执行命令：'.$command);
+                // Log::info('开始执行命令：'.$command);
                 // 执行shell命令
                 
                 putenv(config('data')['perl_path']);
                 putenv(config('data')['perl_perl5ltb']);
                 exec($command, $output, $returnVar);
-                Log::info('命令执行完成，返回码：'.$returnVar);
+                // Log::info('命令执行完成，返回码：'.$returnVar);
 
                 if ($returnVar === 0) {
-                    Log::info("找到以下文件:");
+                    // Log::info("找到以下文件:");
                     $sample->analysis_time = date('Y-m-d H:i:s');
                     $sample->analysis_result = Sample::ANALYSIS_RESULT_SUCCESS;
                     $sample->save();
                 } else {
-                    Log::error("未找到文件或命令执行失败");
-                    Log::error('命令输出：'.print_r($output, true));
-                    Log::error('返回码：'.$returnVar);
+                    // Log::error("未找到文件或命令执行失败");
+                    // Log::error('命令输出：'.print_r($output, true));
+                    // Log::error('返回码：'.$returnVar);
                     // 不符合条件-更新检测结果状态为失败
                     $sample->analysis_result = Sample::CHECK_RESULT_FAIL;
                     $sample->save();
                 }
-                Log::info('样本分析完成-'.date('Y-m-d H:i:s'));
+                // Log::info('样本分析完成-'.date('Y-m-d H:i:s'));
             }
         } catch (\Exception $e) {
             Log::error('样本分析出错：'.$e->getMessage());

@@ -727,7 +727,7 @@ class FamilyService extends BaseService
         $commandPl = config('data')['family_analysis_run_command_pl'];
 
         $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -r {$r} -s {$s} -b {$childPath}{$motherPath} -f {$fatherPath} 2>log";
-        Log::info('search-command:' . $command);
+        // Log::info('search-command:' . $command);
         // 执行shell命令
         putenv(config('data')['perl_path']);
         putenv(config('data')['perl_perl5ltb']);
@@ -741,10 +741,10 @@ class FamilyService extends BaseService
                 $family->save();
             }
             // 符合条件-更新检测结果状态为成功
-            Log::info('search-success');
+            // Log::info('search-success');
             return true;
         } else {
-            Log::info('search-fail');
+            // Log::info('search-fail');
             return false;
         }
     }
@@ -821,14 +821,14 @@ class FamilyService extends BaseService
             $batch = Bus::batch($jobs)
             ->then(function (Batch $batch) {
                 // 所有任务完成后的处理
-                Log::info('bus::batch-所有任务完成id:' . $batch->id, (array)$batch);
+                // Log::info('bus::batch-所有任务完成id:' . $batch->id, (array)$batch);
             })
             ->catch(function (Batch $batch, Exception $e) {
-                Log::info('bus::batch-任务失败id:' . $batch->id.';'.$e->getMessage(), (array)$batch);
+                // Log::info('bus::batch-任务失败id:' . $batch->id.';'.$e->getMessage(), (array)$batch);
                 // 批次中第一个任务失败时执行
             })->finally(function (Batch $batch) {
                 // 无论成功或失败都会执行
-                Log::info('bus::batch-finally:' , (array)$batch);
+                // Log::info('bus::batch-finally:' , (array)$batch);
             })
             ->onConnection('redis')  // 明确指定使用redis连接
             ->onQueue('father_filter')       // 可选，指定队列优先级
@@ -843,13 +843,13 @@ class FamilyService extends BaseService
             $batch = Bus::findBatch($batchId);
             if ($batch) {
                 $progress = $batch->progress();
-                Log::info('bus::batch-progress:' . $progress);
+                // Log::info('bus::batch-progress:' . $progress);
                 // 未完成时循环
                 if ($progress < 100 && (time() - $startTime) < 60) {
                     goto progress;
                 }
             } else {
-                Log::info('bus::batch-not-found:' . $batchId);
+                // Log::info('bus::batch-not-found:' . $batchId);
             }
         }
         return [
@@ -968,7 +968,7 @@ class FamilyService extends BaseService
         $generateDir = $sampleAName.'_unity_out.tsv';
 
         $command = "cd {$secondAnalysisProjectDir} && " . $commandPl . " -b {$sampleAName} -f {$sampleBNames} -o {$generateDir} 2>log";
-        Log::info('同一认定-command:' . $command);
+        // Log::info('同一认定-command:' . $command);
         // 执行shell命令
         putenv(config('data')['perl_path']);
         putenv(config('data')['perl_perl5ltb']);
@@ -976,10 +976,10 @@ class FamilyService extends BaseService
 
         if ($returnVar === 0) {
             // 符合条件-更新检测结果状态为成功
-            Log::info('search-success');
+            // Log::info('search-success');
             return true;
         } else {
-            Log::info('search-fail');
+            // Log::info('search-fail');
             return false;
         }
     }

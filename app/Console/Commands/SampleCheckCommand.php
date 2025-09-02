@@ -139,19 +139,19 @@ class SampleCheckCommand extends Command
             $files = array_filter(explode("\n", trim($process->getOutput())));
             foreach ($files as $file) {
                 $fileName = basename($file);
-                Log::info($sampleName . ":" . $file);
+                // Log::info($sampleName . ":" . $file);
                 // Log::info($sample->sample_name . ":" . $fileName);
                 // r1文件路径
                 if ((strpos($fileName, '1.fq.gz') !== false || strpos($fileName, '1.fastq.gz') !== false) && empty($r1Url)) {
                     $r1Url = $file;
                     $this->info('r1Url:' . $r1Url);
-                    Log::info($sampleName . ":" . 'r1Url:' . $r1Url);
+                    // Log::info($sampleName . ":" . 'r1Url:' . $r1Url);
                 }
                 // r2文件路径
                 if ((strpos($fileName, '2.fq.gz') !== false || strpos($fileName, '2.fastq.gz') !== false) && empty($r2Url)) {
                     $r2Url = $file;
                     $this->info('r2Url:' . $r2Url);
-                    Log::info($sampleName . ":" . 'r2Url:' . $r2Url);
+                    // Log::info($sampleName . ":" . 'r2Url:' . $r2Url);
                 }
             }
             
@@ -165,12 +165,12 @@ class SampleCheckCommand extends Command
             }else{
                 // 未下机-变为未检测-继续检测
                 $this->info("文件数量不正确:r1url:{$r1Url}-r2url:{$r2Url}");
-                Log::info("文件数量不正确:r1url:{$r1Url}-r2url:{$r2Url}");
+                // Log::info("文件数量不正确:r1url:{$r1Url}-r2url:{$r2Url}");
                 $sample->check_result = Sample::CHECK_RESULT_UNKNOWN;
                 $sample->save();
             }
         } else {
-            Log::error("执行失败: " . $process->getErrorOutput());
+            // Log::error("执行失败: " . $process->getErrorOutput());
             // 不符合条件-更新检测结果状态为失败
             $sample->check_result = Sample::CHECK_RESULT_FAIL;
             $sample->save();

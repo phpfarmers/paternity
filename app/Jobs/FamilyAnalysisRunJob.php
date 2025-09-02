@@ -34,9 +34,9 @@ class FamilyAnalysisRunJob implements ShouldQueue
     {
         // 实现家系分析逻辑
         // 例如：调用 shell 脚本或 PHP 函数处理下载
-        Log::info("开始家系分析：{$this->id}-".date('Y-m-d H:i:s'));
+        // Log::info("开始家系分析：{$this->id}-".date('Y-m-d H:i:s'));
         $this->runAnalysis($this->id);
-        Log::info("家系分析结束：{$this->id}-".date('Y-m-d H:i:s'));
+        // Log::info("家系分析结束：{$this->id}-".date('Y-m-d H:i:s'));
     }
     
     protected function runAnalysis($id): void
@@ -49,7 +49,7 @@ class FamilyAnalysisRunJob implements ShouldQueue
             ->limit(1)->get();
 
         if ($families->isEmpty()) {
-            Log::info('没有要分析的家系');
+            // Log::info('没有要分析的家系');
             return;
         }
         // 获取样本信息
@@ -68,7 +68,7 @@ class FamilyAnalysisRunJob implements ShouldQueue
 
         try {
             foreach ($families as $family) {
-                Log::info('家系分析开始：' . $family->id . '-' . date('Y-m-d H:i:s'));
+                // Log::info('家系分析开始：' . $family->id . '-' . date('Y-m-d H:i:s'));
                 // 家系分析变为分析中
                 $family->report_result = Family::REPORT_RESULT_ANALYZING;
                 $family->report_times  += 1;
@@ -86,7 +86,7 @@ class FamilyAnalysisRunJob implements ShouldQueue
                 $canAnalysis = true;
                 foreach ($samplesGroupByFamilyId[$family->id] as $sample) {
                     if ($sample['analysis_result'] != Sample::ANALYSIS_RESULT_SUCCESS) {
-                        Log::info('家系分析家系：' . $family->name . '，样本：' . $sample['sample_name'] . '-未分析');
+                        // Log::info('家系分析家系：' . $family->name . '，样本：' . $sample['sample_name'] . '-未分析');
                         $canAnalysis = false;
                         break;
                     }
@@ -136,7 +136,7 @@ class FamilyAnalysisRunJob implements ShouldQueue
                 exec($command, $output, $returnVar);
 
                 if ($returnVar === 0) {
-                    Log::info("找到以下文件:");
+                    // Log::info("找到以下文件:");
                     
                     // 符合条件-更新检测结果状态为成功
                     $family->report_result = Family::REPORT_RESULT_SUCCESS;
@@ -145,12 +145,12 @@ class FamilyAnalysisRunJob implements ShouldQueue
                     $family->report_time = date('Y-m-d H:i:s');
                     $family->save();
                 } else {
-                    Log::info("未找到文件或命令执行失败");
+                    // Log::info("未找到文件或命令执行失败");
                     // 不符合条件-更新检测结果状态为失败
                     $family->report_result = family::REPORT_RESULT_FAIL;
                     $family->save();
                 }
-                Log::info('家系分析完成-' . date('Y-m-d H:i:s'));
+                // Log::info('家系分析完成-' . date('Y-m-d H:i:s'));
             }
             return;
         } catch (\Exception $e) {

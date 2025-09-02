@@ -207,12 +207,12 @@ class SampleService extends BaseService
         $searchPath = escapeshellarg($searchPath); // 搜索路径
         // 按修改时间倒序排序并获取文件路径
         $command = "find {$searchPath} -name {$searchPattern} -type f -printf '%T@ %p\n' | sort -nr | cut -d' ' -f2-";
-        Log::info('样本检测-执行命令：'.$command);
+        // Log::info('样本检测-执行命令：'.$command);
         // 执行shell命令
         exec($command, $output, $returnVar);
         
         if ($returnVar !== 0) {
-            Log::error('手动令执行失败：'.$command);
+            // Log::error('手动令执行失败：'.$command);
             return false;
         }
         $r1Url = ''; // 样本R1文件路径
@@ -232,10 +232,10 @@ class SampleService extends BaseService
         // 检测规则
         // 符合条件-更新检测结果状态为成功
         if(empty($r1Url) || empty($r2Url)){
-            Log::error('样本检测结果不符合要求！'.count($output).';'.$r1Url.';'.$r2Url);
+            // Log::error('样本检测结果不符合要求！'.count($output).';'.$r1Url.';'.$r2Url);
             return false;
         }
-        Log::info('样本检测结果符合要求！'.count($output).';'.$r1Url.';'.$r2Url);
+        // Log::info('样本检测结果符合要求！'.count($output).';'.$r1Url.';'.$r2Url);
         return ['r1_url' => $r1Url, 'r2_url' => $r2Url];
     }
 
@@ -310,7 +310,7 @@ class SampleService extends BaseService
     { 
         $samples = Sample::where('sample_name', 'like', "%{$search}%")
         ->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)
-        ->limit(100)
+        ->limit(2000)
         ->get(['id', 'sample_name as text']);
         return $samples;
     }

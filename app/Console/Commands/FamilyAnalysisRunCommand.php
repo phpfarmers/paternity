@@ -38,7 +38,7 @@ class FamilyAnalysisRunCommand extends Command
     public function handle()
     {
         $this->info('自动-家系分析开始：' . date('Y-m-d H:i:s'));
-        Log::info('自动-家系分析开始：' . date('Y-m-d H:i:s'));
+        // Log::info('自动-家系分析开始：' . date('Y-m-d H:i:s'));
         $id = $this->argument('id') ?? 0;
         $families = Family::where('report_result', '!=', Family::REPORT_RESULT_SUCCESS);
         // 指定id-前端操作
@@ -53,7 +53,7 @@ class FamilyAnalysisRunCommand extends Command
 
         if ($families->isEmpty()) {
             $this->info('自动-没有要分析的家系：' . date('Y-m-d H:i:s'));
-            Log::info('自动-没有要分析的家系：' . date('Y-m-d H:i:s'));
+            // Log::info('自动-没有要分析的家系：' . date('Y-m-d H:i:s'));
             return 0;
         }
         // 获取样本信息
@@ -69,11 +69,11 @@ class FamilyAnalysisRunCommand extends Command
         try {
             foreach ($families as $family) {
                 $this->info('自动-家系分析开始：' . $family->id . '-' . $family->name . '-' . date('Y-m-d H:i:s'));
-                Log::info('自动-家系分析开始：' . $family->id . '-' . $family->name . '-' . date('Y-m-d H:i:s'));
+                // Log::info('自动-家系分析开始：' . $family->id . '-' . $family->name . '-' . date('Y-m-d H:i:s'));
                 // 次数大于3000，标记为失败
                 if ($family->report_times > 3000) {
                     $this->info('自动-家系分析：' . $family->name . '，次数大于3000，标记为失败');
-                    Log::info('自动-家系分析：' . $family->name . '，次数大于3000，标记为失败');
+                    // Log::info('自动-家系分析：' . $family->name . '，次数大于3000，标记为失败');
                     $family->report_result = Family::REPORT_RESULT_FAIL;
                     $family->save();
                     continue;
@@ -85,7 +85,7 @@ class FamilyAnalysisRunCommand extends Command
                 $family->save();
                 if (!isset($samplesGroupByFamilyId[$family->id]) || count($samplesGroupByFamilyId[$family->id]) < 2) {
                     $this->info('自动-家系分析：' . $family->name . '，样本分析完成数量不正确');
-                    Log::info('自动-家系分析：' . $family->name . '，样本分析完成数量不正确');
+                    // Log::info('自动-家系分析：' . $family->name . '，样本分析完成数量不正确');
                     $family->report_result = Family::REPORT_RESULT_FAIL;
                     $family->save();
                     continue;
@@ -95,7 +95,7 @@ class FamilyAnalysisRunCommand extends Command
                 foreach ($samplesGroupByFamilyId[$family->id] as $sample) {
                     if ($sample['analysis_result'] != Sample::ANALYSIS_RESULT_SUCCESS) {
                         $this->info('自动-家系分析家系：' . $family->name . '，样本：' . $sample['sample_name'] . '-未分析');
-                        Log::info('自动-家系分析：' . $family->name . '，样本:' . $sample['sample_name'] . '-未分析');
+                        // Log::info('自动-家系分析：' . $family->name . '，样本:' . $sample['sample_name'] . '-未分析');
                         $canAnalysis = false;
                         break;
                     }
@@ -112,11 +112,11 @@ class FamilyAnalysisRunCommand extends Command
                 FamilyAnalysisRunJob::dispatch($family->id)->onQueue('family_analysis_run');
 
                 $this->info('自动-家系分析完成-' . $family->id . '-' . $family->name . '-' . date('Y-m-d H:i:s'));
-                Log::info('自动-家系分析完成-' . $family->id . '-' . $family->name . '-' . date('Y-m-d H:i:s'));
+                // Log::info('自动-家系分析完成-' . $family->id . '-' . $family->name . '-' . date('Y-m-d H:i:s'));
             }
         } catch (\Exception $e) {
             $this->info('自动-家系分析出错：' . $e->getMessage());
-            Log::info('自动-家系分析出错：' . $e->getMessage());
+            // Log::info('自动-家系分析出错：' . $e->getMessage());
         }
         return 0;
     }

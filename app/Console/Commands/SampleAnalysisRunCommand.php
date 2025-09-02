@@ -40,7 +40,7 @@ class SampleAnalysisRunCommand extends Command
         start:
         $id = $this->argument('id') ?? 0;
         $this->info('开始分析样本');
-        Log::info('开始分析样本');
+        // Log::info('开始分析样本');
         $samples = Sample::where('check_result', Sample::CHECK_RESULT_SUCCESS);
         // 指定id-前端操作-只要未完成的都可操作
         if ($id > 0) {
@@ -51,21 +51,21 @@ class SampleAnalysisRunCommand extends Command
         $samples = $samples->orderBy('analysis_times', 'asc')->orderBy('id', 'asc')->limit(10)->get();
         if ($samples->isEmpty()) {
             $this->info('没有要分析的样本');
-            Log::info('没有要分析的样本');
+            // Log::info('没有要分析的样本');
             return 0;
         }
         // 如果正在分析中的样本数量大50，停止1分钟，再从start位置开始执行
         $analyzingCount = Sample::where('analysis_result', Sample::ANALYSIS_RESULT_ANALYZING)->count();
         if ($analyzingCount > 100) {
             $this->info('正在分析中的样本数量大于100，停止1分钟');
-            Log::info('正在分析中的样本数量大于100，停止1分钟');
+            // Log::info('正在分析中的样本数量大于100，停止1分钟');
             sleep(60);
             goto start;
         }
         try {
             foreach ($samples as $sample) {
                 $this->info('样本分析开始：'.$sample->id).'-'.date('Y-m-d H:i:s');
-                Log::info('样本分析开始：'.$sample->id).'-'.date('Y-m-d H:i:s');
+                // Log::info('样本分析开始：'.$sample->id).'-'.date('Y-m-d H:i:s');
                 // 次数大于3000次，标记为失败
                 if ($sample->analysis_times > 3000) {
                     $sample->analysis_result = Sample::ANALYSIS_RESULT_FAIL;
@@ -80,11 +80,11 @@ class SampleAnalysisRunCommand extends Command
                 $sample->save();
                 dispatch(new SampleAnalysisRunJob($sample->id))->onQueue('sample_analysis_run')->delay(now()->addSeconds(5));
                 $this->info('样本分析完成-'.date('Y-m-d H:i:s'));
-                Log::info('样本分析完成-'.date('Y-m-d H:i:s'));
+                // Log::info('样本分析完成-'.date('Y-m-d H:i:s'));
             }
         } catch (\Exception $e) {
             $this->info('样本分析出错：'.$e->getMessage());
-            Log::info('样本分析出错：'.$e->getMessage());
+            // Log::info('样本分析出错：'.$e->getMessage());
         }
         return 0;
     }
