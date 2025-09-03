@@ -310,7 +310,7 @@ class SampleService extends BaseService
     { 
         $samples = Sample::where('sample_name', 'like', "%{$search}%")
         ->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)
-        ->limit(10)
+        ->limit(8)
         ->get(['id', 'sample_name as text']);
         return $samples;
     }
