@@ -170,14 +170,21 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="layui-form-item" style="display: inline-block; width: 28%; vertical-align: top;">
+                        <div class="layui-form-item" style="display: inline-block; width: 40%; vertical-align: top;">
+                            <label class="layui-form-label">比较样本</label>
+                            <!-- textarea -->   
+                            <div class="layui-input-block" style="min-width: 400px;height: 50px;">
+                                <textarea name="sampleB" id="sampleB" placeholder="请输入比较样本，多个样本用英文逗号隔开" class="layui-textarea" style="min-height: 50px;"></textarea>
+                            </div>
+                        </div>
+                        <!-- <div class="layui-form-item" style="display: inline-block; width: 28%; vertical-align: top;">
                             <label class="layui-form-label">比较样本</label>
                             <div class="layui-input-block" style="min-width: 300px;margin-left: 0;">
                                 <div class="layui-input-block" style="min-width: 300px;">
                                     <div class="xm-select-demo"></div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <!-- 提交按钮 -->
                         <div class="layui-form-item" style="display: inline-block; vertical-align: top; ">
                             <div class="layui-input-block">
@@ -869,7 +876,8 @@
             // 表单提交时获取选中值
             $('#unityBtn').on('click', function(data) {
                 // 获取 xmSelect 的值 (比较样本)
-                var selectedValues = sampleBSelect.getValue('valueStr');
+                //var selectedValues = sampleBSelect.getValue('valueStr');
+                var selectedValues = $('#sampleB').val();
                 console.log('选中的比较样本值:', selectedValues);
 
                 // 获取目标样本的值
