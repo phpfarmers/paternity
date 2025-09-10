@@ -963,7 +963,7 @@ class FamilyService extends BaseService
         if(empty($sampleAName)){
             throw new \Exception('未找到匹配父本数据');
         }
-        $sampleBNames = $sampleIds;
+        $sampleBNames = implode(',', $sampleIds);
         // 一级分析目录
         
         $secondAnalysisProject = config('data')['analysis_project']; // 一级分析目录
