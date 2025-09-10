@@ -938,27 +938,33 @@ class FamilyService extends BaseService
         throw_if(empty($sampleIds), new ApiException(1, '请选至少1个样本'));
 
         // 将sampleAId加入到sampleIds中 
-        if (!in_array($sampleAId, $sampleIds)) {
-            $sampleIds[] = $sampleAId;
-        }
+        // if (!in_array($sampleAId, $sampleIds)) {
+        //     $sampleIds[] = $sampleAId;
+        // }
 
-        $samples = Sample::whereIn('id', $sampleIds)
-            ->where('sample_type', Sample::SAMPLE_TYPE_FATHER)
-            ->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)
-            ->pluck('sample_name', 'id');
+        // $samples = Sample::whereIn('id', $sampleIds)
+        //     ->where('sample_type', Sample::SAMPLE_TYPE_FATHER)
+        //     ->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)
+        //     ->pluck('sample_name', 'id');
 
-        if ($samples->isEmpty()) {
+        // if ($samples->isEmpty()) {
+        //     throw new \Exception('未找到匹配父本数据');
+        // }
+        // // sampleAId名称,单个样本名称
+        // $sampleAName = $samples->get($sampleAId);
+        // // 获取所有样本名称，除去sampleAId名称
+        // $sampleIds = array_values(array_diff($sampleIds, array($sampleAId)));
+        // $sampleBNames = $samples->filter(function ($key, $item) use ($sampleAId) {
+        //     return $key != $sampleAId;
+        // });
+        // // 用都好分隔sampleBNames
+        // $sampleBNames = implode(',', $sampleBNames->all());
+        $sampleAName = Sample::find($sampleAId)->sample_name;
+        if(empty($sampleAName)){
             throw new \Exception('未找到匹配父本数据');
         }
-        // sampleAId名称,单个样本名称
-        $sampleAName = $samples->get($sampleAId);
-        // 获取所有样本名称，除去sampleAId名称
-        $sampleIds = array_values(array_diff($sampleIds, array($sampleAId)));
-        $sampleBNames = $samples->filter(function ($key, $item) use ($sampleAId) {
-            return $key != $sampleAId;
-        });
-        // 用都好分隔sampleBNames
-        $sampleBNames = implode(',', $sampleBNames->all());
+        $sampleBNames = $sampleIds;
+        // 一级分析目录
         
         $secondAnalysisProject = config('data')['analysis_project']; // 一级分析目录
         $secondAnalysisProjectDir = escapeshellarg($secondAnalysisProject); //转义后的二级分析目录
