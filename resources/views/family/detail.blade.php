@@ -164,17 +164,20 @@
                     <form id="unityForm" class="layui-form">
                         <div class="layui-form-item" style="display: inline-block; width: 26%; vertical-align: top;">
                             <label class="layui-form-label">目标样本</label>
-                            <div class="layui-input-block" style="width: 200px;">
+                            <!-- <div class="layui-input-block" style="width: 200px;">
                                 <select id="sampleASelect" name="sampleA" lay-verify="required" lay-filter="sampleA" lay-search>
                                     <option value="">请选择目标样本</option>
                                 </select>
+                            </div> -->
+                            <div class="layui-input-block" style="min-width: 200px;height: 50px;">
+                                <input type="text" name="sampleA" id="sampleA" placeholder="请输入目标单个样本名" class="layui-input">
                             </div>
                         </div>
                         <div class="layui-form-item" style="display: inline-block; width: 40%; vertical-align: top;">
                             <label class="layui-form-label">比较样本</label>
                             <!-- textarea -->   
                             <div class="layui-input-block" style="min-width: 400px;height: 50px;">
-                                <textarea name="sampleB" id="sampleB" placeholder="请输入比较样本，多个样本用英文逗号隔开" class="layui-textarea" style="min-height: 50px;"></textarea>
+                                <textarea name="sampleB" id="sampleB" placeholder="请输入比较样本名，多个样本名用英文逗号隔开" class="layui-textarea" style="min-height: 50px;"></textarea>
                             </div>
                         </div>
                         <!-- <div class="layui-form-item" style="display: inline-block; width: 28%; vertical-align: top;">
@@ -280,7 +283,7 @@
                         // 同一认定
                         console.log('切换到同一认定');
                         // 获取样本数据
-                        initSampleA();
+                        // initSampleA();
                         break;
                         // 其他选项卡...
                     case 8:
@@ -881,7 +884,8 @@
                 console.log('选中的比较样本值:', selectedValues);
 
                 // 获取目标样本的值
-                var sampleAValue = $('#sampleASelect').val();
+                // var sampleAValue = $('#sampleASelect').val();
+                var sampleAValue = $('#sampleA').val();
                 console.log('目标样本的值:', sampleAValue);
 
                 // 表单验证

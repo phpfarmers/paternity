@@ -289,7 +289,7 @@ class FamilyController extends Controller
     public function unityRun(Request $request, $id)
     {
         $request->validate([
-            'sampleAId' => 'required|integer',
+            'sampleAId' => 'required|string',
             'sampleIds' => 'required|string',
         ]);
         
@@ -318,7 +318,7 @@ class FamilyController extends Controller
     public function unityTable(Request $request, $id)
     {
         $request->validate([
-            'sampleAId' => 'required|integer',
+            'sampleAId' => 'required|string',
         ]);
         $data = $this->familyService->unityTable($request);
         return response()->json([

@@ -931,8 +931,8 @@ class FamilyService extends BaseService
      */
     public function unityRun($request)
     {
-        $sampleAId = $request->input('sampleAId', 0);
-        throw_if($sampleAId < 1 , new ApiException(1, '请选目标样本'));
+        $sampleAId = trim($request->input('sampleAId', ''));
+        throw_if(empty($sampleAId) , new ApiException(1, '请选目标样本'));
         $sampleIdStr = $request->input('sampleIds', '');
         $sampleIds = array_unique(explode(',', $sampleIdStr));
         throw_if(empty($sampleIds), new ApiException(1, '请选至少1个样本'));
@@ -959,9 +959,11 @@ class FamilyService extends BaseService
         // });
         // // 用都好分隔sampleBNames
         // $sampleBNames = implode(',', $sampleBNames->all());
-        $sampleAName = Sample::find($sampleAId)->sample_name;
+        // $sampleAName = Sample::find($sampleAId)->sample_name;
+
+        $sampleAName = Sample::where('sample_name', $sampleAId)->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)->value('sample_name');
         if(empty($sampleAName)){
-            throw new \Exception('未找到匹配父本数据');
+            throw new \Exception('未找到匹配目标样本数据');
         }
         $sampleBNames = implode(',', $sampleIds);
         // 一级分析目录
@@ -1003,7 +1005,7 @@ class FamilyService extends BaseService
             $limit = $request->input('limit', 10);
             $offset = ($page - 1) * $limit;
 
-            $fatherSample = Sample::where('id', $request->sampleAId)->first();
+            $fatherSample = Sample::where('sample_name', $request->sampleAId)->where('analysis_result', Sample::ANALYSIS_RESULT_SUCCESS)->first();
             $returnData = [];
             // 组装路径
             $dataDir = config('data')['analysis_project'] . $fatherSample->sample_name;
